@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rossöhamn</title>
+  <meta name="description" content="Rossöhamn – information, kontakt och uppdateringar." />
+  <style>
+    :root { color-scheme: light; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      margin: 0;
+      line-height: 1.5;
+    }
+    header {
+      padding: 40px 20px 18px;
+      border-bottom: 1px solid #e6e6e6;
+      background: #fff;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; }
+    .brand {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    h1 { margin: 0; font-size: 2rem; letter-spacing: 0.2px; }
+    .tagline { margin: 8px 0 0; color: #555; }
+    nav { margin-top: 18px; display: flex; gap: 14px; flex-wrap: wrap; }
+    nav a {
+      color: #0b57d0;
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 10px;
+    }
+    nav a:hover { background: #f2f6ff; }
+    main { padding: 26px 20px 44px; background: #fafafa; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #e6e6e6;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+    }
+    .card h2 { margin: 0 0 8px; font-size: 1.1rem; }
+    .card p { margin: 0; color: #444; }
+    footer {
+      padding: 18px 20px;
+      border-top: 1px solid #e6e6e6;
+      background: #fff;
+      color: #666;
+      font-size: 0.95rem;
+    }
+    .pill {
+      display: inline-block;
+      border: 1px solid #e6e6e6;
+      border-radius: 999px;
+      padding: 2px 10px;
+      font-size: 0.85rem;
+      color: #666;
+      background: #fff;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="brand">
+        <h1>Rossöhamn</h1>
+        <span class="pill">rossohamn.se</span>
+      </div>
+      <p class="tagline">Välkommen till Rossöhamn — information, kontakt och uppdateringar.</p>
+      <nav>
+        <a href="/">Hem</a>
+        <a href="#info">Information</a>
+        <a href="#kontakt">Kontakt</a>
+        <a href="/spotprices/">Spotpriser</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <section id="info">
+        <div class="card">
+          <h2>Om Rossöhamn</h2>
+          <p>
+            Här kan du samla praktisk information, nyheter och annat för Rossöhamn.
+            Sidan är byggd som en enkel statisk webbplats (GitHub Pages) och kan byggas ut över tid.
+          </p>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h2>Aktuellt</h2>
+            <p>Här kan du lägga korta uppdateringar och länkar när du vill.</p>
+          </div>
+          <div class="card">
+            <h2>Service</h2>
+            <p>Öppettider, kontaktvägar, felanmälan eller annan serviceinformation.</p>
+          </div>
+          <div class="card">
+            <h2>Spotpriser</h2>
+            <p>
+              På <strong>/spotprices/</strong> kan du senare visa elpriser (graf + kommande dygn)
+              från dina HomeyScript-exporter.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="kontakt" style="margin-top: 16px;">
+        <div class="card">
+          <h2>Kontakt</h2>
+          <p>
+            Lägg in e-post/telefon här när du vill.<br/>
+            Exempel: <a href="mailto:info@rossohamn.se">info@rossohamn.se</a>
+          </p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      © <span id="year"></span> Rossöhamn
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
