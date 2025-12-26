@@ -231,22 +231,50 @@
           tension: 0.2
         }]
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: true },
-          title: { display: true, text: title }
+options: {
+  responsive: true,
+  maintainAspectRatio: false,
+
+  interaction: {
+    mode: "index",      // visar tooltip för närmaste X-position
+    intersect: false    // du behöver inte pricka linjen exakt
+  },
+
+  plugins: {
+    legend: { display: true },
+    title: { display: true, text: title },
+
+    tooltip: {
+      enabled: true,
+      callbacks: {
+        // Titelraden i tooltip (t.ex. 13:45)
+        title: (items) => {
+          // items[0].label är HH:MM från labels-arrayen
+          return items?.[0]?.label || "";
         },
-        scales: {
-          x: {
-            ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 }
-          },
-          y: {
-            title: { display: true, text: unitLabel() }
-          }
+        // Själva värdet (t.ex. "öre/kWh: 123.45")
+        label: (ctx) => {
+          const v = ctx.parsed?.y;
+          if (v === null || v === undefined || Number.isNaN(v)) return "—";
+          return `${unitLabel()}: ${v.toFixed(state.metric === "oreKwh" ? 2 : 4)}`;
+        },
+        // Extra rad: UTC-tid från din points-array (om du vill)
+        afterLabel: (ctx) => {
+          const idx = ctx.dataIndex;
+          const day = state.data?.days?.[state.selectedDate];
+          const p = day?.points?.[idx];
+          if (!p || !p.utc) return "";
+          return `UTC: ${p.utc}`;
         }
       }
+    }
+  },
+
+  scales: {
+    x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } },
+    y: { title: { display: true, text: unitLabel() } }
+  }
+}
     });
 
     // Summary
