@@ -1,10 +1,380 @@
 <!doctype html>
 <html lang="sv">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Spotpriser – Rossöhamn</title></head>
-<body style="font-family:system-ui;margin:20px;">
-  <h1>Spotpriser</h1>
-  <p>Kommer snart.</p>
-  <p><a href="/">Tillbaka</a></p>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rossohamn – Spotpriser (SE3)</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 0; padding: 16px; }
+    .wrap { max-width: 1100px; margin: 0 auto; display: grid; gap: 12px; }
+    .card { border: 1px solid #2a2a2a; border-radius: 12px; padding: 12px; background: #101010; }
+    .row { display:flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .tabs button { padding: 8px 10px; border-radius: 10px; border: 1px solid #2a2a2a; background: #151515; color: #fff; cursor: pointer; }
+    .tabs button.active { border-color: #6b6b6b; background: #1e1e1e; }
+    select, input { background:#151515; color:#fff; border:1px solid #2a2a2a; border-radius:10px; padding:8px 10px; }
+    .meta { opacity: .9; font-size: 13px; line-height: 1.4; }
+    table { width:100%; border-collapse: collapse; font-size: 14px; }
+    td, th { border-top: 1px solid #242424; padding: 8px; text-align:left; vertical-align: top; }
+    .small { font-size: 12px; opacity: .85; }
+    .pill { display:inline-block; padding: 2px 8px; border: 1px solid #2a2a2a; border-radius: 999px; margin-right: 6px; }
+    canvas { width: 100%; height: 420px; }
+    a { color: #9fd4ff; }
+  </style>
+
+  <!-- Chart.js (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="row" style="justify-content:space-between;">
+        <div>
+          <div style="font-size:18px; font-weight:700;">Rossohamn – Spotpriser</div>
+          <div class="small">Källa: ENTSO-E A44 (SE3) → history.json</div>
+        </div>
+        <div class="row">
+          <label class="small" for="src">Data-URL</label>
+          <input id="src" style="min-width:320px" />
+          <button id="reload" style="padding:8px 10px; border-radius:10px; border:1px solid #2a2a2a; background:#151515; color:#fff; cursor:pointer;">Ladda</button>
+        </div>
+      </div>
+
+      <div id="meta" class="meta" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="row tabs">
+        <button id="tab-today" class="active">Idag</button>
+        <button id="tab-tomorrow">Imorgon</button>
+        <button id="tab-history">Historik</button>
+        <span style="flex:1;"></span>
+
+        <label class="small" for="metric">Serie</label>
+        <select id="metric">
+          <option value="oreKwh" selected>öre/kWh</option>
+          <option value="sekKwh">SEK/kWh</option>
+          <option value="eurMwh">EUR/MWh</option>
+        </select>
+
+        <label class="small" for="datePick">Datum</label>
+        <select id="datePick"></select>
+      </div>
+
+      <div style="margin-top:10px;">
+        <canvas id="chart"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between;">
+        <div style="font-weight:700;">Summering</div>
+        <div class="small">Billigaste fönster kräver komplett fönster (inga null)</div>
+      </div>
+      <div id="summary" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card small">
+      Tips: du kan byta datakälla via querystring: <span class="pill">?src=https://www.rossohamn.se/spotprices/history.json</span>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const DEFAULT_SRC = "history.json"; // samma katalog som index.html
+  const el = (id) => document.getElementById(id);
+
+  const state = {
+    data: null,
+    tab: "today",          // today | tomorrow | history
+    selectedDate: null,    // YYYY-MM-DD
+    metric: "oreKwh"
+  };
+
+  function stockholmTodayIsoDate() {
+    // Ingen extern lib: använd Intl för Europe/Stockholm
+    const parts = new Intl.DateTimeFormat("sv-SE", {
+      timeZone: "Europe/Stockholm",
+      year: "numeric", month: "2-digit", day: "2-digit"
+    }).formatToParts(new Date());
+    const y = parts.find(p => p.type === "year").value;
+    const m = parts.find(p => p.type === "month").value;
+    const d = parts.find(p => p.type === "day").value;
+    return `${y}-${m}-${d}`;
+  }
+
+  function addDays(yyyyMmDd, deltaDays) {
+    const [y,m,d] = yyyyMmDd.split("-").map(Number);
+    const dt = new Date(Date.UTC(y, m-1, d));
+    dt.setUTCDate(dt.getUTCDate() + deltaDays);
+    const y2 = dt.getUTCFullYear();
+    const m2 = String(dt.getUTCMonth()+1).padStart(2,"0");
+    const d2 = String(dt.getUTCDate()).padStart(2,"0");
+    return `${y2}-${m2}-${d2}`;
+  }
+
+  function getParam(name) {
+    const u = new URL(location.href);
+    return u.searchParams.get(name);
+  }
+
+  function fmtNum(v, decimals=2) {
+    if (v === null || v === undefined || Number.isNaN(v)) return "—";
+    return Number(v).toFixed(decimals);
+  }
+
+  function computeDailyStats(day) {
+    // räknar på day.points som finns (ignorerar null)
+    const vals = day.points
+      .filter(p => p && typeof p[state.metric] === "number")
+      .map(p => p[state.metric]);
+
+    if (!vals.length) return { avg: null, min: null, max: null };
+
+    let sum = 0;
+    let min = vals[0];
+    let max = vals[0];
+    for (const v of vals) {
+      sum += v;
+      if (v < min) min = v;
+      if (v > max) max = v;
+    }
+    return { avg: sum / vals.length, min, max };
+  }
+
+  function cheapestWindow(day, slots) {
+    // kräver att alla slots i fönstret finns och har metric (inga null)
+    const pts = day.points;
+    let best = null;
+
+    for (let i = 0; i <= pts.length - slots; i++) {
+      let ok = true;
+      let sum = 0;
+
+      for (let k = 0; k < slots; k++) {
+        const p = pts[i+k];
+        if (!p || typeof p[state.metric] !== "number") { ok = false; break; }
+        sum += p[state.metric];
+      }
+      if (!ok) continue;
+
+      const avg = sum / slots;
+      if (!best || avg < best.avg) {
+        best = {
+          startIdx: i,
+          endIdx: i + slots - 1,
+          avg
+        };
+      }
+    }
+    if (!best) return null;
+
+    const start = pts[best.startIdx];
+    const end = pts[best.endIdx];
+    return {
+      avg: best.avg,
+      startTime: start.time,
+      endTime: end.time,
+      startUtc: start.utc,
+      endUtc: end.utc
+    };
+  }
+
+  function buildLabelsForDay(day) {
+    // labels ska vara "HH:MM" för varje slot (null har ändå plats)
+    return day.points.map(p => p ? p.time : "");
+  }
+
+  function buildSeriesForDay(day) {
+    // data = metric eller null => Chart.js gap
+    return day.points.map(p => (p && typeof p[state.metric] === "number") ? p[state.metric] : null);
+  }
+
+  function unitLabel() {
+    switch (state.metric) {
+      case "oreKwh": return "öre/kWh";
+      case "sekKwh": return "SEK/kWh";
+      case "eurMwh": return "EUR/MWh";
+      default: return state.metric;
+    }
+  }
+
+  let chart = null;
+  function renderChartForDate(dateKey) {
+    const day = state.data?.days?.[dateKey];
+    const ctx = el("chart").getContext("2d");
+
+    if (!day) {
+      if (chart) chart.destroy();
+      chart = null;
+      el("summary").innerHTML = `<div>Inget dygn hittades för <b>${dateKey}</b>.</div>`;
+      return;
+    }
+
+    const labels = buildLabelsForDay(day);
+    const series = buildSeriesForDay(day);
+
+    const title = `${dateKey} (${unitLabel()}) – present ${day.present}/${day.expected}`;
+
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          label: unitLabel(),
+          data: series,
+          spanGaps: false,
+          pointRadius: 0,
+          borderWidth: 2,
+          tension: 0.2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true },
+          title: { display: true, text: title }
+        },
+        scales: {
+          x: {
+            ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 }
+          },
+          y: {
+            title: { display: true, text: unitLabel() }
+          }
+        }
+      }
+    });
+
+    // Summary
+    const stats = computeDailyStats(day);
+    const win2h = cheapestWindow(day, 8);   // 2h = 8*15m
+    const win4h = cheapestWindow(day, 16);  // 4h = 16*15m
+
+    el("summary").innerHTML = `
+      <div class="row">
+        <span class="pill">Dygnsmedel: <b>${fmtNum(stats.avg, state.metric === "oreKwh" ? 2 : 4)}</b> ${unitLabel()}</span>
+        <span class="pill">Min: <b>${fmtNum(stats.min, state.metric === "oreKwh" ? 2 : 4)}</b></span>
+        <span class="pill">Max: <b>${fmtNum(stats.max, state.metric === "oreKwh" ? 2 : 4)}</b></span>
+      </div>
+      <table style="margin-top:10px;">
+        <thead><tr><th>Fönster</th><th>Medel</th><th>Tid (lokal HH:MM från points)</th><th>Not</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Billigaste 2h</td>
+            <td>${win2h ? `<b>${fmtNum(win2h.avg, state.metric === "oreKwh" ? 2 : 4)}</b> ${unitLabel()}` : "—"}</td>
+            <td>${win2h ? `${win2h.startTime} → ${win2h.endTime}` : "—"}</td>
+            <td>${win2h ? "Endast fönster utan null" : "Inget komplett 2h-fönster (null i vägen)"}</td>
+          </tr>
+          <tr>
+            <td>Billigaste 4h</td>
+            <td>${win4h ? `<b>${fmtNum(win4h.avg, state.metric === "oreKwh" ? 2 : 4)}</b> ${unitLabel()}` : "—"}</td>
+            <td>${win4h ? `${win4h.startTime} → ${win4h.endTime}` : "—"}</td>
+            <td>${win4h ? "Endast fönster utan null" : "Inget komplett 4h-fönster (null i vägen)"}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="small" style="margin-top:10px;">
+        seriesStartUtc: ${day.series?.seriesStartUtc ?? "—"} · mRID: ${day.series?.mRID ?? "—"} · resolution: ${day.resolutionMinutes ?? "—"} min
+      </div>
+    `;
+  }
+
+  function setTab(tab) {
+    state.tab = tab;
+    el("tab-today").classList.toggle("active", tab === "today");
+    el("tab-tomorrow").classList.toggle("active", tab === "tomorrow");
+    el("tab-history").classList.toggle("active", tab === "history");
+
+    const today = stockholmTodayIsoDate();
+    const tomorrow = addDays(today, 1);
+
+    if (tab === "today") state.selectedDate = today;
+    else if (tab === "tomorrow") state.selectedDate = tomorrow;
+    else state.selectedDate = el("datePick").value || state.selectedDate;
+
+    el("datePick").value = state.selectedDate || "";
+    renderChartForDate(state.selectedDate);
+  }
+
+  function renderMeta() {
+    const m = state.data?.meta;
+    if (!m) { el("meta").textContent = ""; return; }
+
+    el("meta").innerHTML = `
+      <div class="row">
+        <span class="pill">area: <b>${m.area}</b></span>
+        <span class="pill">documentType: <b>${m.documentType}</b></span>
+        <span class="pill">tz: <b>${m.timeZone}</b></span>
+        <span class="pill">EUR/SEK: <b>${m.eursek}</b> (${m.eursekDate})</span>
+        <span class="pill">updatedAt: <b>${m.updatedAt}</b></span>
+      </div>
+      <div class="small" style="margin-top:8px;">
+        request: ${m.request?.periodStart ?? "—"} → ${m.request?.periodEnd ?? "—"}
+      </div>
+    `;
+  }
+
+  function populateDatePick() {
+    const days = state.data?.days || {};
+    const keys = Object.keys(days).sort(); // YYYY-MM-DD
+    const dp = el("datePick");
+    dp.innerHTML = keys.map(k => `<option value="${k}">${k} (${days[k].present}/${days[k].expected})</option>`).join("");
+
+    // default: om "idag" saknas, välj senaste dygn som finns
+    const today = stockholmTodayIsoDate();
+    if (keys.includes(today)) state.selectedDate = today;
+    else state.selectedDate = keys[keys.length - 1] || null;
+
+    dp.value = state.selectedDate || "";
+  }
+
+  async function loadHistory(url) {
+    const r = await fetch(url, { cache: "no-store" });
+    if (!r.ok) throw new Error(`HTTP ${r.status} vid GET ${url}`);
+    return await r.json();
+  }
+
+  async function bootstrap() {
+    const src = getParam("src") || DEFAULT_SRC;
+    el("src").value = src;
+
+    state.metric = el("metric").value;
+
+    try {
+      state.data = await loadHistory(src);
+      renderMeta();
+      populateDatePick();
+      setTab("today");
+    } catch (e) {
+      el("meta").innerHTML = `<div style="color:#ff9a9a;"><b>Fel:</b> ${e.message}</div>`;
+      if (chart) chart.destroy();
+      chart = null;
+      el("summary").innerHTML = "";
+    }
+  }
+
+  // events
+  el("reload").addEventListener("click", bootstrap);
+  el("tab-today").addEventListener("click", () => setTab("today"));
+  el("tab-tomorrow").addEventListener("click", () => setTab("tomorrow"));
+  el("tab-history").addEventListener("click", () => setTab("history"));
+
+  el("metric").addEventListener("change", () => {
+    state.metric = el("metric").value;
+    if (state.selectedDate) renderChartForDate(state.selectedDate);
+  });
+
+  el("datePick").addEventListener("change", () => {
+    state.selectedDate = el("datePick").value;
+    setTab("history");
+  });
+
+  bootstrap();
+})();
+</script>
 </body>
 </html>
