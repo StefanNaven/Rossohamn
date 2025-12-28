@@ -4,8 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Rossohamn – Spotpriser (SE3)</title>
-  <link rel="stylesheet" href="styles.css">
 
+  <!-- External CSS -->
+  <link rel="stylesheet" href="styles.css">
 
   <!-- Chart.js (CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -43,7 +44,6 @@
           <option value="eurMwh">EUR/MWh</option>
         </select>
 
-        <!-- gap fill toggle -->
         <label class="toggle small" title="Fyll bara korta luckor (max 2 null i rad) med linjär interpolation. Rådata ändras inte.">
           <input id="fillGaps" type="checkbox" />
           Extrapolera null (≤2)
@@ -73,13 +73,13 @@
 
 <script>
 (() => {
-  const DEFAULT_SRC = "history.json"; // samma katalog som index.html
+  const DEFAULT_SRC = "history.json";
   const el = (id) => document.getElementById(id);
 
   const state = {
     data: null,
-    tab: "today",          // today | tomorrow | history
-    selectedDate: null,    // YYYY-MM-DD
+    tab: "today",
+    selectedDate: null,
     metric: "oreKwh",
     fillGaps: false
   };
@@ -204,6 +204,19 @@
     };
   }
 
+  // Rainbow-ish gradient for the line (green -> blue -> red)
+  function lineGradientColor(ctx) {
+    const { chart } = ctx;
+    const { ctx: c, chartArea } = chart;
+    if (!chartArea) return "#9fd4ff";
+
+    const g = c.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+    g.addColorStop(0.00, "#2ecc71"); // low (green)
+    g.addColorStop(0.50, "#3498db"); // mid (blue)
+    g.addColorStop(1.00, "#e74c3c"); // high (red)
+    return g;
+  }
+
   let chart = null;
   function renderChartForDate(dateKey) {
     const day = state.data?.days?.[dateKey];
@@ -235,17 +248,18 @@
           spanGaps: false,
           pointRadius: 0,
           borderWidth: 2,
-          tension: 0.2
+          tension: 0.2,
+
+          borderColor: lineGradientColor,
+          borderJoinStyle: "round",
+          borderCapStyle: "round"
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
 
-        interaction: {
-          mode: "index",
-          intersect: false
-        },
+        interaction: { mode: "index", intersect: false },
 
         plugins: {
           legend: { display: true },
@@ -264,7 +278,9 @@
                 const idx = ctx.dataIndex;
                 const p = day?.points?.[idx];
                 if (!p || !p.utc) return "";
-                const note = (p && typeof p[state.metric] === "number") ? "" : (state.fillGaps ? " (extrapolerad punkt)" : " (saknas i rådata)");
+                const note = (p && typeof p[state.metric] === "number")
+                  ? ""
+                  : (state.fillGaps ? " (extrapolerad punkt)" : " (saknas i rådata)");
                 return `UTC: ${p.utc}${note}`;
               }
             }
