@@ -20,6 +20,10 @@
     .pill { display:inline-block; padding: 2px 8px; border: 1px solid #2a2a2a; border-radius: 999px; margin-right: 6px; }
     canvas { width: 100%; height: 420px; }
     a { color: #9fd4ff; }
+
+    /* toggle */
+    .toggle { display:flex; align-items:center; gap:8px; padding:6px 10px; border:1px solid #2a2a2a; border-radius:999px; background:#151515; }
+    .toggle input { width:16px; height:16px; }
   </style>
 
   <!-- Chart.js (CDN) -->
@@ -58,6 +62,12 @@
           <option value="eurMwh">EUR/MWh</option>
         </select>
 
+        <!-- NEW: gap fill toggle -->
+        <label class="toggle small" title="Fyll bara korta luckor (max 2 null i rad) med linjär interpolation. Rådata ändras inte.">
+          <input id="fillGaps" type="checkbox" />
+          Extrapolera null (≤2)
+        </label>
+
         <label class="small" for="datePick">Datum</label>
         <select id="datePick"></select>
       </div>
@@ -70,7 +80,7 @@
     <div class="card">
       <div class="row" style="justify-content:space-between;">
         <div style="font-weight:700;">Summering</div>
-        <div class="small">Billigaste fönster kräver komplett fönster (inga null)</div>
+        <div class="small" id="summaryNote">Billigaste fönster kräver komplett fönster (inga null)</div>
       </div>
       <div id="summary" style="margin-top:10px;"></div>
     </div>
@@ -89,11 +99,11 @@
     data: null,
     tab: "today",          // today | tomorrow | history
     selectedDate: null,    // YYYY-MM-DD
-    metric: "oreKwh"
+    metric: "oreKwh",
+    fillGaps: false        // NEW
   };
 
   function stockholmTodayIsoDate() {
-    // Ingen extern lib: använd Intl för Europe/Stockholm
     const parts = new Intl.DateTimeFormat("sv-SE", {
       timeZone: "Europe/Stockholm",
       year: "numeric", month: "2-digit", day: "2-digit"
@@ -124,17 +134,19 @@
     return Number(v).toFixed(decimals);
   }
 
-  function computeDailyStats(day) {
-    // räknar på day.points som finns (ignorerar null)
-    const vals = day.points
-      .filter(p => p && typeof p[state.metric] === "number")
-      .map(p => p[state.metric]);
+  function unitLabel() {
+    switch (state.metric) {
+      case "oreKwh": return "öre/kWh";
+      case "sekKwh": return "SEK/kWh";
+      case "eurMwh": return "EUR/MWh";
+      default: return state.metric;
+    }
+  }
 
+  function computeDailyStatsFromSeries(series) {
+    const vals = series.filter(v => typeof v === "number");
     if (!vals.length) return { avg: null, min: null, max: null };
-
-    let sum = 0;
-    let min = vals[0];
-    let max = vals[0];
+    let sum = 0, min = vals[0], max = vals[0];
     for (const v of vals) {
       sum += v;
       if (v < min) min = v;
@@ -143,61 +155,74 @@
     return { avg: sum / vals.length, min, max };
   }
 
-  function cheapestWindow(day, slots) {
-    // kräver att alla slots i fönstret finns och har metric (inga null)
-    const pts = day.points;
-    let best = null;
+  // NEW: fill small null gaps (<=2 in a row) using linear interpolation
+  function fillSmallGapsLinear(values, maxGap = 2) {
+    const out = values.slice();
+    let i = 0;
 
-    for (let i = 0; i <= pts.length - slots; i++) {
-      let ok = true;
-      let sum = 0;
+    while (i < out.length) {
+      if (typeof out[i] === "number") { i++; continue; }
 
-      for (let k = 0; k < slots; k++) {
-        const p = pts[i+k];
-        if (!p || typeof p[state.metric] !== "number") { ok = false; break; }
-        sum += p[state.metric];
-      }
-      if (!ok) continue;
+      const gapStart = i;
+      while (i < out.length && typeof out[i] !== "number") i++;
+      const gapEnd = i - 1;
+      const gapLen = gapEnd - gapStart + 1;
 
-      const avg = sum / slots;
-      if (!best || avg < best.avg) {
-        best = {
-          startIdx: i,
-          endIdx: i + slots - 1,
-          avg
-        };
+      if (gapLen > maxGap) continue;
+
+      const leftIdx = gapStart - 1;
+      const rightIdx = gapEnd + 1;
+      if (leftIdx < 0 || rightIdx >= out.length) continue;
+
+      const left = out[leftIdx];
+      const right = out[rightIdx];
+      if (typeof left !== "number" || typeof right !== "number") continue;
+
+      const step = (right - left) / (gapLen + 1);
+      for (let k = 1; k <= gapLen; k++) {
+        out[gapStart + (k - 1)] = left + step * k;
       }
     }
-    if (!best) return null;
-
-    const start = pts[best.startIdx];
-    const end = pts[best.endIdx];
-    return {
-      avg: best.avg,
-      startTime: start.time,
-      endTime: end.time,
-      startUtc: start.utc,
-      endUtc: end.utc
-    };
+    return out;
   }
 
   function buildLabelsForDay(day) {
-    // labels ska vara "HH:MM" för varje slot (null har ändå plats)
     return day.points.map(p => p ? p.time : "");
   }
 
   function buildSeriesForDay(day) {
-    // data = metric eller null => Chart.js gap
     return day.points.map(p => (p && typeof p[state.metric] === "number") ? p[state.metric] : null);
   }
 
-  function unitLabel() {
-    switch (state.metric) {
-      case "oreKwh": return "öre/kWh";
-      case "sekKwh": return "SEK/kWh";
-      case "eurMwh": return "EUR/MWh";
-      default: return state.metric;
+  function cheapestWindowFromSeries(day, series, slots) {
+    // series: number|null (or filled numbers)
+    let best = null;
+
+    for (let i = 0; i <= series.length - slots; i++) {
+      let ok = true;
+      let sum = 0;
+
+      for (let k = 0; k < slots; k++) {
+        const v = series[i+k];
+        if (typeof v !== "number") { ok = false; break; }
+        sum += v;
+      }
+      if (!ok) continue;
+
+      const avg = sum / slots;
+      if (!best || avg < best.avg) best = { startIdx: i, endIdx: i + slots - 1, avg };
     }
+
+    if (!best) return null;
+    const start = day.points[best.startIdx];
+    const end = day.points[best.endIdx];
+    return {
+      avg: best.avg,
+      startTime: start?.time ?? "",
+      endTime: end?.time ?? "",
+      startUtc: start?.utc ?? "",
+      endUtc: end?.utc ?? ""
+    };
   }
 
   let chart = null;
@@ -213,9 +238,12 @@
     }
 
     const labels = buildLabelsForDay(day);
-    const series = buildSeriesForDay(day);
 
-    const title = `${dateKey} (${unitLabel()}) – present ${day.present}/${day.expected}`;
+    const rawSeries = buildSeriesForDay(day);
+    const series = state.fillGaps ? fillSmallGapsLinear(rawSeries, 2) : rawSeries;
+
+    const title = `${dateKey} (${unitLabel()}) – present ${day.present}/${day.expected}` +
+      (state.fillGaps ? " (extrapolerat ≤2 null)" : "");
 
     if (chart) chart.destroy();
     chart = new Chart(ctx, {
@@ -231,80 +259,85 @@
           tension: 0.2
         }]
       },
-options: {
-  responsive: true,
-  maintainAspectRatio: false,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
 
-  interaction: {
-    mode: "index",      // visar tooltip för närmaste X-position
-    intersect: false    // du behöver inte pricka linjen exakt
-  },
-
-  plugins: {
-    legend: { display: true },
-    title: { display: true, text: title },
-
-    tooltip: {
-      enabled: true,
-      callbacks: {
-        // Titelraden i tooltip (t.ex. 13:45)
-        title: (items) => {
-          // items[0].label är HH:MM från labels-arrayen
-          return items?.[0]?.label || "";
+        interaction: {
+          mode: "index",
+          intersect: false
         },
-        // Själva värdet (t.ex. "öre/kWh: 123.45")
-        label: (ctx) => {
-          const v = ctx.parsed?.y;
-          if (v === null || v === undefined || Number.isNaN(v)) return "—";
-          return `${unitLabel()}: ${v.toFixed(state.metric === "oreKwh" ? 2 : 4)}`;
+
+        plugins: {
+          legend: { display: true },
+          title: { display: true, text: title },
+
+          tooltip: {
+            enabled: true,
+            callbacks: {
+              title: (items) => items?.[0]?.label || "",
+              label: (ctx) => {
+                const v = ctx.parsed?.y;
+                if (v === null || v === undefined || Number.isNaN(v)) return "—";
+                return `${unitLabel()}: ${v.toFixed(state.metric === "oreKwh" ? 2 : 4)}`;
+              },
+              afterLabel: (ctx) => {
+                const idx = ctx.dataIndex;
+                const p = day?.points?.[idx];
+                if (!p || !p.utc) return "";
+                const note = (p && typeof p[state.metric] === "number") ? "" : (state.fillGaps ? " (extrapolerad punkt)" : " (saknas i rådata)");
+                return `UTC: ${p.utc}${note}`;
+              }
+            }
+          }
         },
-        // Extra rad: UTC-tid från din points-array (om du vill)
-        afterLabel: (ctx) => {
-          const idx = ctx.dataIndex;
-          const day = state.data?.days?.[state.selectedDate];
-          const p = day?.points?.[idx];
-          if (!p || !p.utc) return "";
-          return `UTC: ${p.utc}`;
+
+        scales: {
+          x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } },
+          y: { title: { display: true, text: unitLabel() } }
         }
       }
-    }
-  },
-
-  scales: {
-    x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } },
-    y: { title: { display: true, text: unitLabel() } }
-  }
-}
     });
 
     // Summary
-    const stats = computeDailyStats(day);
-    const win2h = cheapestWindow(day, 8);   // 2h = 8*15m
-    const win4h = cheapestWindow(day, 16);  // 4h = 16*15m
+    const stats = computeDailyStatsFromSeries(series);
+
+    // Billigaste fönster:
+    // - om fillGaps är OFF: kräver komplett fönster utan null (rådata)
+    // - om fillGaps är ON: tillåter extrapolerade punkter för att få ett resultat
+    const win2h = cheapestWindowFromSeries(day, series, 8);
+    const win4h = cheapestWindowFromSeries(day, series, 16);
+
+    el("summaryNote").textContent = state.fillGaps
+      ? "Billigaste fönster kan använda extrapolerade punkter (≤2 null i rad). Rådata ändras inte."
+      : "Billigaste fönster kräver komplett fönster (inga null).";
 
     el("summary").innerHTML = `
       <div class="row">
         <span class="pill">Dygnsmedel: <b>${fmtNum(stats.avg, state.metric === "oreKwh" ? 2 : 4)}</b> ${unitLabel()}</span>
         <span class="pill">Min: <b>${fmtNum(stats.min, state.metric === "oreKwh" ? 2 : 4)}</b></span>
         <span class="pill">Max: <b>${fmtNum(stats.max, state.metric === "oreKwh" ? 2 : 4)}</b></span>
+        ${state.fillGaps ? `<span class="pill">Extrapolering: <b>ON</b> (≤2 null)</span>` : `<span class="pill">Extrapolering: <b>OFF</b></span>`}
       </div>
+
       <table style="margin-top:10px;">
-        <thead><tr><th>Fönster</th><th>Medel</th><th>Tid (lokal HH:MM från points)</th><th>Not</th></tr></thead>
+        <thead><tr><th>Fönster</th><th>Medel</th><th>Tid</th><th>Not</th></tr></thead>
         <tbody>
           <tr>
             <td>Billigaste 2h</td>
             <td>${win2h ? `<b>${fmtNum(win2h.avg, state.metric === "oreKwh" ? 2 : 4)}</b> ${unitLabel()}` : "—"}</td>
             <td>${win2h ? `${win2h.startTime} → ${win2h.endTime}` : "—"}</td>
-            <td>${win2h ? "Endast fönster utan null" : "Inget komplett 2h-fönster (null i vägen)"}</td>
+            <td>${win2h ? (state.fillGaps ? "Kan inkludera extrapolerade punkter" : "Endast rådata utan null") : "Inget komplett 2h-fönster"}</td>
           </tr>
           <tr>
             <td>Billigaste 4h</td>
             <td>${win4h ? `<b>${fmtNum(win4h.avg, state.metric === "oreKwh" ? 2 : 4)}</b> ${unitLabel()}` : "—"}</td>
             <td>${win4h ? `${win4h.startTime} → ${win4h.endTime}` : "—"}</td>
-            <td>${win4h ? "Endast fönster utan null" : "Inget komplett 4h-fönster (null i vägen)"}</td>
+            <td>${win4h ? (state.fillGaps ? "Kan inkludera extrapolerade punkter" : "Endast rådata utan null") : "Inget komplett 4h-fönster"}</td>
           </tr>
         </tbody>
       </table>
+
       <div class="small" style="margin-top:10px;">
         seriesStartUtc: ${day.series?.seriesStartUtc ?? "—"} · mRID: ${day.series?.mRID ?? "—"} · resolution: ${day.resolutionMinutes ?? "—"} min
       </div>
@@ -348,11 +381,10 @@ options: {
 
   function populateDatePick() {
     const days = state.data?.days || {};
-    const keys = Object.keys(days).sort(); // YYYY-MM-DD
+    const keys = Object.keys(days).sort();
     const dp = el("datePick");
     dp.innerHTML = keys.map(k => `<option value="${k}">${k} (${days[k].present}/${days[k].expected})</option>`).join("");
 
-    // default: om "idag" saknas, välj senaste dygn som finns
     const today = stockholmTodayIsoDate();
     if (keys.includes(today)) state.selectedDate = today;
     else state.selectedDate = keys[keys.length - 1] || null;
@@ -366,11 +398,22 @@ options: {
     return await r.json();
   }
 
+  function loadFillGapsSetting() {
+    const v = localStorage.getItem("rossohamn_fillGaps");
+    state.fillGaps = (v === "1");
+    el("fillGaps").checked = state.fillGaps;
+  }
+
+  function saveFillGapsSetting() {
+    localStorage.setItem("rossohamn_fillGaps", state.fillGaps ? "1" : "0");
+  }
+
   async function bootstrap() {
     const src = getParam("src") || DEFAULT_SRC;
     el("src").value = src;
 
     state.metric = el("metric").value;
+    loadFillGapsSetting();
 
     try {
       state.data = await loadHistory(src);
@@ -399,6 +442,13 @@ options: {
   el("datePick").addEventListener("change", () => {
     state.selectedDate = el("datePick").value;
     setTab("history");
+  });
+
+  // NEW: toggle handler
+  el("fillGaps").addEventListener("change", () => {
+    state.fillGaps = el("fillGaps").checked;
+    saveFillGapsSetting();
+    if (state.selectedDate) renderChartForDate(state.selectedDate);
   });
 
   bootstrap();
