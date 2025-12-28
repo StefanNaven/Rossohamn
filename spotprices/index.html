@@ -6,6 +6,7 @@
   <title>Rossohamn – Spotpriser (SE3)</title>
   <link rel="stylesheet" href="styles.css">
 
+
   <!-- Chart.js (CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
@@ -20,7 +21,7 @@
         </div>
         <div class="row">
           <label class="small" for="src">Data-URL</label>
-          <input id="src" style="min-width:320px" />
+          <input id="src" style="min-width:180px; flex: 1 1 260px;" />
           <button id="reload" style="padding:8px 10px; border-radius:10px; border:1px solid #2a2a2a; background:#151515; color:#fff; cursor:pointer;">Ladda</button>
         </div>
       </div>
@@ -42,7 +43,7 @@
           <option value="eurMwh">EUR/MWh</option>
         </select>
 
-        <!-- NEW: gap fill toggle -->
+        <!-- gap fill toggle -->
         <label class="toggle small" title="Fyll bara korta luckor (max 2 null i rad) med linjär interpolation. Rådata ändras inte.">
           <input id="fillGaps" type="checkbox" />
           Extrapolera null (≤2)
@@ -52,7 +53,7 @@
         <select id="datePick"></select>
       </div>
 
-      <div style="margin-top:10px;">
+      <div style="margin-top:10px;" class="chartWrap">
         <canvas id="chart"></canvas>
       </div>
     </div>
@@ -80,7 +81,7 @@
     tab: "today",          // today | tomorrow | history
     selectedDate: null,    // YYYY-MM-DD
     metric: "oreKwh",
-    fillGaps: false        // NEW
+    fillGaps: false
   };
 
   function stockholmTodayIsoDate() {
@@ -135,7 +136,6 @@
     return { avg: sum / vals.length, min, max };
   }
 
-  // NEW: fill small null gaps (<=2 in a row) using linear interpolation
   function fillSmallGapsLinear(values, maxGap = 2) {
     const out = values.slice();
     let i = 0;
@@ -175,7 +175,6 @@
   }
 
   function cheapestWindowFromSeries(day, series, slots) {
-    // series: number|null (or filled numbers)
     let best = null;
 
     for (let i = 0; i <= series.length - slots; i++) {
@@ -279,12 +278,8 @@
       }
     });
 
-    // Summary
     const stats = computeDailyStatsFromSeries(series);
 
-    // Billigaste fönster:
-    // - om fillGaps är OFF: kräver komplett fönster utan null (rådata)
-    // - om fillGaps är ON: tillåter extrapolerade punkter för att få ett resultat
     const win2h = cheapestWindowFromSeries(day, series, 8);
     const win4h = cheapestWindowFromSeries(day, series, 16);
 
@@ -408,7 +403,6 @@
     }
   }
 
-  // events
   el("reload").addEventListener("click", bootstrap);
   el("tab-today").addEventListener("click", () => setTab("today"));
   el("tab-tomorrow").addEventListener("click", () => setTab("tomorrow"));
@@ -424,7 +418,6 @@
     setTab("history");
   });
 
-  // NEW: toggle handler
   el("fillGaps").addEventListener("change", () => {
     state.fillGaps = el("fillGaps").checked;
     saveFillGapsSetting();
