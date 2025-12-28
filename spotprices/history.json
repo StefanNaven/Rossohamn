@@ -5,11 +5,11 @@
     "timeZone": "Europe/Stockholm",
     "eursek": 10.8055,
     "eursekDate": "2025-12-24",
-    "updatedAt": "2025-12-28T19:46:49.224Z",
+    "updatedAt": "2025-12-28T20:04:03.019Z",
     "includesTransferFee": false,
     "request": {
-      "periodStart": "202512261600",
-      "periodEnd": "202512312200"
+      "periodStart": "202512261700",
+      "periodEnd": "202512312300"
     }
   },
   "days": {
@@ -695,7 +695,7 @@
       ]
     },
     "2025-12-27": {
-      "present": 63,
+      "present": 91,
       "expected": 96,
       "resolutionMinutes": 15,
       "series": {
@@ -704,7 +704,7 @@
         "currency": "EUR",
         "unit": "MWH",
         "seriesStartUtc": "2025-12-26T23:00:00.000Z",
-        "pointsTotalInSeries": 63
+        "pointsTotalInSeries": 91
       },
       "points": [
         {
@@ -759,11 +759,17 @@
         {
           "utc": "2025-12-27T00:45:00.000Z",
           "time": "01:45",
+          "eurMwh": -0.13,
+          "sekKwh": -0.001405,
+          "oreKwh": -0.14
+        },
+        {
+          "utc": "2025-12-27T01:00:00.000Z",
+          "time": "02:00",
           "eurMwh": 0.31,
           "sekKwh": 0.00335,
           "oreKwh": 0.335
         },
-        null,
         {
           "utc": "2025-12-27T01:15:00.000Z",
           "time": "02:15",
@@ -782,18 +788,60 @@
         {
           "utc": "2025-12-27T02:00:00.000Z",
           "time": "03:00",
+          "eurMwh": -0.5,
+          "sekKwh": -0.005403,
+          "oreKwh": -0.54
+        },
+        {
+          "utc": "2025-12-27T02:15:00.000Z",
+          "time": "03:15",
+          "eurMwh": -0.91,
+          "sekKwh": -0.009833,
+          "oreKwh": -0.983
+        },
+        {
+          "utc": "2025-12-27T02:30:00.000Z",
+          "time": "03:30",
+          "eurMwh": -1.37,
+          "sekKwh": -0.014804,
+          "oreKwh": -1.48
+        },
+        {
+          "utc": "2025-12-27T02:45:00.000Z",
+          "time": "03:45",
+          "eurMwh": -1.53,
+          "sekKwh": -0.016532,
+          "oreKwh": -1.653
+        },
+        {
+          "utc": "2025-12-27T03:00:00.000Z",
+          "time": "04:00",
+          "eurMwh": -1.29,
+          "sekKwh": -0.013939,
+          "oreKwh": -1.394
+        },
+        {
+          "utc": "2025-12-27T03:15:00.000Z",
+          "time": "04:15",
+          "eurMwh": -1.5,
+          "sekKwh": -0.016208,
+          "oreKwh": -1.621
+        },
+        {
+          "utc": "2025-12-27T03:30:00.000Z",
+          "time": "04:30",
+          "eurMwh": -1.54,
+          "sekKwh": -0.01664,
+          "oreKwh": -1.664
+        },
+        null,
+        {
+          "utc": "2025-12-27T04:00:00.000Z",
+          "time": "05:00",
           "eurMwh": 0.55,
           "sekKwh": 0.005943,
           "oreKwh": 0.594
         },
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
         {
           "utc": "2025-12-27T04:15:00.000Z",
           "time": "05:15",
@@ -811,11 +859,17 @@
         {
           "utc": "2025-12-27T04:45:00.000Z",
           "time": "05:45",
+          "eurMwh": -0.08,
+          "sekKwh": -0.000864,
+          "oreKwh": -0.086
+        },
+        {
+          "utc": "2025-12-27T05:00:00.000Z",
+          "time": "06:00",
           "eurMwh": 0.11,
           "sekKwh": 0.001189,
           "oreKwh": 0.119
         },
-        null,
         {
           "utc": "2025-12-27T05:15:00.000Z",
           "time": "06:15",
@@ -1161,26 +1215,140 @@
           "sekKwh": 0.01167,
           "oreKwh": 1.167
         },
+        {
+          "utc": "2025-12-27T18:00:00.000Z",
+          "time": "19:00",
+          "eurMwh": -0.04,
+          "sekKwh": -0.000432,
+          "oreKwh": -0.043
+        },
+        {
+          "utc": "2025-12-27T18:15:00.000Z",
+          "time": "19:15",
+          "eurMwh": -0.18,
+          "sekKwh": -0.001945,
+          "oreKwh": -0.194
+        },
+        {
+          "utc": "2025-12-27T18:30:00.000Z",
+          "time": "19:30",
+          "eurMwh": -0.24,
+          "sekKwh": -0.002593,
+          "oreKwh": -0.259
+        },
+        {
+          "utc": "2025-12-27T18:45:00.000Z",
+          "time": "19:45",
+          "eurMwh": -0.29,
+          "sekKwh": -0.003134,
+          "oreKwh": -0.313
+        },
+        {
+          "utc": "2025-12-27T19:00:00.000Z",
+          "time": "20:00",
+          "eurMwh": -0.05,
+          "sekKwh": -0.00054,
+          "oreKwh": -0.054
+        },
+        {
+          "utc": "2025-12-27T19:15:00.000Z",
+          "time": "20:15",
+          "eurMwh": -0.24,
+          "sekKwh": -0.002593,
+          "oreKwh": -0.259
+        },
+        {
+          "utc": "2025-12-27T19:30:00.000Z",
+          "time": "20:30",
+          "eurMwh": -0.76,
+          "sekKwh": -0.008212,
+          "oreKwh": -0.821
+        },
+        {
+          "utc": "2025-12-27T19:45:00.000Z",
+          "time": "20:45",
+          "eurMwh": -0.96,
+          "sekKwh": -0.010373,
+          "oreKwh": -1.037
+        },
+        {
+          "utc": "2025-12-27T20:00:00.000Z",
+          "time": "21:00",
+          "eurMwh": -0.99,
+          "sekKwh": -0.010697,
+          "oreKwh": -1.07
+        },
         null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
+        {
+          "utc": "2025-12-27T20:30:00.000Z",
+          "time": "21:30",
+          "eurMwh": -1.01,
+          "sekKwh": -0.010914,
+          "oreKwh": -1.091
+        },
+        {
+          "utc": "2025-12-27T20:45:00.000Z",
+          "time": "21:45",
+          "eurMwh": -1.04,
+          "sekKwh": -0.011238,
+          "oreKwh": -1.124
+        },
+        {
+          "utc": "2025-12-27T21:00:00.000Z",
+          "time": "22:00",
+          "eurMwh": -0.76,
+          "sekKwh": -0.008212,
+          "oreKwh": -0.821
+        },
+        {
+          "utc": "2025-12-27T21:15:00.000Z",
+          "time": "22:15",
+          "eurMwh": -1.22,
+          "sekKwh": -0.013183,
+          "oreKwh": -1.318
+        },
+        {
+          "utc": "2025-12-27T21:30:00.000Z",
+          "time": "22:30",
+          "eurMwh": -1.34,
+          "sekKwh": -0.014479,
+          "oreKwh": -1.448
+        },
+        {
+          "utc": "2025-12-27T21:45:00.000Z",
+          "time": "22:45",
+          "eurMwh": -1.44,
+          "sekKwh": -0.01556,
+          "oreKwh": -1.556
+        },
+        {
+          "utc": "2025-12-27T22:00:00.000Z",
+          "time": "23:00",
+          "eurMwh": -2.04,
+          "sekKwh": -0.022043,
+          "oreKwh": -2.204
+        },
+        {
+          "utc": "2025-12-27T22:15:00.000Z",
+          "time": "23:15",
+          "eurMwh": -2.29,
+          "sekKwh": -0.024745,
+          "oreKwh": -2.474
+        },
+        {
+          "utc": "2025-12-27T22:30:00.000Z",
+          "time": "23:30",
+          "eurMwh": -2.36,
+          "sekKwh": -0.025501,
+          "oreKwh": -2.55
+        },
+        {
+          "utc": "2025-12-27T22:45:00.000Z",
+          "time": "23:45",
+          "eurMwh": -2.45,
+          "sekKwh": -0.026473,
+          "oreKwh": -2.647
+        }
       ]
     },
     "2025-12-24": {
@@ -2534,7 +2702,7 @@
       ]
     },
     "2025-12-28": {
-      "present": 78,
+      "present": 87,
       "expected": 96,
       "resolutionMinutes": 15,
       "series": {
@@ -2543,33 +2711,87 @@
         "currency": "EUR",
         "unit": "MWH",
         "seriesStartUtc": "2025-12-27T23:00:00.000Z",
-        "pointsTotalInSeries": 78
+        "pointsTotalInSeries": 87
       },
       "points": [
         {
           "utc": "2025-12-27T23:00:00.000Z",
           "time": "00:00",
-          "eurMwh": 0,
-          "sekKwh": 0,
-          "oreKwh": 0
+          "eurMwh": -0.13,
+          "sekKwh": -0.001405,
+          "oreKwh": -0.14
+        },
+        {
+          "utc": "2025-12-27T23:15:00.000Z",
+          "time": "00:15",
+          "eurMwh": -0.12,
+          "sekKwh": -0.001297,
+          "oreKwh": -0.13
         },
         null,
         null,
         null,
         null,
         null,
+        {
+          "utc": "2025-12-28T00:45:00.000Z",
+          "time": "01:45",
+          "eurMwh": -0.35,
+          "sekKwh": -0.003782,
+          "oreKwh": -0.378
+        },
         null,
         null,
+        {
+          "utc": "2025-12-28T01:30:00.000Z",
+          "time": "02:30",
+          "eurMwh": -0.34,
+          "sekKwh": -0.003674,
+          "oreKwh": -0.367
+        },
         null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
+        {
+          "utc": "2025-12-28T02:00:00.000Z",
+          "time": "03:00",
+          "eurMwh": -0.12,
+          "sekKwh": -0.001297,
+          "oreKwh": -0.13
+        },
+        {
+          "utc": "2025-12-28T02:15:00.000Z",
+          "time": "03:15",
+          "eurMwh": -0.11,
+          "sekKwh": -0.001189,
+          "oreKwh": -0.119
+        },
+        {
+          "utc": "2025-12-28T02:30:00.000Z",
+          "time": "03:30",
+          "eurMwh": -0.09,
+          "sekKwh": -0.000972,
+          "oreKwh": -0.097
+        },
+        {
+          "utc": "2025-12-28T02:45:00.000Z",
+          "time": "03:45",
+          "eurMwh": -0.07,
+          "sekKwh": -0.000756,
+          "oreKwh": -0.076
+        },
+        {
+          "utc": "2025-12-28T03:00:00.000Z",
+          "time": "04:00",
+          "eurMwh": -0.06,
+          "sekKwh": -0.000648,
+          "oreKwh": -0.065
+        },
+        {
+          "utc": "2025-12-28T03:15:00.000Z",
+          "time": "04:15",
+          "eurMwh": 0,
+          "sekKwh": 0,
+          "oreKwh": 0
+        },
         {
           "utc": "2025-12-28T03:30:00.000Z",
           "time": "04:30",
