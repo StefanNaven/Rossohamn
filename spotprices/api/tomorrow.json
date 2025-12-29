@@ -7,396 +7,396 @@
     "resolutionMinutes": 15,
     "expected": 96,
     "present": 0,
-    "updatedAt": "2025-12-29T10:25:20.606Z",
-    "historyUpdatedAt": "2025-12-29T10:25:20.585Z",
+    "updatedAt": "2025-12-29T10:53:18.453Z",
+    "historyUpdatedAt": "2025-12-29T10:53:18.432Z",
     "eursek": 10.8055,
     "eursekDate": "2025-12-24",
     "includesTransferFee": false
   },
   "timeline": [
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-29T23:00:00.000Z",
+      "time": "00:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-29T23:15:00.000Z",
+      "time": "00:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-29T23:30:00.000Z",
+      "time": "00:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-29T23:45:00.000Z",
+      "time": "00:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T00:00:00.000Z",
+      "time": "01:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T00:15:00.000Z",
+      "time": "01:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T00:30:00.000Z",
+      "time": "01:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T00:45:00.000Z",
+      "time": "01:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T01:00:00.000Z",
+      "time": "02:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T01:15:00.000Z",
+      "time": "02:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T01:30:00.000Z",
+      "time": "02:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T01:45:00.000Z",
+      "time": "02:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T02:00:00.000Z",
+      "time": "03:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T02:15:00.000Z",
+      "time": "03:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T02:30:00.000Z",
+      "time": "03:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T02:45:00.000Z",
+      "time": "03:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T03:00:00.000Z",
+      "time": "04:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T03:15:00.000Z",
+      "time": "04:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T03:30:00.000Z",
+      "time": "04:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T03:45:00.000Z",
+      "time": "04:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T04:00:00.000Z",
+      "time": "05:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T04:15:00.000Z",
+      "time": "05:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T04:30:00.000Z",
+      "time": "05:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T04:45:00.000Z",
+      "time": "05:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T05:00:00.000Z",
+      "time": "06:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T05:15:00.000Z",
+      "time": "06:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T05:30:00.000Z",
+      "time": "06:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T05:45:00.000Z",
+      "time": "06:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T06:00:00.000Z",
+      "time": "07:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T06:15:00.000Z",
+      "time": "07:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T06:30:00.000Z",
+      "time": "07:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T06:45:00.000Z",
+      "time": "07:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T07:00:00.000Z",
+      "time": "08:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T07:15:00.000Z",
+      "time": "08:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T07:30:00.000Z",
+      "time": "08:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T07:45:00.000Z",
+      "time": "08:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T08:00:00.000Z",
+      "time": "09:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T08:15:00.000Z",
+      "time": "09:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T08:30:00.000Z",
+      "time": "09:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T08:45:00.000Z",
+      "time": "09:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T09:00:00.000Z",
+      "time": "10:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T09:15:00.000Z",
+      "time": "10:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T09:30:00.000Z",
+      "time": "10:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T09:45:00.000Z",
+      "time": "10:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T10:00:00.000Z",
+      "time": "11:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T10:15:00.000Z",
+      "time": "11:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T10:30:00.000Z",
+      "time": "11:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T10:45:00.000Z",
+      "time": "11:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T11:00:00.000Z",
+      "time": "12:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T11:15:00.000Z",
+      "time": "12:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T11:30:00.000Z",
+      "time": "12:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T11:45:00.000Z",
+      "time": "12:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T12:00:00.000Z",
+      "time": "13:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T12:15:00.000Z",
+      "time": "13:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T12:30:00.000Z",
+      "time": "13:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T12:45:00.000Z",
+      "time": "13:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T13:00:00.000Z",
+      "time": "14:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T13:15:00.000Z",
+      "time": "14:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T13:30:00.000Z",
+      "time": "14:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T13:45:00.000Z",
+      "time": "14:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T14:00:00.000Z",
+      "time": "15:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T14:15:00.000Z",
+      "time": "15:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T14:30:00.000Z",
+      "time": "15:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T14:45:00.000Z",
+      "time": "15:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T15:00:00.000Z",
+      "time": "16:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T15:15:00.000Z",
+      "time": "16:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T15:30:00.000Z",
+      "time": "16:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T15:45:00.000Z",
+      "time": "16:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T16:00:00.000Z",
+      "time": "17:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T16:15:00.000Z",
+      "time": "17:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T16:30:00.000Z",
+      "time": "17:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T16:45:00.000Z",
+      "time": "17:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T17:00:00.000Z",
+      "time": "18:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T17:15:00.000Z",
+      "time": "18:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T17:30:00.000Z",
+      "time": "18:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T17:45:00.000Z",
+      "time": "18:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T18:00:00.000Z",
+      "time": "19:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T18:15:00.000Z",
+      "time": "19:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T18:30:00.000Z",
+      "time": "19:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T18:45:00.000Z",
+      "time": "19:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T19:00:00.000Z",
+      "time": "20:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T19:15:00.000Z",
+      "time": "20:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T19:30:00.000Z",
+      "time": "20:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T19:45:00.000Z",
+      "time": "20:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T20:00:00.000Z",
+      "time": "21:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T20:15:00.000Z",
+      "time": "21:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T20:30:00.000Z",
+      "time": "21:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T20:45:00.000Z",
+      "time": "21:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T21:00:00.000Z",
+      "time": "22:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T21:15:00.000Z",
+      "time": "22:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T21:30:00.000Z",
+      "time": "22:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T21:45:00.000Z",
+      "time": "22:45"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T22:00:00.000Z",
+      "time": "23:00"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T22:15:00.000Z",
+      "time": "23:15"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T22:30:00.000Z",
+      "time": "23:30"
     },
     {
-      "utc": null,
-      "time": null
+      "utc": "2025-12-30T22:45:00.000Z",
+      "time": "23:45"
     }
   ],
   "raw": {
