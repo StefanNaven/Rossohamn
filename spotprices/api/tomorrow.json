@@ -1,0 +1,715 @@
+{
+  "meta": {
+    "area": "SE3",
+    "documentType": "A44",
+    "timeZone": "Europe/Stockholm",
+    "date": "2025-12-30",
+    "resolutionMinutes": 15,
+    "expected": 96,
+    "present": 0,
+    "updatedAt": "2025-12-29T10:25:20.606Z",
+    "historyUpdatedAt": "2025-12-29T10:25:20.585Z",
+    "eursek": 10.8055,
+    "eursekDate": "2025-12-24",
+    "includesTransferFee": false
+  },
+  "timeline": [
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    },
+    {
+      "utc": null,
+      "time": null
+    }
+  ],
+  "raw": {
+    "points": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "missingCount": 96
+  },
+  "extrapolated": {
+    "method": "linear-internal-only",
+    "points": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "filled": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "stillNullCount": 96
+  },
+  "windows": {
+    "raw": {
+      "cheapest2h": null,
+      "cheapest4h": null,
+      "cheapest8h": null
+    },
+    "extrapolated": {
+      "cheapest2h": null,
+      "cheapest4h": null,
+      "cheapest8h": null
+    }
+  }
+}
