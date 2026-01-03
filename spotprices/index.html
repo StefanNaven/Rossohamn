@@ -369,8 +369,21 @@
     `;
   }
 
-  // Disable legend click toggling (den röda "dölj kurvan"-knappen)
-  function legendNoToggle() { /* intentionally empty */ }
+  // Legend click: block toggling of the main price curve (men låt highlights 2h/4h/8h gå att slå av/på)
+  function legendOnClick(e, legendItem, legend) {
+    const chart = legend.chart;
+    const idx = legendItem.datasetIndex;
+    const ds = chart.data.datasets[idx];
+    if (!ds) return;
+
+    // Main series = första datasetet (label = unitLabel())
+    if (idx === 0) return;
+
+    // Toggle only for highlight + reference lines
+    const meta = chart.getDatasetMeta(idx);
+    meta.hidden = meta.hidden === null ? !chart.data.datasets[idx].hidden : null;
+    chart.update();
+  }
 
   function renderChartSingleDay(dateKey) {
     const day = state.data?.days?.[dateKey];
@@ -412,9 +425,9 @@
     ];
 
     // Highlight order: 8h -> 4h -> 2h (so 2h sits on top)
-    if (hi8) datasets.push({ label: "Billigaste 8h", data: hi8, pointRadius: 0, borderWidth: 6, tension: 0.2, borderColor: "rgba(255,255,255,0.55)" });
-    if (hi4) datasets.push({ label: "Billigaste 4h", data: hi4, pointRadius: 0, borderWidth: 5, tension: 0.2, borderDash: [2,3], borderColor: "rgba(255,255,255,0.70)" });
-    if (hi2) datasets.push({ label: "Billigaste 2h", data: hi2, pointRadius: 0, borderWidth: 6, tension: 0.2, borderDash: [6,4], borderColor: "rgba(255,255,255,0.95)" });
+    if (hi8) datasets.push({ label: "Billigaste 8h", data: hi8, pointRadius: 0, borderWidth: 6, tension: 0.2, borderColor: "rgba(255,255,255,0.40)" });
+    if (hi4) datasets.push({ label: "Billigaste 4h", data: hi4, pointRadius: 0, borderWidth: 5, tension: 0.2, borderColor: "rgba(120,220,255,0.85)" });
+    if (hi2) datasets.push({ label: "Billigaste 2h", data: hi2, pointRadius: 0, borderWidth: 6, tension: 0.2, borderColor: "rgba(255,215,120,0.95)" });
 
     // Reference lines 1/2/3 kr/kWh converted to current metric
     if (state.krLines) {
@@ -451,7 +464,7 @@
         maintainAspectRatio: false,
         interaction: { mode: "index", intersect: false },
         plugins: {
-          legend: { display: true, onClick: legendNoToggle },
+          legend: { display: true, onClick: legendOnClick },
           title: { display: true, text: title },
           tooltip: {
             enabled: true,
@@ -531,9 +544,9 @@
       }
     ];
 
-    if (hi8) datasets.push({ label: "Billigaste 8h", data: hi8, pointRadius: 0, borderWidth: 6, tension: 0.15, borderColor: "rgba(255,255,255,0.55)" });
-    if (hi4) datasets.push({ label: "Billigaste 4h", data: hi4, pointRadius: 0, borderWidth: 5, tension: 0.15, borderDash: [2,3], borderColor: "rgba(255,255,255,0.70)" });
-    if (hi2) datasets.push({ label: "Billigaste 2h", data: hi2, pointRadius: 0, borderWidth: 6, tension: 0.15, borderDash: [6,4], borderColor: "rgba(255,255,255,0.95)" });
+    if (hi8) datasets.push({ label: "Billigaste 8h", data: hi8, pointRadius: 0, borderWidth: 6, tension: 0.15, borderColor: "rgba(255,255,255,0.40)" });
+    if (hi4) datasets.push({ label: "Billigaste 4h", data: hi4, pointRadius: 0, borderWidth: 5, tension: 0.15, borderColor: "rgba(120,220,255,0.85)" });
+    if (hi2) datasets.push({ label: "Billigaste 2h", data: hi2, pointRadius: 0, borderWidth: 6, tension: 0.15, borderColor: "rgba(255,215,120,0.95)" });
 
     if (state.krLines) {
       const y1 = sekKwhToMetricY(1);
@@ -568,7 +581,7 @@
         maintainAspectRatio: false,
         interaction: { mode: "index", intersect: false },
         plugins: {
-          legend: { display: true, onClick: legendNoToggle },
+          legend: { display: true, onClick: legendOnClick },
           title: { display: true, text: title },
           tooltip: {
             enabled: true,
