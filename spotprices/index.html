@@ -34,8 +34,10 @@
       <div class="row tabs">
         <button id="tab-today" class="active">Idag</button>
         <button id="tab-tomorrow">Imorgon</button>
-        <button id="tab-history">Historik</button>
-        <button id="tab-last7">7 dagar</button>
+        <button id="tab-day">Dag</button>
+        <button id="tab-7d">7 dagar</button>
+        <button id="tab-14d">14 dagar</button>
+        <button id="tab-30d">30 dagar</button>
         <span style="flex:1;"></span>
 
         <label class="small" for="metric">Serie</label>
@@ -50,22 +52,15 @@
           Extrapolera null (≤8)
         </label>
 
-        <label class="toggle small" title="Lås Y-axeln så att maxvärdet (för aktuell vy) blir fast. Gör små skillnader lättare att se.">
-          <input id="lockYMax" type="checkbox" />
-          Lås Y-max
-        </label>
-
-        <label class="toggle small" title="Visa horisontella referenslinjer (1 kr, 2 kr, 3 kr) när du visar SEK/kWh.">
-          <input id="showCostLines" type="checkbox" checked />
+        <label class="toggle small" title="Visa referenslinjer för 1 kr, 2 kr, 3 kr (omräknat för vald serie).">
+          <input id="refLines" type="checkbox" checked />
           1/2/3 kr-linjer
         </label>
 
         <label class="small" for="datePick">Datum</label>
-        <div class="dayNav">
-          <button id="prevDay" class="iconBtn" title="Föregående dag (←)">←</button>
-          <select id="datePick"></select>
-          <button id="nextDay" class="iconBtn" title="Nästa dag (→)">→</button>
-        </div>
+        <button id="prevDay" class="navBtn" title="Föregående dag">←</button>
+        <select id="datePick"></select>
+        <button id="nextDay" class="navBtn" title="Nästa dag">→</button>
       </div>
 
       <div style="margin-top:10px;" class="chartWrap">
@@ -87,6 +82,7 @@
   </div>
 
 <script>
+
 (() => {
   const DEFAULT_SRC = "history.json";
   const el = (id) => document.getElementById(id);
@@ -97,33 +93,27 @@
     selectedDate: null,
     metric: "oreKwh",
     fillGaps: false,
-    lockYMax: false,
-    showCostLines: true
+    refLines: true
   };
-
-  let chart = null;
 
   function stockholmTodayIsoDate() {
     const parts = new Intl.DateTimeFormat("sv-SE", {
       timeZone: "Europe/Stockholm",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit"
+      year: "numeric", month: "2-digit", day: "2-digit"
     }).formatToParts(new Date());
-
     const y = parts.find(p => p.type === "year").value;
     const m = parts.find(p => p.type === "month").value;
     const d = parts.find(p => p.type === "day").value;
     return `${y}-${m}-${d}`;
   }
 
-  function addDaysIsoDate(isoDate, deltaDays) {
-    const [y, m, d] = isoDate.split("-").map(Number);
-    const dt = new Date(Date.UTC(y, m - 1, d));
+  function addDays(yyyyMmDd, deltaDays) {
+    const [y,m,d] = yyyyMmDd.split("-").map(Number);
+    const dt = new Date(Date.UTC(y, m-1, d));
     dt.setUTCDate(dt.getUTCDate() + deltaDays);
     const y2 = dt.getUTCFullYear();
-    const m2 = String(dt.getUTCMonth() + 1).padStart(2, "0");
-    const d2 = String(dt.getUTCDate()).padStart(2, "0");
+    const m2 = String(dt.getUTCMonth()+1).padStart(2,"0");
+    const d2 = String(dt.getUTCDate()).padStart(2,"0");
     return `${y2}-${m2}-${d2}`;
   }
 
@@ -132,7 +122,7 @@
     return u.searchParams.get(name);
   }
 
-  function fmtNum(v, decimals = 2) {
+  function fmtNum(v, decimals=2) {
     if (v === null || v === undefined || Number.isNaN(v)) return "—";
     return Number(v).toFixed(decimals);
   }
@@ -149,42 +139,131 @@
   function computeDailyStatsFromSeries(series) {
     const vals = series.filter(v => typeof v === "number");
     if (!vals.length) return { avg: null, min: null, max: null };
-    const sum = vals.reduce((a, b) => a + b, 0);
-    return { avg: sum / vals.length, min: Math.min(...vals), max: Math.max(...vals) };
+    let sum = 0, min = vals[0], max = vals[0];
+    for (const v of vals) {
+      sum += v;
+      if (v < min) min = v;
+      if (v > max) max = v;
+    }
+    return { avg: sum / vals.length, min, max };
   }
 
-  // Fill only *small internal gaps* where we have a number on both sides.
-  function fillSmallGapsLinear(series, maxGap) {
-    const out = [...series];
-
+  function fillSmallGapsLinear(values, maxGap = 2) {
+    const out = values.slice();
     let i = 0;
+
     while (i < out.length) {
       if (typeof out[i] === "number") { i++; continue; }
 
-      // gap start
       const gapStart = i;
       while (i < out.length && typeof out[i] !== "number") i++;
       const gapEnd = i - 1;
       const gapLen = gapEnd - gapStart + 1;
 
-      // Need left/right anchor numbers
+      if (gapLen > maxGap) continue;
+
       const leftIdx = gapStart - 1;
-      const rightIdx = i;
-      if (gapLen <= maxGap && leftIdx >= 0 && rightIdx < out.length) {
-        const left = out[leftIdx];
-        const right = out[rightIdx];
-        if (typeof left === "number" && typeof right === "number") {
-          const step = (right - left) / (gapLen + 1);
-          for (let k = 1; k <= gapLen; k++) {
-            out[gapStart + (k - 1)] = left + step * k;
-          }
-        }
+      const rightIdx = gapEnd + 1;
+      if (leftIdx < 0 || rightIdx >= out.length) continue;
+
+      const left = out[leftIdx];
+      const right = out[rightIdx];
+      if (typeof left !== "number" || typeof right !== "number") continue;
+
+      const step = (right - left) / (gapLen + 1);
+      for (let k = 1; k <= gapLen; k++) {
+        out[gapStart + (k - 1)] = left + step * k;
       }
     }
     return out;
   }
 
-  function buildLabelsForDay(day) {
+  
+
+  function krRefValuesForMetric() {
+    // Returns {v1, v2, v3} in the currently selected metric.
+    // Baseline is 1/2/3 SEK per kWh.
+    const eursek = state.data?.meta?.eursek; // SEK per EUR (expected)
+    const to = (krPerKwh) => {
+      if (state.metric === "sekKwh") return krPerKwh;
+      if (state.metric === "oreKwh") return krPerKwh * 100;
+      if (state.metric === "eurMwh") {
+        // 1 SEK/kWh = 1000 SEK/MWh. Convert SEK→EUR using eursek (SEK per EUR).
+        if (!eursek || !isFinite(eursek) || eursek <= 0) return null;
+        return (krPerKwh * 1000) / eursek;
+      }
+      return null;
+    };
+    const v1 = to(1);
+    const v2 = to(2);
+    const v3 = to(3);
+    return { v1, v2, v3 };
+  }
+
+  function buildRefLineDatasets(labels) {
+    if (!state.refLines) return [];
+    const { v1, v2, v3 } = krRefValuesForMetric();
+    const values = [
+      { v: v1, label: "1 kr" },
+      { v: v2, label: "2 kr" },
+      { v: v3, label: "3 kr" }
+    ].filter(x => typeof x.v === "number" && isFinite(x.v));
+
+    if (!values.length) return [];
+
+    return values.map(x => ({
+      label: x.label,
+      data: Array(labels.length).fill(x.v),
+      borderColor: "rgba(255,255,255,0.25)",
+      borderWidth: 1,
+      borderDash: [4,4],
+      pointRadius: 0
+    }));
+  }
+
+  function buildWindowHighlightSeries(series, day, win) {
+    if (!win || !day?.points?.length) return null;
+
+    const startIdx = day.points.findIndex(p => p?.time === win.startTime);
+    const endIdx = day.points.findIndex(p => p?.time === win.endTime);
+    if (startIdx < 0 || endIdx < 0) return null;
+
+    const out = series.map(() => null);
+    for (let i = startIdx; i <= endIdx; i++) out[i] = series[i];
+    return out;
+  }
+
+  const nowLinePlugin = {
+    id: "nowLine",
+    afterDraw(chart) {
+      // Only in "Idag" och bara om vi verkligen visar dagens datum
+      if (state.tab !== "today") return;
+      const today = stockholmTodayIsoDate();
+      if (state.selectedDate !== today) return;
+
+      const now = new Date();
+      const hh = now.getHours();
+      const mm = now.getMinutes();
+      const slot = hh * 4 + Math.floor(mm / 15); // 15-min slots
+
+      const xScale = chart.scales.x;
+      if (!xScale) return;
+
+      // Labels are 0..95 indices in dagsvy (buildLabelsForDay). We can use slot as index.
+      const x = xScale.getPixelForValue(slot);
+
+      const ctx = chart.ctx;
+      ctx.save();
+      ctx.strokeStyle = "rgba(255,255,255,0.6)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x, chart.chartArea.top);
+      ctx.lineTo(x, chart.chartArea.bottom);
+      ctx.stroke();
+      ctx.restore();
+    }
+  };
+function buildLabelsForDay(day) {
     return day.points.map(p => p ? p.time : "");
   }
 
@@ -200,7 +279,7 @@
       let sum = 0;
 
       for (let k = 0; k < slots; k++) {
-        const v = series[i + k];
+        const v = series[i+k];
         if (typeof v !== "number") { ok = false; break; }
         sum += v;
       }
@@ -211,189 +290,165 @@
     }
 
     if (!best) return null;
-
-    const startTime = day.points[best.startIdx]?.time ?? "";
-    const endTime = day.points[best.endIdx]?.time ?? "";
-    return { ...best, startTime, endTime };
-  }
-
-  function buildHighlightSeries(series, win) {
-    if (!win) return null;
-    const out = series.map(() => null);
-    for (let i = win.startIdx; i <= win.endIdx; i++) out[i] = series[i];
-    return out;
-  }
-
-  function horizontalLine(value, len, label) {
+    const start = day.points[best.startIdx];
+    const end = day.points[best.endIdx];
     return {
-      label,
-      data: Array(len).fill(value),
-      borderColor: "rgba(255,255,255,0.25)",
-      borderWidth: 1,
-      borderDash: [4, 4],
-      pointRadius: 0,
-      tension: 0
+      avg: best.avg,
+      startTime: start?.time ?? "",
+      endTime: end?.time ?? "",
+      startUtc: start?.utc ?? "",
+      endUtc: end?.utc ?? ""
     };
   }
 
-  const nowLinePlugin = {
-    id: "nowLine",
-    afterDraw(chart) {
-      // Only show for "today"-tab AND when the rendered date actually is today's date.
-      if (state.tab !== "today") return;
-      const today = stockholmTodayIsoDate();
-      if (state.selectedDate !== today) return;
+  // Rainbow-ish gradient for the line (green -> blue -> red)
+  function lineGradientColor(ctx) {
+    const { chart } = ctx;
+    const { ctx: c, chartArea } = chart;
+    if (!chartArea) return "#9fd4ff";
 
-      const now = new Date();
-      const hh = now.getHours();
-      const mm = now.getMinutes();
-      const slot = hh * 4 + Math.floor(mm / 15); // 15-min slots
-
-      const xScale = chart.scales.x;
-      if (!xScale) return;
-      const x = xScale.getPixelForValue(slot);
-
-      const ctx = chart.ctx;
-      ctx.save();
-      ctx.strokeStyle = "rgba(255,255,255,0.55)";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(x, chart.chartArea.top);
-      ctx.lineTo(x, chart.chartArea.bottom);
-      ctx.stroke();
-      ctx.restore();
-    }
-  };
-
-  function setActiveTabButton(tab) {
-    ["today", "tomorrow", "history", "last7"].forEach(t => {
-      const b = el(`tab-${t === "last7" ? "last7" : t}`);
-      if (!b) return;
-      b.classList.toggle("active", t === tab);
-    });
-  }
-
-  function setTab(tab) {
-    state.tab = tab;
-    setActiveTabButton(tab);
-
-    // Pick a date automatically for today/tomorrow, otherwise keep selected.
-    const keys = Object.keys(state.data?.days || {}).sort();
-    if (!keys.length) return;
-
-    const today = stockholmTodayIsoDate();
-
-    if (tab === "today") {
-      state.selectedDate = keys.includes(today) ? today : keys[keys.length - 1];
-      el("datePick").value = state.selectedDate;
-      renderChartForDate(state.selectedDate);
-      return;
-    }
-
-    if (tab === "tomorrow") {
-      const tomorrow = addDaysIsoDate(today, 1);
-      // If we have tomorrow, use it; otherwise fall back to latest available.
-      state.selectedDate = keys.includes(tomorrow) ? tomorrow : keys[keys.length - 1];
-      el("datePick").value = state.selectedDate;
-      renderChartForDate(state.selectedDate);
-      return;
-    }
-
-    if (tab === "history") {
-      if (!state.selectedDate) state.selectedDate = keys[keys.length - 1];
-      el("datePick").value = state.selectedDate;
-      renderChartForDate(state.selectedDate);
-      return;
-    }
-
-    if (tab === "last7") {
-      if (!state.selectedDate) state.selectedDate = keys[keys.length - 1];
-      el("datePick").value = state.selectedDate;
-      renderChartLastNDays(7, state.selectedDate);
-      return;
-    }
-  }
-
-  function stepDay(delta) {
-    const keys = Object.keys(state.data?.days || {}).sort();
-    if (!keys.length) return;
-
-    if (!state.selectedDate) state.selectedDate = keys[keys.length - 1];
-    const idx = keys.indexOf(state.selectedDate);
-    if (idx === -1) return;
-
-    const nextIdx = idx + delta;
-    if (nextIdx < 0 || nextIdx >= keys.length) return;
-
-    state.selectedDate = keys[nextIdx];
-    el("datePick").value = state.selectedDate;
-
-    // Keep current view type, but ensure it renders correctly
-    if (state.tab === "last7") {
-      renderChartLastNDays(7, state.selectedDate);
-    } else {
-      setTab("history");
-    }
-  }
-
-  function buildLineGradient(ctx, chartArea) {
-    const g = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-    // rainbow-ish: green (low) -> blue (mid) -> red (high)
-    g.addColorStop(0.00, "rgba(0,255,140,0.95)");
-    g.addColorStop(0.55, "rgba(0,160,255,0.95)");
-    g.addColorStop(1.00, "rgba(255,70,70,0.95)");
+    const g = c.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+    g.addColorStop(0.00, "#2ecc71"); // low (green)
+    g.addColorStop(0.50, "#3498db"); // mid (blue)
+    g.addColorStop(1.00, "#e74c3c"); // high (red)
     return g;
   }
 
-  function buildChart(title, labels, datasets, ySuggestedMax) {
+  let chart = null;
+  function renderChartForDate(dateKey) {
+    const day = state.data?.days?.[dateKey];
     const ctx = el("chart").getContext("2d");
-    if (chart) chart.destroy();
 
+    if (!day) {
+      if (chart) chart.destroy();
+      chart = null;
+      el("summary").innerHTML = `<div>Inget dygn hittades för <b>${dateKey}</b>.</div>`;
+      return;
+    }
+
+    const labels = buildLabelsForDay(day);
+
+    const rawSeries = buildSeriesForDay(day);
+    const series = state.fillGaps ? fillSmallGapsLinear(rawSeries, 8) : rawSeries;
+
+    const title = `${dateKey} (${unitLabel()}) – present ${day.present}/${day.expected}` +
+      (state.fillGaps ? " (extrapolerat ≤8 null)" : "");
+
+    const win2h = cheapestWindowFromSeries(day, series, 8);
+    const win4h = cheapestWindowFromSeries(day, series, 16);
+    const win8h = cheapestWindowFromSeries(day, series, 32);
+
+    const hi2 = buildWindowHighlightSeries(series, day, win2h);
+    const hi4 = buildWindowHighlightSeries(series, day, win4h);
+    const hi8 = buildWindowHighlightSeries(series, day, win8h);
+
+    const refLineDatasets = buildRefLineDatasets(labels);
+
+
+    if (chart) chart.destroy();
     chart = new Chart(ctx, {
       type: "line",
-      data: { labels, datasets },
-      plugins: [nowLinePlugin],
+      data: {
+        labels,
+        datasets: [
+          ...refLineDatasets,
+          {
+            label: unitLabel(),
+            data: series,
+            spanGaps: false,
+            pointRadius: 0,
+            borderWidth: 2,
+            tension: 0.2,
+
+            borderColor: lineGradientColor,
+            borderJoinStyle: "round",
+            borderCapStyle: "round"
+          },
+
+          ...(hi8 ? [{
+            label: "Billigaste 8h",
+            data: hi8,
+            spanGaps: false,
+            pointRadius: 0,
+            borderWidth: 5,
+            tension: 0.2,
+            borderColor: "rgba(255,255,255,0.85)"
+          }] : []),
+
+          ...(hi4 ? [{
+            label: "Billigaste 4h",
+            data: hi4,
+            spanGaps: false,
+            pointRadius: 0,
+            borderWidth: 4,
+            tension: 0.2,
+            borderColor: "rgba(255,255,255,0.55)"
+          }] : []),
+
+          ...(hi2 ? [{
+            label: "Billigaste 2h",
+            data: hi2,
+            spanGaps: false,
+            pointRadius: 0,
+            borderWidth: 3,
+            tension: 0.2,
+            borderColor: "rgba(255,255,255,0.35)"
+          }] : [])
+        ]},
       options: {
         responsive: true,
         maintainAspectRatio: false,
+
         interaction: { mode: "index", intersect: false },
 
         plugins: {
           legend: { display: true },
           title: { display: true, text: title },
-          tooltip: { enabled: true }
+
+          tooltip: {
+            enabled: true,
+            callbacks: {
+              title: (items) => items?.[0]?.label || "",
+              label: (ctx) => {
+                const v = ctx.parsed?.y;
+                if (v === null || v === undefined || Number.isNaN(v)) return "—";
+                return `${unitLabel()}: ${v.toFixed(state.metric === "oreKwh" ? 2 : 4)}`;
+              },
+              afterLabel: (ctx) => {
+                const idx = ctx.dataIndex;
+                const p = day?.points?.[idx];
+                if (!p || !p.utc) return "";
+                const note = (p && typeof p[state.metric] === "number")
+                  ? ""
+                  : (state.fillGaps ? " (extrapolerad punkt)" : " (saknas i rådata)");
+                return `UTC: ${p.utc}${note}`;
+              }
+            }
+          }
         },
 
         scales: {
-          x: {
-            ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 },
-            grid: { color: "rgba(255,255,255,0.06)" }
-          },
-          y: {
-            title: { display: true, text: unitLabel() },
-            suggestedMax: ySuggestedMax ?? undefined,
-            grid: { color: "rgba(255,255,255,0.06)" }
-          }
+          x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } },
+          y: { title: { display: true, text: unitLabel() } }
         }
       }
     });
-  }
 
-  function renderSummary(stats, win2h, win4h, win8h, extrapolatedCount) {
+    const stats = computeDailyStatsFromSeries(series);
+
+    const win2h = cheapestWindowFromSeries(day, series, 8);
+    const win4h = cheapestWindowFromSeries(day, series, 16);
+
     el("summaryNote").textContent = state.fillGaps
-      ? "Billigaste fönster kan använda extrapolerade punkter (≤8 null i rad). Rådata ändras inte."
+      ? "Billigaste fönster kan använda extrapolerade punkter (≤2 null i rad). Rådata ändras inte."
       : "Billigaste fönster kräver komplett fönster (inga null).";
-
-    const dec = (state.metric === "oreKwh") ? 2 : 4;
 
     el("summary").innerHTML = `
       <div class="row">
-        <span class="pill">Medel: <b>${fmtNum(stats.avg, dec)}</b> ${unitLabel()}</span>
-        <span class="pill">Min: <b>${fmtNum(stats.min, dec)}</b></span>
-        <span class="pill">Max: <b>${fmtNum(stats.max, dec)}</b></span>
-        ${state.fillGaps
-          ? `<span class="pill">Extrapolering: <b>ON</b> (antal punkter: ${extrapolatedCount})</span>`
-          : `<span class="pill">Extrapolering: <b>OFF</b></span>`}
+        <span class="pill">Dygnsmedel: <b>${fmtNum(stats.avg, state.metric === "oreKwh" ? 2 : 4)}</b> ${unitLabel()}</span>
+        <span class="pill">Min: <b>${fmtNum(stats.min, state.metric === "oreKwh" ? 2 : 4)}</b></span>
+        <span class="pill">Max: <b>${fmtNum(stats.max, state.metric === "oreKwh" ? 2 : 4)}</b></span>
+        ${state.fillGaps ? `<span class="pill">Extrapolering: <b>ON</b> (≤2 null)</span>` : `<span class="pill">Extrapolering: <b>OFF</b></span>`}
       </div>
 
       <table style="margin-top:10px;">
@@ -401,187 +456,154 @@
         <tbody>
           <tr>
             <td>Billigaste 2h</td>
-            <td>${win2h ? `<b>${fmtNum(win2h.avg, dec)}</b> ${unitLabel()}` : "—"}</td>
+            <td>${win2h ? `<b>${fmtNum(win2h.avg, state.metric === "oreKwh" ? 2 : 4)}</b> ${unitLabel()}` : "—"}</td>
             <td>${win2h ? `${win2h.startTime} → ${win2h.endTime}` : "—"}</td>
             <td>${win2h ? (state.fillGaps ? "Kan inkludera extrapolerade punkter" : "Endast rådata utan null") : "Inget komplett 2h-fönster"}</td>
           </tr>
           <tr>
             <td>Billigaste 4h</td>
-            <td>${win4h ? `<b>${fmtNum(win4h.avg, dec)}</b> ${unitLabel()}` : "—"}</td>
+            <td>${win4h ? `<b>${fmtNum(win4h.avg, state.metric === "oreKwh" ? 2 : 4)}</b> ${unitLabel()}` : "—"}</td>
             <td>${win4h ? `${win4h.startTime} → ${win4h.endTime}` : "—"}</td>
             <td>${win4h ? (state.fillGaps ? "Kan inkludera extrapolerade punkter" : "Endast rådata utan null") : "Inget komplett 4h-fönster"}</td>
           </tr>
-          <tr>
-            <td>Billigaste 8h</td>
-            <td>${win8h ? `<b>${fmtNum(win8h.avg, dec)}</b> ${unitLabel()}` : "—"}</td>
-            <td>${win8h ? `${win8h.startTime} → ${win8h.endTime}` : "—"}</td>
-            <td>${win8h ? (state.fillGaps ? "Kan inkludera extrapolerade punkter" : "Endast rådata utan null") : "Inget komplett 8h-fönster"}</td>
-          </tr>
         </tbody>
       </table>
+
+      <div class="small" style="margin-top:10px;">
+        seriesStartUtc: ${day.series?.seriesStartUtc ?? "—"} · mRID: ${day.series?.mRID ?? "—"} · resolution: ${day.resolutionMinutes ?? "—"} min
+      </div>
     `;
   }
 
-  function countExtrapolated(rawSeries, filledSeries) {
-    let c = 0;
-    for (let i = 0; i < rawSeries.length; i++) {
-      if (rawSeries[i] === null && typeof filledSeries[i] === "number") c++;
-    }
-    return c;
-  }
 
-  function renderChartForDate(dateKey) {
-    const day = state.data?.days?.[dateKey];
-    if (!day) return;
+  function buildRangeSeries(daysBack) {
+    const keys = Object.keys(state.data?.days || {}).sort();
+    const today = stockholmTodayIsoDate();
 
-    const labels = buildLabelsForDay(day);
-    const rawSeries = buildSeriesForDay(day);
-    const series = state.fillGaps ? fillSmallGapsLinear(rawSeries, 8) : rawSeries;
-
-    const extrapolatedCount = state.fillGaps ? countExtrapolated(rawSeries, series) : 0;
-
-    const stats = computeDailyStatsFromSeries(series);
-
-    const win2h = cheapestWindowFromSeries(day, series, 8);
-    const win4h = cheapestWindowFromSeries(day, series, 16);
-    const win8h = cheapestWindowFromSeries(day, series, 32);
-
-    const hi8 = buildHighlightSeries(series, win8h);
-
-    const maxVal = stats.max;
-    const ySuggestedMax = state.lockYMax && typeof maxVal === "number" ? maxVal * 1.05 : undefined;
-
-    // Build datasets
-    const ctx = el("chart").getContext("2d");
-    const lineGradientColor = (chart && chart.chartArea)
-      ? buildLineGradient(ctx, chart.chartArea)
-      : "rgba(0,160,255,0.95)";
-
-    const datasets = [
-      {
-        label: unitLabel(),
-        data: series,
-        spanGaps: false,
-        pointRadius: 0,
-        borderWidth: 2,
-        tension: 0.2,
-        borderColor: lineGradientColor,
-        borderJoinStyle: "round",
-        borderCapStyle: "round"
-      }
-    ];
-
-    if (hi8) {
-      datasets.push({
-        label: "Billigaste 8h",
-        data: hi8,
-        spanGaps: false,
-        pointRadius: 0,
-        borderWidth: 5,
-        tension: 0.2,
-        borderColor: "rgba(255,255,255,0.85)"
-      });
-    }
-
-    if (state.metric === "sekKwh" && state.showCostLines) {
-      datasets.push(horizontalLine(1, labels.length, "1 kr"));
-      datasets.push(horizontalLine(2, labels.length, "2 kr"));
-      datasets.push(horizontalLine(3, labels.length, "3 kr"));
-    }
-
-    const title = `${dateKey} (${unitLabel()}) – present ${day.present}/${day.expected}` +
-      (state.fillGaps ? " (extrapolerat ≤8 null)" : "");
-
-    buildChart(title, labels, datasets, ySuggestedMax);
-    renderSummary(stats, win2h, win4h, win8h, extrapolatedCount);
-  }
-
-  function buildLastNDaysSeries(n, endDateKey) {
-    const days = state.data?.days || {};
-    const keys = Object.keys(days).sort();
-    if (!keys.length) return null;
-
-    const endIdx = keys.indexOf(endDateKey);
-    const lastKeys = (endIdx >= 0 ? keys.slice(Math.max(0, endIdx - (n - 1)), endIdx + 1) : keys.slice(-n));
+    const pastKeys = keys.filter(k => k <= today);
+    const slice = pastKeys.slice(Math.max(0, pastKeys.length - daysBack));
 
     const labels = [];
     const raw = [];
-    lastKeys.forEach(dk => {
-      const day = days[dk];
+
+    slice.forEach(d => {
+      const day = state.data.days[d];
+      if (!day?.points) return;
       day.points.forEach(p => {
-        labels.push(`${dk} ${p ? p.time : ""}`);
-        raw.push((p && typeof p[state.metric] === "number") ? p[state.metric] : null);
+        if (!p) { labels.push(`${d} --:--`); raw.push(null); return; }
+        labels.push(`${d} ${p.time}`);
+        raw.push(p[state.metric] ?? null);
       });
     });
 
-    return { labels, raw, lastKeys };
+    const series = state.fillGaps ? fillSmallGapsLinear(raw, 8) : raw;
+    return { labels, series, days: slice };
   }
 
-  function renderChartLastNDays(n, endDateKey) {
-    const built = buildLastNDaysSeries(n, endDateKey);
-    if (!built) return;
+  function renderChartForRange(daysBack) {
+    const { labels, series, days } = buildRangeSeries(daysBack);
 
-    const { labels, raw, lastKeys } = built;
-    const series = state.fillGaps ? fillSmallGapsLinear(raw, 8) : raw;
-    const extrapolatedCount = state.fillGaps ? countExtrapolated(raw, series) : 0;
-
-    const stats = computeDailyStatsFromSeries(series);
-
-    // Cheapest 8h across the whole last-N view (still 15-min resolution => 32 slots)
-    const fauxDay = { points: labels.map((lab, idx) => ({ time: lab.split(" ").slice(1).join(" ") })) };
-    const win8 = cheapestWindowFromSeries(fauxDay, series, 32);
-    const hi8 = buildHighlightSeries(series, win8);
-
-    const maxVal = stats.max;
-    const ySuggestedMax = state.lockYMax && typeof maxVal === "number" ? maxVal * 1.05 : undefined;
-
-    const ctx = el("chart").getContext("2d");
-    const lineGradientColor = (chart && chart.chartArea)
-      ? buildLineGradient(ctx, chart.chartArea)
-      : "rgba(0,160,255,0.95)";
-
-    const datasets = [
-      {
-        label: `${unitLabel()} (${lastKeys[0]} → ${lastKeys[lastKeys.length - 1]})`,
-        data: series,
-        spanGaps: false,
-        pointRadius: 0,
-        borderWidth: 2,
-        tension: 0.2,
-        borderColor: lineGradientColor,
-        borderJoinStyle: "round",
-        borderCapStyle: "round"
-      }
-    ];
-
-    if (hi8) {
-      datasets.push({
-        label: "Billigaste 8h (i vyn)",
-        data: hi8,
-        spanGaps: false,
-        pointRadius: 0,
-        borderWidth: 5,
-        tension: 0.2,
-        borderColor: "rgba(255,255,255,0.85)"
-      });
+    if (!labels.length) {
+      if (chart) chart.destroy();
+      chart = null;
+      el("summary").innerHTML = `<div>Inga data för senaste ${daysBack} dagar.</div>`;
+      return;
     }
 
-    if (state.metric === "sekKwh" && state.showCostLines) {
-      datasets.push(horizontalLine(1, labels.length, "1 kr"));
-      datasets.push(horizontalLine(2, labels.length, "2 kr"));
-      datasets.push(horizontalLine(3, labels.length, "3 kr"));
-    }
-
-    const title = `${n} dagar (${unitLabel()}) – ${lastKeys[0]} → ${lastKeys[lastKeys.length - 1]}` +
+    const title = `Senaste ${daysBack} dagar (${unitLabel()}) – ${days[0] || "?"} → ${days[days.length-1] || "?"}` +
       (state.fillGaps ? " (extrapolerat ≤8 null)" : "");
 
-    buildChart(title, labels, datasets, ySuggestedMax);
+    const refLineDatasets = buildRefLineDatasets(labels);
 
-    // Summary: show only "window 8h" for the view; keep 2h/4h as "—" to avoid confusion.
-    renderSummary(stats, null, null, win8 ? { ...win8, startTime: labels[win8.startIdx], endTime: labels[win8.endIdx] } : null, extrapolatedCount);
+    const baseDataset = {
+      label: unitLabel(),
+      data: series,
+      spanGaps: false,
+      pointRadius: 0,
+      borderWidth: 2,
+      tension: 0.2,
+      borderColor: "rgba(255,255,255,0.8)",
+      borderJoinStyle: "round",
+      borderCapStyle: "round"
+    };
+
+    if (chart) chart.destroy();
+    chart = new Chart(el("chart").getContext("2d"), {
+      type: "line",
+      data: { labels, datasets: [...refLineDatasets, baseDataset] },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+          legend: { display: true },
+          title: { display: true, text: title },
+          tooltip: {
+            enabled: true,
+            callbacks: {
+              title: (items) => items?.[0]?.label || "",
+              label: (ctx) => {
+                const v = ctx.parsed?.y;
+                if (v === null || v === undefined || Number.isNaN(v)) return "—";
+                return `${ctx.dataset.label}: ${v.toFixed(state.metric === "oreKwh" ? 2 : 4)}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 14 } },
+          y: { title: { display: true, text: unitLabel() } }
+        }
+      }
+    });
+
+    el("summary").innerHTML = `
+      <div class="row">
+        <span class="pill">Period: <b>${days[0] || "—"}</b> → <b>${days[days.length-1] || "—"}</b></span>
+        <span class="pill">Punkter: <b>${series.length}</b></span>
+      </div>
+    `;
   }
 
-  function renderMeta() {
+  function setTab(tab) {
+    state.tab = tab;
+
+    const btns = ["today","tomorrow","day","7d","14d","30d"];
+    btns.forEach(t => {
+      const b = el("tab-"+t);
+      if (b) b.classList.toggle("active", tab === t);
+    });
+
+    const today = stockholmTodayIsoDate();
+    const tomorrow = addDays(today, 1);
+
+    if (tab === "today") {
+      state.selectedDate = today;
+      el("datePick").value = state.selectedDate || "";
+      renderChartForDate(state.selectedDate);
+      return;
+    }
+
+    if (tab === "tomorrow") {
+      state.selectedDate = tomorrow;
+      el("datePick").value = state.selectedDate || "";
+      renderChartForDate(state.selectedDate);
+      return;
+    }
+
+    if (tab === "day") {
+      state.selectedDate = el("datePick").value || state.selectedDate || today;
+      el("datePick").value = state.selectedDate || "";
+      renderChartForDate(state.selectedDate);
+      return;
+    }
+
+    if (tab === "7d") return renderChartForRange(7);
+    if (tab === "14d") return renderChartForRange(14);
+    if (tab === "30d") return renderChartForRange(30);
+  }
+
+function renderMeta() {
     const m = state.data?.meta;
     if (!m) { el("meta").textContent = ""; return; }
 
@@ -618,18 +640,14 @@
     return await r.json();
   }
 
-  function loadSettings() {
-    state.fillGaps = (localStorage.getItem("rossohamn_fillGaps") === "1");
-    state.lockYMax = (localStorage.getItem("rossohamn_lockYMax") === "1");
-    state.showCostLines = (localStorage.getItem("rossohamn_showCostLines") !== "0"); // default ON
-
+  function loadFillGapsSetting() {
+    const v = localStorage.getItem("rossohamn_fillGaps");
+    state.fillGaps = (v === "1");
     el("fillGaps").checked = state.fillGaps;
-    el("lockYMax").checked = state.lockYMax;
-    el("showCostLines").checked = state.showCostLines;
   }
 
-  function saveSetting(key, val) {
-    localStorage.setItem(key, val ? "1" : "0");
+  function saveFillGapsSetting() {
+    localStorage.setItem("rossohamn_fillGaps", state.fillGaps ? "1" : "0");
   }
 
   async function bootstrap() {
@@ -637,7 +655,12 @@
     el("src").value = src;
 
     state.metric = el("metric").value;
-    loadSettings();
+    loadFillGapsSetting();
+    state.refLines = el("refLines").checked;
+
+    // Register plugins once
+    try { Chart.register(nowLinePlugin); } catch (e) {}
+
 
     try {
       state.data = await loadHistory(src);
@@ -648,61 +671,46 @@
       el("meta").innerHTML = `<div style="color:#ff9a9a;"><b>Fel:</b> ${e.message}</div>`;
       if (chart) chart.destroy();
       chart = null;
+      el("summary").innerHTML = "";
     }
   }
 
-  // ===== UI wiring =====
-  el("reload").addEventListener("click", async () => {
-    const src = el("src").value.trim() || DEFAULT_SRC;
-    try {
-      state.data = await loadHistory(src);
-      renderMeta();
-      populateDatePick();
-      setTab(state.tab);
-    } catch (e) {
-      el("meta").innerHTML = `<div style="color:#ff9a9a;"><b>Fel:</b> ${e.message}</div>`;
-      if (chart) chart.destroy();
-      chart = null;
-    }
-  });
+  el("reload").addEventListener("click", bootstrap);
 
-  el("metric").addEventListener("change", () => {
-    state.metric = el("metric").value;
-    if (state.tab === "last7") renderChartLastNDays(7, state.selectedDate);
-    else if (state.selectedDate) renderChartForDate(state.selectedDate);
-  });
-
+  // Tabs
   el("tab-today").addEventListener("click", () => setTab("today"));
   el("tab-tomorrow").addEventListener("click", () => setTab("tomorrow"));
-  el("tab-history").addEventListener("click", () => setTab("history"));
-  el("tab-last7").addEventListener("click", () => setTab("last7"));
+  el("tab-day").addEventListener("click", () => setTab("day"));
+  el("tab-7d").addEventListener("click", () => setTab("7d"));
+  el("tab-14d").addEventListener("click", () => setTab("14d"));
+  el("tab-30d").addEventListener("click", () => setTab("30d"));
 
+  // Serie
+  el("metric").addEventListener("change", () => {
+    state.metric = el("metric").value;
+    // Re-render current tab
+    setTab(state.tab);
+  });
+
+  // Datum (gäller "Dag"-vyn)
   el("datePick").addEventListener("change", () => {
     state.selectedDate = el("datePick").value;
-    if (state.tab === "last7") renderChartLastNDays(7, state.selectedDate);
-    else setTab("history");
+    setTab("day");
   });
 
-  el("fillGaps").addEventListener("change", () => {
-    state.fillGaps = el("fillGaps").checked;
-    saveSetting("rossohamn_fillGaps", state.fillGaps);
-    if (state.tab === "last7") renderChartLastNDays(7, state.selectedDate);
-    else if (state.selectedDate) renderChartForDate(state.selectedDate);
-  });
+  // Prev/Next dag (gäller "Idag/Imorgon/Dag")
+  function stepDay(delta) {
+    const keys = Object.keys(state.data?.days || {}).sort();
+    const idx = keys.indexOf(state.selectedDate);
+    if (idx === -1) return;
 
-  el("lockYMax").addEventListener("change", () => {
-    state.lockYMax = el("lockYMax").checked;
-    saveSetting("rossohamn_lockYMax", state.lockYMax);
-    if (state.tab === "last7") renderChartLastNDays(7, state.selectedDate);
-    else if (state.selectedDate) renderChartForDate(state.selectedDate);
-  });
+    const nextIdx = idx + delta;
+    if (nextIdx < 0 || nextIdx >= keys.length) return;
 
-  el("showCostLines").addEventListener("change", () => {
-    state.showCostLines = el("showCostLines").checked;
-    saveSetting("rossohamn_showCostLines", state.showCostLines);
-    if (state.tab === "last7") renderChartLastNDays(7, state.selectedDate);
-    else if (state.selectedDate) renderChartForDate(state.selectedDate);
-  });
+    state.selectedDate = keys[nextIdx];
+    el("datePick").value = state.selectedDate;
+    setTab("day");
+  }
 
   el("prevDay").addEventListener("click", () => stepDay(-1));
   el("nextDay").addEventListener("click", () => stepDay(1));
@@ -712,8 +720,22 @@
     if (e.key === "ArrowRight") stepDay(1);
   });
 
+  // Extrapolera null
+  el("fillGaps").addEventListener("change", () => {
+    state.fillGaps = el("fillGaps").checked;
+    saveFillGapsSetting();
+    setTab(state.tab);
+  });
+
+  // 1/2/3 kr-linjer
+  el("refLines").addEventListener("change", () => {
+    state.refLines = el("refLines").checked;
+    setTab(state.tab);
+  });
+
   bootstrap();
 })();
+
 </script>
 </body>
 </html>
