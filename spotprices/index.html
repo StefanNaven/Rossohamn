@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Rossohamn – Spotpriser (SE3)</title>
 
-  <!-- External CSS -->
   <link rel="stylesheet" href="styles.css">
 
   <!-- Chart.js (CDN) -->
@@ -17,13 +16,13 @@
     <div class="card">
       <div class="row" style="justify-content:space-between;">
         <div>
-          <div style="font-size:18px; font-weight:700;">Rossohamn – Spotpriser</div>
+          <div class="title">Rossohamn – Spotpriser</div>
           <div class="small">Källa: ENTSO-E A44 (SE3) → history.json</div>
         </div>
         <div class="row">
           <label class="small" for="src">Data-URL</label>
           <input id="src" style="min-width:180px; flex: 1 1 260px;" />
-          <button id="reload" style="padding:8px 10px; border-radius:10px; border:1px solid #2a2a2a; background:#151515; color:#fff; cursor:pointer;">Ladda</button>
+          <button id="reload" class="btn">Ladda</button>
         </div>
       </div>
 
@@ -38,6 +37,7 @@
         <button id="tab-7d">7 dagar</button>
         <button id="tab-14d">14 dagar</button>
         <button id="tab-30d">30 dagar</button>
+
         <span style="flex:1;"></span>
 
         <label class="small" for="metric">Serie</label>
@@ -52,15 +52,16 @@
           Extrapolera null (≤8)
         </label>
 
-        <label class="toggle small" title="Visa referenslinjer för 1 kr, 2 kr, 3 kr (omräknat för vald serie).">
-          <input id="refLines" type="checkbox" checked />
+        <label class="toggle small" title="Visa referenslinjer motsvarande 1/2/3 kr/kWh (omräknat till vald serie).">
+          <input id="krLines" type="checkbox" />
           1/2/3 kr-linjer
         </label>
 
         <label class="small" for="datePick">Datum</label>
-        <button id="prevDay" class="navBtn" title="Föregående dag">←</button>
         <select id="datePick"></select>
-        <button id="nextDay" class="navBtn" title="Nästa dag">→</button>
+
+        <button id="prevDay" class="btn">←</button>
+        <button id="nextDay" class="btn">→</button>
       </div>
 
       <div style="margin-top:10px;" class="chartWrap">
@@ -77,12 +78,12 @@
     </div>
 
     <div class="card small">
-      Tips: du kan byta datakälla via querystring: <span class="pill">?src=https://www.rossohamn.se/spotprices/history.json</span>
+      Tips: du kan byta datakälla via querystring:
+      <span class="pill">?src=https://www.rossohamn.se/spotprices/history.json</span>
     </div>
   </div>
 
 <script>
-
 (() => {
   const DEFAULT_SRC = "history.json";
   const el = (id) => document.getElementById(id);
@@ -93,7 +94,7 @@
     selectedDate: null,
     metric: "oreKwh",
     fillGaps: false,
-    refLines: true
+    krLines: false,
   };
 
   function stockholmTodayIsoDate() {
@@ -136,19 +137,34 @@
     }
   }
 
-  function computeDailyStatsFromSeries(series) {
+  function sekKwhToMetricY(sekKwhValue) {
+    if (typeof sekKwhValue !== "number") return null;
+
+    if (state.metric === "sekKwh") return sekKwhValue;
+    if (state.metric === "oreKwh") return sekKwhValue * 100.0;
+
+    if (state.metric === "eurMwh") {
+      const eursek = Number(state.data?.meta?.eursek);
+      if (!eursek || Number.isNaN(eursek)) return null;
+      const sekPerMwh = sekKwhValue * 1000.0;
+      return sekPerMwh / eursek;
+    }
+    return null;
+  }
+
+  function computeStats(series) {
     const vals = series.filter(v => typeof v === "number");
-    if (!vals.length) return { avg: null, min: null, max: null };
+    if (!vals.length) return { avg: null, min: null, max: null, count: 0 };
     let sum = 0, min = vals[0], max = vals[0];
     for (const v of vals) {
       sum += v;
       if (v < min) min = v;
       if (v > max) max = v;
     }
-    return { avg: sum / vals.length, min, max };
+    return { avg: sum / vals.length, min, max, count: vals.length };
   }
 
-  function fillSmallGapsLinear(values, maxGap = 2) {
+  function fillSmallGapsLinear(values, maxGap = 8) {
     const out = values.slice();
     let i = 0;
 
@@ -178,83 +194,91 @@
     return out;
   }
 
-  
+  function buildDayLabels(day) {
+    return day.points.map(p => p ? p.time : "");
+  }
 
-  function krRefValuesForMetric() {
-    // Returns {v1, v2, v3} in the currently selected metric.
-    // Baseline is 1/2/3 SEK per kWh.
-    const eursek = state.data?.meta?.eursek; // SEK per EUR (expected)
-    const to = (krPerKwh) => {
-      if (state.metric === "sekKwh") return krPerKwh;
-      if (state.metric === "oreKwh") return krPerKwh * 100;
-      if (state.metric === "eurMwh") {
-        // 1 SEK/kWh = 1000 SEK/MWh. Convert SEK→EUR using eursek (SEK per EUR).
-        if (!eursek || !isFinite(eursek) || eursek <= 0) return null;
-        return (krPerKwh * 1000) / eursek;
+  function buildDaySeries(day) {
+    return day.points.map(p => (p && typeof p[state.metric] === "number") ? p[state.metric] : null);
+  }
+
+  function buildRangeKeys(nDays) {
+    const keys = Object.keys(state.data?.days || {}).sort();
+    if (!keys.length) return [];
+    return keys.slice(-nDays);
+  }
+
+  function buildRangeLabelsAndSeries(keys) {
+    const labels = [];
+    const series = [];
+
+    for (const dayKey of keys) {
+      const day = state.data.days[dayKey];
+      if (!day?.points) continue;
+
+      for (let i = 0; i < day.points.length; i++) {
+        const p = day.points[i];
+        labels.push(p ? `${dayKey.slice(5)} ${p.time}` : `${dayKey.slice(5)} —`);
+        series.push((p && typeof p[state.metric] === "number") ? p[state.metric] : null);
       }
-      return null;
-    };
-    const v1 = to(1);
-    const v2 = to(2);
-    const v3 = to(3);
-    return { v1, v2, v3 };
+    }
+    return { labels, series };
   }
 
-  function buildRefLineDatasets(labels) {
-    if (!state.refLines) return [];
-    const { v1, v2, v3 } = krRefValuesForMetric();
-    const values = [
-      { v: v1, label: "1 kr" },
-      { v: v2, label: "2 kr" },
-      { v: v3, label: "3 kr" }
-    ].filter(x => typeof x.v === "number" && isFinite(x.v));
-
-    if (!values.length) return [];
-
-    return values.map(x => ({
-      label: x.label,
-      data: Array(labels.length).fill(x.v),
-      borderColor: "rgba(255,255,255,0.25)",
-      borderWidth: 1,
-      borderDash: [4,4],
-      pointRadius: 0
-    }));
+  function cheapestWindow(series, slots) {
+    let best = null;
+    for (let i = 0; i <= series.length - slots; i++) {
+      let ok = true;
+      let sum = 0;
+      for (let k = 0; k < slots; k++) {
+        const v = series[i+k];
+        if (typeof v !== "number") { ok = false; break; }
+        sum += v;
+      }
+      if (!ok) continue;
+      const avg = sum / slots;
+      if (!best || avg < best.avg) best = { startIdx: i, endIdx: i + slots - 1, avg };
+    }
+    return best;
   }
 
-  function buildWindowHighlightSeries(series, day, win) {
-    if (!win || !day?.points?.length) return null;
-
-    const startIdx = day.points.findIndex(p => p?.time === win.startTime);
-    const endIdx = day.points.findIndex(p => p?.time === win.endTime);
-    if (startIdx < 0 || endIdx < 0) return null;
-
+  function buildHighlightSeries(series, win) {
+    if (!win) return null;
     const out = series.map(() => null);
-    for (let i = startIdx; i <= endIdx; i++) out[i] = series[i];
+    for (let i = win.startIdx; i <= win.endIdx; i++) out[i] = series[i];
     return out;
+  }
+
+  function lineGradientColor(ctx) {
+    const { chart } = ctx;
+    const { ctx: c, chartArea } = chart;
+    if (!chartArea) return "#9fd4ff";
+
+    const g = c.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+    g.addColorStop(0.00, "#2ecc71");
+    g.addColorStop(0.50, "#3498db");
+    g.addColorStop(1.00, "#e74c3c");
+    return g;
   }
 
   const nowLinePlugin = {
     id: "nowLine",
     afterDraw(chart) {
-      // Only in "Idag" och bara om vi verkligen visar dagens datum
       if (state.tab !== "today") return;
-      const today = stockholmTodayIsoDate();
-      if (state.selectedDate !== today) return;
-
-      const now = new Date();
-      const hh = now.getHours();
-      const mm = now.getMinutes();
-      const slot = hh * 4 + Math.floor(mm / 15); // 15-min slots
-
       const xScale = chart.scales.x;
       if (!xScale) return;
 
-      // Labels are 0..95 indices in dagsvy (buildLabelsForDay). We can use slot as index.
+      const now = new Date();
+      const hh = Number(new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Stockholm", hour: "2-digit" }).format(now));
+      const mm = Number(new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Stockholm", minute: "2-digit" }).format(now));
+      const slot = hh * 4 + Math.floor(mm / 15);
+
       const x = xScale.getPixelForValue(slot);
+      if (!Number.isFinite(x)) return;
 
       const ctx = chart.ctx;
       ctx.save();
-      ctx.strokeStyle = "rgba(255,255,255,0.6)";
+      ctx.strokeStyle = "rgba(255,255,255,0.55)";
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(x, chart.chartArea.top);
@@ -263,59 +287,50 @@
       ctx.restore();
     }
   };
-function buildLabelsForDay(day) {
-    return day.points.map(p => p ? p.time : "");
-  }
 
-  function buildSeriesForDay(day) {
-    return day.points.map(p => (p && typeof p[state.metric] === "number") ? p[state.metric] : null);
-  }
-
-  function cheapestWindowFromSeries(day, series, slots) {
-    let best = null;
-
-    for (let i = 0; i <= series.length - slots; i++) {
-      let ok = true;
-      let sum = 0;
-
-      for (let k = 0; k < slots; k++) {
-        const v = series[i+k];
-        if (typeof v !== "number") { ok = false; break; }
-        sum += v;
-      }
-      if (!ok) continue;
-
-      const avg = sum / slots;
-      if (!best || avg < best.avg) best = { startIdx: i, endIdx: i + slots - 1, avg };
-    }
-
-    if (!best) return null;
-    const start = day.points[best.startIdx];
-    const end = day.points[best.endIdx];
-    return {
-      avg: best.avg,
-      startTime: start?.time ?? "",
-      endTime: end?.time ?? "",
-      startUtc: start?.utc ?? "",
-      endUtc: end?.utc ?? ""
-    };
-  }
-
-  // Rainbow-ish gradient for the line (green -> blue -> red)
-  function lineGradientColor(ctx) {
-    const { chart } = ctx;
-    const { ctx: c, chartArea } = chart;
-    if (!chartArea) return "#9fd4ff";
-
-    const g = c.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-    g.addColorStop(0.00, "#2ecc71"); // low (green)
-    g.addColorStop(0.50, "#3498db"); // mid (blue)
-    g.addColorStop(1.00, "#e74c3c"); // high (red)
-    return g;
-  }
+  Chart.register(nowLinePlugin);
 
   let chart = null;
-  function renderChartForDate(dateKey) {
+
+  function renderSummary({ stats, win2h, win4h, win8h, infoText }) {
+    const dec = (state.metric === "oreKwh") ? 2 : 4;
+
+    el("summaryNote").textContent = state.fillGaps
+      ? "Billigaste fönster kan använda extrapolerade punkter (≤8 null i rad). Rådata ändras inte."
+      : "Billigaste fönster kräver komplett fönster (inga null).";
+
+    const row = (label, win, hours) => {
+      if (!win) return `<tr><td>${label}</td><td>—</td><td>—</td><td>Inget komplett ${hours}h-fönster</td></tr>`;
+      return `<tr>
+        <td>${label}</td>
+        <td><b>${fmtNum(win.avg, dec)}</b> ${unitLabel()}</td>
+        <td>idx ${win.startIdx} → ${win.endIdx}</td>
+        <td>${state.fillGaps ? "Kan inkludera extrapolerade punkter" : "Endast rådata utan null"}</td>
+      </tr>`;
+    };
+
+    el("summary").innerHTML = `
+      <div class="row">
+        <span class="pill">${infoText}</span>
+        <span class="pill">Medel: <b>${fmtNum(stats.avg, dec)}</b> ${unitLabel()}</span>
+        <span class="pill">Min: <b>${fmtNum(stats.min, dec)}</b></span>
+        <span class="pill">Max: <b>${fmtNum(stats.max, dec)}</b></span>
+        <span class="pill">Punkter: <b>${stats.count}</b></span>
+        ${state.fillGaps ? `<span class="pill">Extrapolering: <b>ON</b> (≤8)</span>` : `<span class="pill">Extrapolering: <b>OFF</b></span>`}
+      </div>
+
+      <table style="margin-top:10px;">
+        <thead><tr><th>Fönster</th><th>Medel</th><th>Index</th><th>Not</th></tr></thead>
+        <tbody>
+          ${row("Billigaste 2h", win2h, 2)}
+          ${row("Billigaste 4h", win4h, 4)}
+          ${row("Billigaste 8h", win8h, 8)}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function renderSingleDay(dateKey) {
     const day = state.data?.days?.[dateKey];
     const ctx = el("chart").getContext("2d");
 
@@ -326,107 +341,81 @@ function buildLabelsForDay(day) {
       return;
     }
 
-    const labels = buildLabelsForDay(day);
-
-    const rawSeries = buildSeriesForDay(day);
+    const labels = buildDayLabels(day);
+    const rawSeries = buildDaySeries(day);
     const series = state.fillGaps ? fillSmallGapsLinear(rawSeries, 8) : rawSeries;
+
+    const stats = computeStats(series);
+
+    const win2h = cheapestWindow(series, 8);
+    const win4h = cheapestWindow(series, 16);
+    const win8h = cheapestWindow(series, 32);
+
+    const hi2 = buildHighlightSeries(series, win2h);
+    const hi4 = buildHighlightSeries(series, win4h);
+    const hi8 = buildHighlightSeries(series, win8h);
+
+    const datasets = [{
+      label: unitLabel(),
+      data: series,
+      spanGaps: false,
+      pointRadius: 0,
+      borderWidth: 2,
+      tension: 0.2,
+      borderColor: lineGradientColor,
+      borderJoinStyle: "round",
+      borderCapStyle: "round"
+    }];
+
+    if (hi8) datasets.push({ label: "Billigaste 8h", data: hi8, pointRadius: 0, borderWidth: 5, tension: 0.2, borderColor: "rgba(255,255,255,0.78)" });
+    if (hi4) datasets.push({ label: "Billigaste 4h", data: hi4, pointRadius: 0, borderWidth: 4, tension: 0.2, borderColor: "rgba(255,255,255,0.55)" });
+    if (hi2) datasets.push({ label: "Billigaste 2h", data: hi2, pointRadius: 0, borderWidth: 3, tension: 0.2, borderColor: "rgba(255,255,255,0.38)" });
+
+    if (state.krLines) {
+      const yVals = [
+        { y: sekKwhToMetricY(1), label: "≈ 1 kr/kWh" },
+        { y: sekKwhToMetricY(2), label: "≈ 2 kr/kWh" },
+        { y: sekKwhToMetricY(3), label: "≈ 3 kr/kWh" },
+      ];
+      for (const it of yVals) {
+        if (typeof it.y !== "number" || Number.isNaN(it.y)) continue;
+        datasets.push({
+          label: it.label,
+          data: labels.map(() => it.y),
+          pointRadius: 0,
+          borderWidth: 1,
+          borderDash: [4,4],
+          borderColor: "rgba(255,255,255,0.25)"
+        });
+      }
+    }
 
     const title = `${dateKey} (${unitLabel()}) – present ${day.present}/${day.expected}` +
       (state.fillGaps ? " (extrapolerat ≤8 null)" : "");
 
-    const win2h = cheapestWindowFromSeries(day, series, 8);
-    const win4h = cheapestWindowFromSeries(day, series, 16);
-    const win8h = cheapestWindowFromSeries(day, series, 32);
-
-    const hi2 = buildWindowHighlightSeries(series, day, win2h);
-    const hi4 = buildWindowHighlightSeries(series, day, win4h);
-    const hi8 = buildWindowHighlightSeries(series, day, win8h);
-
-    const refLineDatasets = buildRefLineDatasets(labels);
-
-
     if (chart) chart.destroy();
     chart = new Chart(ctx, {
       type: "line",
-      data: {
-        labels,
-        datasets: [
-          ...refLineDatasets,
-          {
-            label: unitLabel(),
-            data: series,
-            spanGaps: false,
-            pointRadius: 0,
-            borderWidth: 2,
-            tension: 0.2,
-
-            borderColor: lineGradientColor,
-            borderJoinStyle: "round",
-            borderCapStyle: "round"
-          },
-
-          ...(hi8 ? [{
-            label: "Billigaste 8h",
-            data: hi8,
-            spanGaps: false,
-            pointRadius: 0,
-            borderWidth: 5,
-            tension: 0.2,
-            borderColor: "rgba(255,255,255,0.85)"
-          }] : []),
-
-          ...(hi4 ? [{
-            label: "Billigaste 4h",
-            data: hi4,
-            spanGaps: false,
-            pointRadius: 0,
-            borderWidth: 4,
-            tension: 0.2,
-            borderColor: "rgba(255,255,255,0.55)"
-          }] : []),
-
-          ...(hi2 ? [{
-            label: "Billigaste 2h",
-            data: hi2,
-            spanGaps: false,
-            pointRadius: 0,
-            borderWidth: 3,
-            tension: 0.2,
-            borderColor: "rgba(255,255,255,0.35)"
-          }] : [])
-        ]},
+      data: { labels, datasets },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-
         interaction: { mode: "index", intersect: false },
-
         plugins: {
           legend: { display: true },
           title: { display: true, text: title },
-
           tooltip: {
             enabled: true,
             callbacks: {
               title: (items) => items?.[0]?.label || "",
-              label: (ctx) => {
-                const v = ctx.parsed?.y;
+              label: (c) => {
+                const v = c.parsed?.y;
                 if (v === null || v === undefined || Number.isNaN(v)) return "—";
-                return `${unitLabel()}: ${v.toFixed(state.metric === "oreKwh" ? 2 : 4)}`;
-              },
-              afterLabel: (ctx) => {
-                const idx = ctx.dataIndex;
-                const p = day?.points?.[idx];
-                if (!p || !p.utc) return "";
-                const note = (p && typeof p[state.metric] === "number")
-                  ? ""
-                  : (state.fillGaps ? " (extrapolerad punkt)" : " (saknas i rådata)");
-                return `UTC: ${p.utc}${note}`;
+                return `${c.dataset.label}: ${v.toFixed(state.metric === "oreKwh" ? 2 : 4)}`;
               }
             }
           }
         },
-
         scales: {
           x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } },
           y: { title: { display: true, text: unitLabel() } }
@@ -434,176 +423,125 @@ function buildLabelsForDay(day) {
       }
     });
 
-    const stats = computeDailyStatsFromSeries(series);
-
-    const win2h = cheapestWindowFromSeries(day, series, 8);
-    const win4h = cheapestWindowFromSeries(day, series, 16);
-
-    el("summaryNote").textContent = state.fillGaps
-      ? "Billigaste fönster kan använda extrapolerade punkter (≤2 null i rad). Rådata ändras inte."
-      : "Billigaste fönster kräver komplett fönster (inga null).";
-
-    el("summary").innerHTML = `
-      <div class="row">
-        <span class="pill">Dygnsmedel: <b>${fmtNum(stats.avg, state.metric === "oreKwh" ? 2 : 4)}</b> ${unitLabel()}</span>
-        <span class="pill">Min: <b>${fmtNum(stats.min, state.metric === "oreKwh" ? 2 : 4)}</b></span>
-        <span class="pill">Max: <b>${fmtNum(stats.max, state.metric === "oreKwh" ? 2 : 4)}</b></span>
-        ${state.fillGaps ? `<span class="pill">Extrapolering: <b>ON</b> (≤2 null)</span>` : `<span class="pill">Extrapolering: <b>OFF</b></span>`}
-      </div>
-
-      <table style="margin-top:10px;">
-        <thead><tr><th>Fönster</th><th>Medel</th><th>Tid</th><th>Not</th></tr></thead>
-        <tbody>
-          <tr>
-            <td>Billigaste 2h</td>
-            <td>${win2h ? `<b>${fmtNum(win2h.avg, state.metric === "oreKwh" ? 2 : 4)}</b> ${unitLabel()}` : "—"}</td>
-            <td>${win2h ? `${win2h.startTime} → ${win2h.endTime}` : "—"}</td>
-            <td>${win2h ? (state.fillGaps ? "Kan inkludera extrapolerade punkter" : "Endast rådata utan null") : "Inget komplett 2h-fönster"}</td>
-          </tr>
-          <tr>
-            <td>Billigaste 4h</td>
-            <td>${win4h ? `<b>${fmtNum(win4h.avg, state.metric === "oreKwh" ? 2 : 4)}</b> ${unitLabel()}` : "—"}</td>
-            <td>${win4h ? `${win4h.startTime} → ${win4h.endTime}` : "—"}</td>
-            <td>${win4h ? (state.fillGaps ? "Kan inkludera extrapolerade punkter" : "Endast rådata utan null") : "Inget komplett 4h-fönster"}</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="small" style="margin-top:10px;">
-        seriesStartUtc: ${day.series?.seriesStartUtc ?? "—"} · mRID: ${day.series?.mRID ?? "—"} · resolution: ${day.resolutionMinutes ?? "—"} min
-      </div>
-    `;
+    renderSummary({ stats, win2h, win4h, win8h, infoText: `Dygn: <b>${dateKey}</b> (${day.resolutionMinutes ?? "—"} min)` });
   }
 
+  function renderRange(nDays) {
+    const ctx = el("chart").getContext("2d");
+    const keys = buildRangeKeys(nDays);
 
-  function buildRangeSeries(daysBack) {
-    const keys = Object.keys(state.data?.days || {}).sort();
-    const today = stockholmTodayIsoDate();
-
-    const pastKeys = keys.filter(k => k <= today);
-    const slice = pastKeys.slice(Math.max(0, pastKeys.length - daysBack));
-
-    const labels = [];
-    const raw = [];
-
-    slice.forEach(d => {
-      const day = state.data.days[d];
-      if (!day?.points) return;
-      day.points.forEach(p => {
-        if (!p) { labels.push(`${d} --:--`); raw.push(null); return; }
-        labels.push(`${d} ${p.time}`);
-        raw.push(p[state.metric] ?? null);
-      });
-    });
-
-    const series = state.fillGaps ? fillSmallGapsLinear(raw, 8) : raw;
-    return { labels, series, days: slice };
-  }
-
-  function renderChartForRange(daysBack) {
-    const { labels, series, days } = buildRangeSeries(daysBack);
-
-    if (!labels.length) {
+    if (!keys.length) {
       if (chart) chart.destroy();
       chart = null;
-      el("summary").innerHTML = `<div>Inga data för senaste ${daysBack} dagar.</div>`;
+      el("summary").innerHTML = `<div>Ingen historik hittades.</div>`;
       return;
     }
 
-    const title = `Senaste ${daysBack} dagar (${unitLabel()}) – ${days[0] || "?"} → ${days[days.length-1] || "?"}` +
-      (state.fillGaps ? " (extrapolerat ≤8 null)" : "");
+    const { labels, series: rawSeries } = buildRangeLabelsAndSeries(keys);
+    const series = state.fillGaps ? fillSmallGapsLinear(rawSeries, 8) : rawSeries;
 
-    const refLineDatasets = buildRefLineDatasets(labels);
+    const stats = computeStats(series);
 
-    const baseDataset = {
-      label: unitLabel(),
+    const win2h = cheapestWindow(series, 8);
+    const win4h = cheapestWindow(series, 16);
+    const win8h = cheapestWindow(series, 32);
+
+    const hi2 = buildHighlightSeries(series, win2h);
+    const hi4 = buildHighlightSeries(series, win4h);
+    const hi8 = buildHighlightSeries(series, win8h);
+
+    const datasets = [{
+      label: `${unitLabel()} (${nDays}d)`,
       data: series,
       spanGaps: false,
       pointRadius: 0,
       borderWidth: 2,
-      tension: 0.2,
-      borderColor: "rgba(255,255,255,0.8)",
-      borderJoinStyle: "round",
-      borderCapStyle: "round"
-    };
+      tension: 0.15,
+      borderColor: lineGradientColor
+    }];
+
+    if (hi8) datasets.push({ label: "Billigaste 8h", data: hi8, pointRadius: 0, borderWidth: 5, tension: 0.15, borderColor: "rgba(255,255,255,0.78)" });
+    if (hi4) datasets.push({ label: "Billigaste 4h", data: hi4, pointRadius: 0, borderWidth: 4, tension: 0.15, borderColor: "rgba(255,255,255,0.55)" });
+    if (hi2) datasets.push({ label: "Billigaste 2h", data: hi2, pointRadius: 0, borderWidth: 3, tension: 0.15, borderColor: "rgba(255,255,255,0.38)" });
+
+    if (state.krLines) {
+      const yVals = [
+        { y: sekKwhToMetricY(1), label: "≈ 1 kr/kWh" },
+        { y: sekKwhToMetricY(2), label: "≈ 2 kr/kWh" },
+        { y: sekKwhToMetricY(3), label: "≈ 3 kr/kWh" },
+      ];
+      for (const it of yVals) {
+        if (typeof it.y !== "number" || Number.isNaN(it.y)) continue;
+        datasets.push({
+          label: it.label,
+          data: labels.map(() => it.y),
+          pointRadius: 0,
+          borderWidth: 1,
+          borderDash: [4,4],
+          borderColor: "rgba(255,255,255,0.25)"
+        });
+      }
+    }
+
+    const title = `Senaste ${nDays} dagar (${unitLabel()})` + (state.fillGaps ? " (extrapolerat ≤8 null)" : "");
 
     if (chart) chart.destroy();
-    chart = new Chart(el("chart").getContext("2d"), {
+    chart = new Chart(ctx, {
       type: "line",
-      data: { labels, datasets: [...refLineDatasets, baseDataset] },
+      data: { labels, datasets },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         interaction: { mode: "index", intersect: false },
         plugins: {
           legend: { display: true },
-          title: { display: true, text: title },
-          tooltip: {
-            enabled: true,
-            callbacks: {
-              title: (items) => items?.[0]?.label || "",
-              label: (ctx) => {
-                const v = ctx.parsed?.y;
-                if (v === null || v === undefined || Number.isNaN(v)) return "—";
-                return `${ctx.dataset.label}: ${v.toFixed(state.metric === "oreKwh" ? 2 : 4)}`;
-              }
-            }
-          }
+          title: { display: true, text: title }
         },
         scales: {
-          x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 14 } },
+          x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 10 } },
           y: { title: { display: true, text: unitLabel() } }
         }
       }
     });
 
-    el("summary").innerHTML = `
-      <div class="row">
-        <span class="pill">Period: <b>${days[0] || "—"}</b> → <b>${days[days.length-1] || "—"}</b></span>
-        <span class="pill">Punkter: <b>${series.length}</b></span>
-      </div>
-    `;
+    renderSummary({ stats, win2h, win4h, win8h, infoText: `Intervall: <b>${keys[0]}</b> → <b>${keys[keys.length-1]}</b>` });
+  }
+
+  function render() {
+    if (!state.data?.days) return;
+
+    if (state.tab === "today") {
+      state.selectedDate = stockholmTodayIsoDate();
+      el("datePick").value = state.selectedDate || "";
+      return renderSingleDay(state.selectedDate);
+    }
+
+    if (state.tab === "tomorrow") {
+      state.selectedDate = addDays(stockholmTodayIsoDate(), 1);
+      el("datePick").value = state.selectedDate || "";
+      return renderSingleDay(state.selectedDate);
+    }
+
+    if (state.tab === "day") {
+      state.selectedDate = el("datePick").value || state.selectedDate;
+      el("datePick").value = state.selectedDate || "";
+      return renderSingleDay(state.selectedDate);
+    }
+
+    if (state.tab === "7d") return renderRange(7);
+    if (state.tab === "14d") return renderRange(14);
+    if (state.tab === "30d") return renderRange(30);
   }
 
   function setTab(tab) {
     state.tab = tab;
-
-    const btns = ["today","tomorrow","day","7d","14d","30d"];
-    btns.forEach(t => {
-      const b = el("tab-"+t);
-      if (b) b.classList.toggle("active", tab === t);
+    ["today","tomorrow","day","7d","14d","30d"].forEach(t => {
+      el(`tab-${t}`).classList.toggle("active", tab === t);
     });
-
-    const today = stockholmTodayIsoDate();
-    const tomorrow = addDays(today, 1);
-
-    if (tab === "today") {
-      state.selectedDate = today;
-      el("datePick").value = state.selectedDate || "";
-      renderChartForDate(state.selectedDate);
-      return;
-    }
-
-    if (tab === "tomorrow") {
-      state.selectedDate = tomorrow;
-      el("datePick").value = state.selectedDate || "";
-      renderChartForDate(state.selectedDate);
-      return;
-    }
-
-    if (tab === "day") {
-      state.selectedDate = el("datePick").value || state.selectedDate || today;
-      el("datePick").value = state.selectedDate || "";
-      renderChartForDate(state.selectedDate);
-      return;
-    }
-
-    if (tab === "7d") return renderChartForRange(7);
-    if (tab === "14d") return renderChartForRange(14);
-    if (tab === "30d") return renderChartForRange(30);
+    render();
   }
 
-function renderMeta() {
+  function renderMeta() {
     const m = state.data?.meta;
     if (!m) { el("meta").textContent = ""; return; }
 
@@ -625,12 +563,14 @@ function renderMeta() {
     const days = state.data?.days || {};
     const keys = Object.keys(days).sort();
     const dp = el("datePick");
-    dp.innerHTML = keys.map(k => `<option value="${k}">${k} (${days[k].present}/${days[k].expected})</option>`).join("");
+
+    dp.innerHTML = keys.map(k => {
+      const d = days[k];
+      return `<option value="${k}">${k} (${d.present}/${d.expected})</option>`;
+    }).join("");
 
     const today = stockholmTodayIsoDate();
-    if (keys.includes(today)) state.selectedDate = today;
-    else state.selectedDate = keys[keys.length - 1] || null;
-
+    state.selectedDate = keys.includes(today) ? today : (keys[keys.length - 1] || null);
     dp.value = state.selectedDate || "";
   }
 
@@ -640,14 +580,33 @@ function renderMeta() {
     return await r.json();
   }
 
-  function loadFillGapsSetting() {
-    const v = localStorage.getItem("rossohamn_fillGaps");
-    state.fillGaps = (v === "1");
+  function loadSettings() {
+    state.fillGaps = (localStorage.getItem("rossohamn_fillGaps") === "1");
     el("fillGaps").checked = state.fillGaps;
+
+    state.krLines = (localStorage.getItem("rossohamn_krLines") === "1");
+    el("krLines").checked = state.krLines;
   }
 
-  function saveFillGapsSetting() {
+  function saveSettings() {
     localStorage.setItem("rossohamn_fillGaps", state.fillGaps ? "1" : "0");
+    localStorage.setItem("rossohamn_krLines", state.krLines ? "1" : "0");
+  }
+
+  function stepDay(delta) {
+    const keys = Object.keys(state.data?.days || {}).sort();
+    if (!keys.length) return;
+
+    const current = el("datePick").value || state.selectedDate;
+    const idx = keys.indexOf(current);
+    if (idx === -1) return;
+
+    const nextIdx = idx + delta;
+    if (nextIdx < 0 || nextIdx >= keys.length) return;
+
+    state.selectedDate = keys[nextIdx];
+    el("datePick").value = state.selectedDate;
+    setTab("day");
   }
 
   async function bootstrap() {
@@ -655,12 +614,7 @@ function renderMeta() {
     el("src").value = src;
 
     state.metric = el("metric").value;
-    loadFillGapsSetting();
-    state.refLines = el("refLines").checked;
-
-    // Register plugins once
-    try { Chart.register(nowLinePlugin); } catch (e) {}
-
+    loadSettings();
 
     try {
       state.data = await loadHistory(src);
@@ -677,7 +631,6 @@ function renderMeta() {
 
   el("reload").addEventListener("click", bootstrap);
 
-  // Tabs
   el("tab-today").addEventListener("click", () => setTab("today"));
   el("tab-tomorrow").addEventListener("click", () => setTab("tomorrow"));
   el("tab-day").addEventListener("click", () => setTab("day"));
@@ -685,32 +638,27 @@ function renderMeta() {
   el("tab-14d").addEventListener("click", () => setTab("14d"));
   el("tab-30d").addEventListener("click", () => setTab("30d"));
 
-  // Serie
   el("metric").addEventListener("change", () => {
     state.metric = el("metric").value;
-    // Re-render current tab
-    setTab(state.tab);
+    render();
   });
 
-  // Datum (gäller "Dag"-vyn)
   el("datePick").addEventListener("change", () => {
     state.selectedDate = el("datePick").value;
     setTab("day");
   });
 
-  // Prev/Next dag (gäller "Idag/Imorgon/Dag")
-  function stepDay(delta) {
-    const keys = Object.keys(state.data?.days || {}).sort();
-    const idx = keys.indexOf(state.selectedDate);
-    if (idx === -1) return;
+  el("fillGaps").addEventListener("change", () => {
+    state.fillGaps = el("fillGaps").checked;
+    saveSettings();
+    render();
+  });
 
-    const nextIdx = idx + delta;
-    if (nextIdx < 0 || nextIdx >= keys.length) return;
-
-    state.selectedDate = keys[nextIdx];
-    el("datePick").value = state.selectedDate;
-    setTab("day");
-  }
+  el("krLines").addEventListener("change", () => {
+    state.krLines = el("krLines").checked;
+    saveSettings();
+    render();
+  });
 
   el("prevDay").addEventListener("click", () => stepDay(-1));
   el("nextDay").addEventListener("click", () => stepDay(1));
@@ -720,22 +668,8 @@ function renderMeta() {
     if (e.key === "ArrowRight") stepDay(1);
   });
 
-  // Extrapolera null
-  el("fillGaps").addEventListener("change", () => {
-    state.fillGaps = el("fillGaps").checked;
-    saveFillGapsSetting();
-    setTab(state.tab);
-  });
-
-  // 1/2/3 kr-linjer
-  el("refLines").addEventListener("change", () => {
-    state.refLines = el("refLines").checked;
-    setTab(state.tab);
-  });
-
   bootstrap();
 })();
-
 </script>
 </body>
 </html>
