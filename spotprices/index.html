@@ -90,13 +90,14 @@
 
   const state = {
     data: null,
-    tab: "today",
+    tab: "today",          // today|tomorrow|day|7d|14d|30d
     selectedDate: null,
     metric: "oreKwh",
     fillGaps: false,
     krLines: false,
   };
 
+  // ----- Time helpers -----
   function stockholmTodayIsoDate() {
     const parts = new Intl.DateTimeFormat("sv-SE", {
       timeZone: "Europe/Stockholm",
@@ -128,6 +129,11 @@
     return Number(v).toFixed(decimals);
   }
 
+  function decimals() {
+    // öre kan visas med 2, SEK/EUR med 4 för jämförelse
+    return (state.metric === "oreKwh") ? 2 : 4;
+  }
+
   function unitLabel() {
     switch (state.metric) {
       case "oreKwh": return "öre/kWh";
@@ -137,6 +143,7 @@
     }
   }
 
+  // Convert "1 SEK/kWh" reference lines into the currently selected unit.
   function sekKwhToMetricY(sekKwhValue) {
     if (typeof sekKwhValue !== "number") return null;
 
@@ -146,9 +153,13 @@
     if (state.metric === "eurMwh") {
       const eursek = Number(state.data?.meta?.eursek);
       if (!eursek || Number.isNaN(eursek)) return null;
+
+      // 1 SEK/kWh = 1000 SEK/MWh
       const sekPerMwh = sekKwhValue * 1000.0;
-      return sekPerMwh / eursek;
+      const eurPerMwh = sekPerMwh / eursek;
+      return eurPerMwh;
     }
+
     return null;
   }
 
@@ -164,6 +175,7 @@
     return { avg: sum / vals.length, min, max, count: vals.length };
   }
 
+  // Fill short gaps (internal only) with linear interpolation.
   function fillSmallGapsLinear(values, maxGap = 8) {
     const out = values.slice();
     let i = 0;
@@ -194,6 +206,7 @@
     return out;
   }
 
+  // ----- Data builders -----
   function buildDayLabels(day) {
     return day.points.map(p => p ? p.time : "");
   }
@@ -211,6 +224,7 @@
   function buildRangeLabelsAndSeries(keys) {
     const labels = [];
     const series = [];
+    const refs = []; // {dayKey,time}
 
     for (const dayKey of keys) {
       const day = state.data.days[dayKey];
@@ -220,11 +234,13 @@
         const p = day.points[i];
         labels.push(p ? `${dayKey.slice(5)} ${p.time}` : `${dayKey.slice(5)} —`);
         series.push((p && typeof p[state.metric] === "number") ? p[state.metric] : null);
+        refs.push({ dayKey, time: p?.time ?? "" });
       }
     }
-    return { labels, series };
+    return { labels, series, refs };
   }
 
+  // Cheapest continuous window over a series (no nulls in window).
   function cheapestWindow(series, slots) {
     let best = null;
     for (let i = 0; i <= series.length - slots; i++) {
@@ -249,18 +265,20 @@
     return out;
   }
 
+  // Rainbow-ish gradient for the main line (green -> blue -> red)
   function lineGradientColor(ctx) {
     const { chart } = ctx;
     const { ctx: c, chartArea } = chart;
     if (!chartArea) return "#9fd4ff";
 
     const g = c.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-    g.addColorStop(0.00, "#2ecc71");
-    g.addColorStop(0.50, "#3498db");
-    g.addColorStop(1.00, "#e74c3c");
+    g.addColorStop(0.00, "#2ecc71"); // low
+    g.addColorStop(0.50, "#3498db"); // mid
+    g.addColorStop(1.00, "#e74c3c"); // high
     return g;
   }
 
+  // "Now" vertical line for today's single-day view
   const nowLinePlugin = {
     id: "nowLine",
     afterDraw(chart) {
@@ -268,6 +286,7 @@
       const xScale = chart.scales.x;
       if (!xScale) return;
 
+      // 15-min resolution => 4 points/hour
       const now = new Date();
       const hh = Number(new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Stockholm", hour: "2-digit" }).format(now));
       const mm = Number(new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Stockholm", minute: "2-digit" }).format(now));
@@ -292,21 +311,41 @@
 
   let chart = null;
 
-  function renderSummary({ stats, win2h, win4h, win8h, infoText }) {
-    const dec = (state.metric === "oreKwh") ? 2 : 4;
+  function windowTimeTextSingleDay(dayKey, day, win) {
+    if (!win) return "—";
+    const start = day?.points?.[win.startIdx]?.time ?? "";
+    const end = day?.points?.[win.endIdx]?.time ?? "";
+    if (!start || !end) return "—";
+    return `${dayKey} ${start} → ${dayKey} ${end}`;
+  }
+
+  function windowTimeTextRange(refs, win) {
+    if (!win) return "—";
+    const a = refs?.[win.startIdx];
+    const b = refs?.[win.endIdx];
+    if (!a?.dayKey || !a?.time || !b?.dayKey || !b?.time) return "—";
+    return `${a.dayKey} ${a.time} → ${b.dayKey} ${b.time}`;
+  }
+
+  function renderSummary({ stats, win2h, win4h, win8h, infoText, timeText2h, timeText4h, timeText8h }) {
+    const dec = decimals();
 
     el("summaryNote").textContent = state.fillGaps
       ? "Billigaste fönster kan använda extrapolerade punkter (≤8 null i rad). Rådata ändras inte."
       : "Billigaste fönster kräver komplett fönster (inga null).";
 
-    const row = (label, win, hours) => {
-      if (!win) return `<tr><td>${label}</td><td>—</td><td>—</td><td>Inget komplett ${hours}h-fönster</td></tr>`;
-      return `<tr>
-        <td>${label}</td>
-        <td><b>${fmtNum(win.avg, dec)}</b> ${unitLabel()}</td>
-        <td>idx ${win.startIdx} → ${win.endIdx}</td>
-        <td>${state.fillGaps ? "Kan inkludera extrapolerade punkter" : "Endast rådata utan null"}</td>
-      </tr>`;
+    const row = (label, win, hours, timeText) => {
+      if (!win) return `
+        <tr>
+          <td>${label}</td><td>—</td><td>—</td><td>Inget komplett ${hours}h-fönster</td>
+        </tr>`;
+      return `
+        <tr>
+          <td>${label}</td>
+          <td><b>${fmtNum(win.avg, dec)}</b> ${unitLabel()}</td>
+          <td>${timeText}</td>
+          <td>${state.fillGaps ? "Kan inkludera extrapolerade punkter" : "Endast rådata utan null"}</td>
+        </tr>`;
     };
 
     el("summary").innerHTML = `
@@ -320,17 +359,20 @@
       </div>
 
       <table style="margin-top:10px;">
-        <thead><tr><th>Fönster</th><th>Medel</th><th>Index</th><th>Not</th></tr></thead>
+        <thead><tr><th>Fönster</th><th>Medel</th><th>Tidsintervall</th><th>Not</th></tr></thead>
         <tbody>
-          ${row("Billigaste 2h", win2h, 2)}
-          ${row("Billigaste 4h", win4h, 4)}
-          ${row("Billigaste 8h", win8h, 8)}
+          ${row("Billigaste 2h", win2h, 2, timeText2h)}
+          ${row("Billigaste 4h", win4h, 4, timeText4h)}
+          ${row("Billigaste 8h", win8h, 8, timeText8h)}
         </tbody>
       </table>
     `;
   }
 
-  function renderSingleDay(dateKey) {
+  // Disable legend click toggling (den röda "dölj kurvan"-knappen)
+  function legendNoToggle() { /* intentionally empty */ }
+
+  function renderChartSingleDay(dateKey) {
     const day = state.data?.days?.[dateKey];
     const ctx = el("chart").getContext("2d");
 
@@ -355,39 +397,46 @@
     const hi4 = buildHighlightSeries(series, win4h);
     const hi8 = buildHighlightSeries(series, win8h);
 
-    const datasets = [{
-      label: unitLabel(),
-      data: series,
-      spanGaps: false,
-      pointRadius: 0,
-      borderWidth: 2,
-      tension: 0.2,
-      borderColor: lineGradientColor,
-      borderJoinStyle: "round",
-      borderCapStyle: "round"
-    }];
+    const datasets = [
+      {
+        label: unitLabel(),
+        data: series,
+        spanGaps: false,
+        pointRadius: 0,
+        borderWidth: 2,
+        tension: 0.2,
+        borderColor: lineGradientColor,
+        borderJoinStyle: "round",
+        borderCapStyle: "round"
+      }
+    ];
 
-    if (hi8) datasets.push({ label: "Billigaste 8h", data: hi8, pointRadius: 0, borderWidth: 5, tension: 0.2, borderColor: "rgba(255,255,255,0.78)" });
-    if (hi4) datasets.push({ label: "Billigaste 4h", data: hi4, pointRadius: 0, borderWidth: 4, tension: 0.2, borderColor: "rgba(255,255,255,0.55)" });
-    if (hi2) datasets.push({ label: "Billigaste 2h", data: hi2, pointRadius: 0, borderWidth: 3, tension: 0.2, borderColor: "rgba(255,255,255,0.38)" });
+    // Highlight order: 8h -> 4h -> 2h (so 2h sits on top)
+    if (hi8) datasets.push({ label: "Billigaste 8h", data: hi8, pointRadius: 0, borderWidth: 6, tension: 0.2, borderColor: "rgba(255,255,255,0.55)" });
+    if (hi4) datasets.push({ label: "Billigaste 4h", data: hi4, pointRadius: 0, borderWidth: 5, tension: 0.2, borderDash: [2,3], borderColor: "rgba(255,255,255,0.70)" });
+    if (hi2) datasets.push({ label: "Billigaste 2h", data: hi2, pointRadius: 0, borderWidth: 6, tension: 0.2, borderDash: [6,4], borderColor: "rgba(255,255,255,0.95)" });
 
+    // Reference lines 1/2/3 kr/kWh converted to current metric
     if (state.krLines) {
-      const yVals = [
-        { y: sekKwhToMetricY(1), label: "≈ 1 kr/kWh" },
-        { y: sekKwhToMetricY(2), label: "≈ 2 kr/kWh" },
-        { y: sekKwhToMetricY(3), label: "≈ 3 kr/kWh" },
-      ];
-      for (const it of yVals) {
-        if (typeof it.y !== "number" || Number.isNaN(it.y)) continue;
+      const y1 = sekKwhToMetricY(1);
+      const y2 = sekKwhToMetricY(2);
+      const y3 = sekKwhToMetricY(3);
+
+      const addH = (y, label) => {
+        if (typeof y !== "number" || Number.isNaN(y)) return;
         datasets.push({
-          label: it.label,
-          data: labels.map(() => it.y),
+          label,
+          data: labels.map(() => y),
           pointRadius: 0,
           borderWidth: 1,
           borderDash: [4,4],
           borderColor: "rgba(255,255,255,0.25)"
         });
-      }
+      };
+
+      addH(y1, "≈ 1 kr/kWh");
+      addH(y2, "≈ 2 kr/kWh");
+      addH(y3, "≈ 3 kr/kWh");
     }
 
     const title = `${dateKey} (${unitLabel()}) – present ${day.present}/${day.expected}` +
@@ -402,7 +451,7 @@
         maintainAspectRatio: false,
         interaction: { mode: "index", intersect: false },
         plugins: {
-          legend: { display: true },
+          legend: { display: true, onClick: legendNoToggle },
           title: { display: true, text: title },
           tooltip: {
             enabled: true,
@@ -411,7 +460,16 @@
               label: (c) => {
                 const v = c.parsed?.y;
                 if (v === null || v === undefined || Number.isNaN(v)) return "—";
-                return `${c.dataset.label}: ${v.toFixed(state.metric === "oreKwh" ? 2 : 4)}`;
+                return `${c.dataset.label}: ${v.toFixed(decimals())}`;
+              },
+              afterLabel: (c) => {
+                const idx = c.dataIndex;
+                const p = day?.points?.[idx];
+                if (!p?.utc) return "";
+                const note = (p && typeof p[state.metric] === "number")
+                  ? ""
+                  : (state.fillGaps ? " (extrapolerad punkt)" : " (saknas i rådata)");
+                return `UTC: ${p.utc}${note}`;
               }
             }
           }
@@ -423,10 +481,19 @@
       }
     });
 
-    renderSummary({ stats, win2h, win4h, win8h, infoText: `Dygn: <b>${dateKey}</b> (${day.resolutionMinutes ?? "—"} min)` });
+    renderSummary({
+      stats,
+      win2h,
+      win4h,
+      win8h,
+      infoText: `Dygn: <b>${dateKey}</b> (${day.resolutionMinutes ?? "—"} min)`,
+      timeText2h: windowTimeTextSingleDay(dateKey, day, win2h),
+      timeText4h: windowTimeTextSingleDay(dateKey, day, win4h),
+      timeText8h: windowTimeTextSingleDay(dateKey, day, win8h),
+    });
   }
 
-  function renderRange(nDays) {
+  function renderChartRange(nDays) {
     const ctx = el("chart").getContext("2d");
     const keys = buildRangeKeys(nDays);
 
@@ -437,7 +504,7 @@
       return;
     }
 
-    const { labels, series: rawSeries } = buildRangeLabelsAndSeries(keys);
+    const { labels, series: rawSeries, refs } = buildRangeLabelsAndSeries(keys);
     const series = state.fillGaps ? fillSmallGapsLinear(rawSeries, 8) : rawSeries;
 
     const stats = computeStats(series);
@@ -450,37 +517,44 @@
     const hi4 = buildHighlightSeries(series, win4h);
     const hi8 = buildHighlightSeries(series, win8h);
 
-    const datasets = [{
-      label: `${unitLabel()} (${nDays}d)`,
-      data: series,
-      spanGaps: false,
-      pointRadius: 0,
-      borderWidth: 2,
-      tension: 0.15,
-      borderColor: lineGradientColor
-    }];
+    const datasets = [
+      {
+        label: `${unitLabel()} (${nDays}d)`,
+        data: series,
+        spanGaps: false,
+        pointRadius: 0,
+        borderWidth: 2,
+        tension: 0.15,
+        borderColor: lineGradientColor,
+        borderJoinStyle: "round",
+        borderCapStyle: "round"
+      }
+    ];
 
-    if (hi8) datasets.push({ label: "Billigaste 8h", data: hi8, pointRadius: 0, borderWidth: 5, tension: 0.15, borderColor: "rgba(255,255,255,0.78)" });
-    if (hi4) datasets.push({ label: "Billigaste 4h", data: hi4, pointRadius: 0, borderWidth: 4, tension: 0.15, borderColor: "rgba(255,255,255,0.55)" });
-    if (hi2) datasets.push({ label: "Billigaste 2h", data: hi2, pointRadius: 0, borderWidth: 3, tension: 0.15, borderColor: "rgba(255,255,255,0.38)" });
+    if (hi8) datasets.push({ label: "Billigaste 8h", data: hi8, pointRadius: 0, borderWidth: 6, tension: 0.15, borderColor: "rgba(255,255,255,0.55)" });
+    if (hi4) datasets.push({ label: "Billigaste 4h", data: hi4, pointRadius: 0, borderWidth: 5, tension: 0.15, borderDash: [2,3], borderColor: "rgba(255,255,255,0.70)" });
+    if (hi2) datasets.push({ label: "Billigaste 2h", data: hi2, pointRadius: 0, borderWidth: 6, tension: 0.15, borderDash: [6,4], borderColor: "rgba(255,255,255,0.95)" });
 
     if (state.krLines) {
-      const yVals = [
-        { y: sekKwhToMetricY(1), label: "≈ 1 kr/kWh" },
-        { y: sekKwhToMetricY(2), label: "≈ 2 kr/kWh" },
-        { y: sekKwhToMetricY(3), label: "≈ 3 kr/kWh" },
-      ];
-      for (const it of yVals) {
-        if (typeof it.y !== "number" || Number.isNaN(it.y)) continue;
+      const y1 = sekKwhToMetricY(1);
+      const y2 = sekKwhToMetricY(2);
+      const y3 = sekKwhToMetricY(3);
+
+      const addH = (y, label) => {
+        if (typeof y !== "number" || Number.isNaN(y)) return;
         datasets.push({
-          label: it.label,
-          data: labels.map(() => it.y),
+          label,
+          data: labels.map(() => y),
           pointRadius: 0,
           borderWidth: 1,
           borderDash: [4,4],
           borderColor: "rgba(255,255,255,0.25)"
         });
-      }
+      };
+
+      addH(y1, "≈ 1 kr/kWh");
+      addH(y2, "≈ 2 kr/kWh");
+      addH(y3, "≈ 3 kr/kWh");
     }
 
     const title = `Senaste ${nDays} dagar (${unitLabel()})` + (state.fillGaps ? " (extrapolerat ≤8 null)" : "");
@@ -494,8 +568,19 @@
         maintainAspectRatio: false,
         interaction: { mode: "index", intersect: false },
         plugins: {
-          legend: { display: true },
-          title: { display: true, text: title }
+          legend: { display: true, onClick: legendNoToggle },
+          title: { display: true, text: title },
+          tooltip: {
+            enabled: true,
+            callbacks: {
+              title: (items) => items?.[0]?.label || "",
+              label: (c) => {
+                const v = c.parsed?.y;
+                if (v === null || v === undefined || Number.isNaN(v)) return "—";
+                return `${c.dataset.label}: ${v.toFixed(decimals())}`;
+              }
+            }
+          }
         },
         scales: {
           x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 10 } },
@@ -504,40 +589,55 @@
       }
     });
 
-    renderSummary({ stats, win2h, win4h, win8h, infoText: `Intervall: <b>${keys[0]}</b> → <b>${keys[keys.length-1]}</b>` });
+    renderSummary({
+      stats,
+      win2h,
+      win4h,
+      win8h,
+      infoText: `Intervall: <b>${keys[0]}</b> → <b>${keys[keys.length-1]}</b>`,
+      timeText2h: windowTimeTextRange(refs, win2h),
+      timeText4h: windowTimeTextRange(refs, win4h),
+      timeText8h: windowTimeTextRange(refs, win8h),
+    });
   }
 
   function render() {
+    // Ensure day dropdown always populated
     if (!state.data?.days) return;
 
     if (state.tab === "today") {
       state.selectedDate = stockholmTodayIsoDate();
       el("datePick").value = state.selectedDate || "";
-      return renderSingleDay(state.selectedDate);
+      renderChartSingleDay(state.selectedDate);
+      return;
     }
 
     if (state.tab === "tomorrow") {
-      state.selectedDate = addDays(stockholmTodayIsoDate(), 1);
+      const tmr = addDays(stockholmTodayIsoDate(), 1);
+      state.selectedDate = tmr;
       el("datePick").value = state.selectedDate || "";
-      return renderSingleDay(state.selectedDate);
+      renderChartSingleDay(state.selectedDate);
+      return;
     }
 
     if (state.tab === "day") {
       state.selectedDate = el("datePick").value || state.selectedDate;
       el("datePick").value = state.selectedDate || "";
-      return renderSingleDay(state.selectedDate);
+      renderChartSingleDay(state.selectedDate);
+      return;
     }
 
-    if (state.tab === "7d") return renderRange(7);
-    if (state.tab === "14d") return renderRange(14);
-    if (state.tab === "30d") return renderRange(30);
+    if (state.tab === "7d") return renderChartRange(7);
+    if (state.tab === "14d") return renderChartRange(14);
+    if (state.tab === "30d") return renderChartRange(30);
   }
 
   function setTab(tab) {
     state.tab = tab;
-    ["today","tomorrow","day","7d","14d","30d"].forEach(t => {
-      el(`tab-${t}`).classList.toggle("active", tab === t);
-    });
+
+    const ids = ["today","tomorrow","day","7d","14d","30d"];
+    ids.forEach(t => el(`tab-${t}`).classList.toggle("active", tab === t));
+
     render();
   }
 
@@ -581,10 +681,12 @@
   }
 
   function loadSettings() {
-    state.fillGaps = (localStorage.getItem("rossohamn_fillGaps") === "1");
+    const fg = localStorage.getItem("rossohamn_fillGaps");
+    state.fillGaps = (fg === "1");
     el("fillGaps").checked = state.fillGaps;
 
-    state.krLines = (localStorage.getItem("rossohamn_krLines") === "1");
+    const kl = localStorage.getItem("rossohamn_krLines");
+    state.krLines = (kl === "1");
     el("krLines").checked = state.krLines;
   }
 
@@ -629,6 +731,7 @@
     }
   }
 
+  // ----- Events -----
   el("reload").addEventListener("click", bootstrap);
 
   el("tab-today").addEventListener("click", () => setTab("today"));

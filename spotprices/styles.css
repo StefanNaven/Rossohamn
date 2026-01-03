@@ -27,12 +27,16 @@ a { color: #9fd4ff; }
 @media (max-width: 720px) {
   body { padding: 10px; }
   .wrap { gap: 10px; }
+
   select, input { padding: 10px 12px; }
   .tabs button { padding: 10px 12px; }
+
   .tabs { align-items: stretch; }
   .tabs > * { flex: 1 1 auto; }
   .tabs button { flex: 1 1 30%; }
+
   .toggle { justify-content: center; }
+
   .chartWrap { height: 320px; }
 }
 
