@@ -3,106 +3,48 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Rossöhamn – Automation & Data</title>
-  <meta name="description" content="Rossöhamn – automatisering, datahantering och elpriser." />
+  <title>Rossöhamn</title>
+  <meta name="description" content="Rossöhamn – nyheter, automation och verktyg." />
 
   <!-- Samma bas-stil som spotprices -->
   <link rel="stylesheet" href="/spotprices/styles.css" />
 
-  <!-- Endast startsidans tillägg -->
+  <!-- Startsidan: layout & komponenter -->
   <link rel="stylesheet" href="/assets/home.css" />
 </head>
 
 <body>
 <main class="wrap">
 
-  <!-- HEADER -->
+  <!-- Header -->
   <header class="card">
     <div class="row row-space">
       <div class="row">
-        <div class="title">Rossöhamn – Automation</div>
-        <span class="pill">data</span>
-        <span class="pill">jobs</span>
-        <span class="pill">spotpriser</span>
+        <div class="title">Rossöhamn</div>
+        <span class="pill">hem</span>
+        <span class="pill">automation</span>
+        <span class="pill">info</span>
       </div>
 
-      <nav class="row nav">
+      <nav class="row nav" aria-label="Huvudmeny">
         <a class="navlink active" href="/">Hem</a>
-        <a class="navlink" href="#automation">Automation</a>
         <a class="navlink" href="#aktuellt">Aktuellt</a>
+        <a class="navlink" href="#automation">Automation</a>
+        <a class="navlink" href="#elpriser">Elpriser</a>
         <a class="navlink cta" href="/spotprices/">Spotpriser</a>
       </nav>
     </div>
 
     <p class="meta" style="margin-top:10px;">
-      Startsida för automatisering och annan datahantering.  
-      Spotpriser är första publika verktyget.
+      Samlingssida för nyheter, information och verktyg. Här kan du senare lägga till fler delar (t.ex. Homey-data).
     </p>
   </header>
 
-  <!-- MINI-GRAF -->
-  <section class="card">
-    <div class="row row-space">
-      <div class="row">
-        <div class="title">Dagens elpris</div>
-        <span class="pill" id="mini-status">laddar…</span>
-      </div>
-      <a class="btn" href="/spotprices/">Öppna spotpriser</a>
-    </div>
-
-    <a href="/spotprices/" class="miniChartLink">
-      <svg id="spark" viewBox="0 0 1000 180" preserveAspectRatio="none">
-        <rect width="1000" height="180" class="spark-bg"></rect>
-        <path id="sparkFill" class="spark-fill"></path>
-        <path id="sparkLine" class="spark-line"></path>
-        <text id="sparkText" x="14" y="26" class="spark-text">Hämtar data…</text>
-      </svg>
-    </a>
-
-    <div class="row small">
-      <span id="mini-meta"></span>
-    </div>
-  </section>
-
-  <!-- AUTOMATION -->
-  <section class="card" id="automation">
-    <div class="row row-space">
-      <div class="title">Automation</div>
-      <span class="pill">översikt</span>
-    </div>
-
-    <div class="grid">
-      <div class="tile">
-        <div class="tile-title">Senaste uppdatering</div>
-        <div class="small" id="sys-updated">—</div>
-        <div class="meta">history.json</div>
-      </div>
-
-      <div class="tile">
-        <div class="tile-title">Systemstatus</div>
-        <div class="small" id="sys-status">—</div>
-        <div class="meta">Datapipeline</div>
-      </div>
-
-      <a class="tile" href="/spotprices/">
-        <div class="tile-title">Spotpriser</div>
-        <div class="small">Dashboard</div>
-        <div class="meta">Graf · tabell · historik</div>
-      </a>
-
-      <div class="tile">
-        <div class="tile-title">Kommande</div>
-        <div class="small">—</div>
-        <div class="meta">Fler datakällor</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- AKTUELLT -->
+  <!-- Segment: Aktuellt / Nyheter -->
   <section class="card" id="aktuellt">
     <div class="row row-space">
       <div class="title">Aktuellt</div>
-      <span class="pill">notiser</span>
+      <span class="pill">nyheter</span>
     </div>
 
     <table>
@@ -115,81 +57,210 @@
       <tbody>
         <tr>
           <td class="small">—</td>
-          <td>Spotpriser uppdateras dagligen via automatiserad pipeline.</td>
+          <td>Här kan du publicera notiser till andra (fritid, hamninfo, uppdateringar).</td>
         </tr>
       </tbody>
     </table>
   </section>
 
-  <!-- FOOTER -->
+  <!-- Segment: Automation -->
+  <section class="card" id="automation">
+    <div class="row row-space">
+      <div class="title">Automation</div>
+      <span class="pill">översikt</span>
+    </div>
+
+    <div class="grid">
+      <div class="tile">
+        <div class="tile-title">Systemstatus</div>
+        <div class="small" id="sys-status">—</div>
+        <div class="meta">Datapipeline</div>
+      </div>
+
+      <div class="tile">
+        <div class="tile-title">Senaste uppdatering</div>
+        <div class="small" id="sys-updated">—</div>
+        <div class="meta">history.json</div>
+      </div>
+
+      <a class="tile" href="/spotprices/">
+        <div class="tile-title">Spotpriser</div>
+        <div class="small">Dashboard</div>
+        <div class="meta">Graf · tabell · historik</div>
+      </a>
+
+      <div class="tile">
+        <div class="tile-title">Homey (framtid)</div>
+        <div class="small">—</div>
+        <div class="meta">Status/metrics</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Segment: Elpriser (minigraf vid sidan) -->
+  <section class="card" id="elpriser">
+    <div class="row row-space">
+      <div class="title">Elpriser</div>
+      <span class="pill" id="mini-status">laddar…</span>
+    </div>
+
+    <div class="priceGrid">
+      <!-- vänster: text + actions -->
+      <div class="priceInfo">
+        <p class="meta" style="margin-top:0;">
+          Miniöversikt för idag (öre/kWh). Klicka grafen eller knappen för full vy.
+        </p>
+
+        <div class="row">
+          <a class="btn" href="/spotprices/">Öppna spotpriser</a>
+          <button class="btn" type="button" id="refresh">Uppdatera</button>
+        </div>
+
+        <div class="meta" id="mini-meta" style="margin-top:10px;"></div>
+        <div class="small" id="mini-note" style="margin-top:6px;"></div>
+      </div>
+
+      <!-- höger: minigraf -->
+      <a href="/spotprices/" class="miniSpark" aria-label="Öppna spotpriser">
+        <svg id="spark" viewBox="0 0 1000 160" preserveAspectRatio="none">
+          <rect width="1000" height="160" class="spark-bg"></rect>
+          <path id="sparkFill" class="spark-fill"></path>
+          <path id="sparkLine" class="spark-line"></path>
+          <text id="sparkText" x="14" y="26" class="spark-text">Hämtar data…</text>
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- Segment: Information (för “publiceringar” och övrigt) -->
+  <section class="card" id="info">
+    <div class="row row-space">
+      <div class="title">Information</div>
+      <span class="pill">sidor</span>
+    </div>
+
+    <div class="grid3">
+      <div class="tile">
+        <div class="tile-title">Publiceringar</div>
+        <div class="small">—</div>
+        <div class="meta">Lägg upp inlägg/uppdateringar här (sen kan det bli egna sidor).</div>
+      </div>
+
+      <div class="tile">
+        <div class="tile-title">Fritid</div>
+        <div class="small">—</div>
+        <div class="meta">Aktiviteter på Rossöhamn, tips, länkar.</div>
+      </div>
+
+      <div class="tile">
+        <div class="tile-title">Praktisk info</div>
+        <div class="small">—</div>
+        <div class="meta">Kontakt, parkering, hamnregler, osv.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
   <footer class="card">
     <div class="row row-space">
       <div class="small">© <span id="year"></span> Rossöhamn</div>
       <div class="row">
-        <a class="navlink" href="/spotprices/">Spotpriser</a>
-        <a class="navlink" href="#automation">Automation</a>
         <a class="navlink" href="#aktuellt">Aktuellt</a>
+        <a class="navlink" href="#automation">Automation</a>
+        <a class="navlink" href="#elpriser">Elpriser</a>
+        <a class="navlink" href="/spotprices/">Spotpriser</a>
       </div>
     </div>
   </footer>
 
 </main>
 
-<!-- SCRIPT -->
 <script>
   document.getElementById("year").textContent = new Date().getFullYear();
-
   const DATA_URL = "/spotprices/history.json";
 
-  function todayKeySE() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  function todayKeyStockholm() {
+    const parts = new Intl.DateTimeFormat("sv-SE", {
+      timeZone: "Europe/Stockholm",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).formatToParts(new Date());
+
+    const y = parts.find(p => p.type === "year").value;
+    const m = parts.find(p => p.type === "month").value;
+    const d = parts.find(p => p.type === "day").value;
+    return `${y}-${m}-${d}`;
   }
 
   function drawSpark(points, label) {
-    const W=1000,H=180,p=14;
+    const W=1000, H=160, pad=14;
     const line=document.getElementById("sparkLine");
     const fill=document.getElementById("sparkFill");
     const text=document.getElementById("sparkText");
 
-    if(points.length<2){ text.textContent="Ingen data"; return; }
+    if (!points || points.length < 2) {
+      line.setAttribute("d", "");
+      fill.setAttribute("d", "");
+      text.textContent = "Ingen data för idag";
+      document.getElementById("mini-meta").textContent = "";
+      return;
+    }
 
     const min=Math.min(...points), max=Math.max(...points);
-    const span=max-min||1;
-    const xs=(W-p*2)/(points.length-1);
-    const y=v=>(H-p)-((v-min)/span)*(H-p*2);
+    const span=max-min || 1;
+    const xs=(W-pad*2)/(points.length-1);
+    const y=v => (H-pad) - ((v-min)/span) * (H-pad*2);
 
     let d="";
-    points.forEach((v,i)=>{
-      d+=`${i?"L":"M"}${p+i*xs} ${y(v)} `;
-    });
+    points.forEach((v,i)=>{ d += `${i?"L":"M"}${pad+i*xs} ${y(v)} `; });
 
-    line.setAttribute("d",d);
-    fill.setAttribute("d",`${d}L ${p+(points.length-1)*xs} ${H-p} L ${p} ${H-p} Z`);
-    text.textContent="";
+    line.setAttribute("d", d);
+    fill.setAttribute("d", `${d}L ${pad+(points.length-1)*xs} ${H-pad} L ${pad} ${H-pad} Z`);
+    text.textContent = "";
+
     document.getElementById("mini-meta").textContent =
-      `Min ${min.toFixed(1)} öre · Max ${max.toFixed(1)} öre (${label})`;
-    document.getElementById("mini-status").textContent="ok";
+      `Idag (${label}) · Min ${min.toFixed(1)} öre/kWh · Max ${max.toFixed(1)} öre/kWh`;
   }
 
   async function loadMini(){
-    try{
-      const r=await fetch(DATA_URL,{cache:"no-store"});
-      const j=await r.json();
-      const key=todayKeySE();
-      const day=j.days?.[key];
-      const pts=day?.points?.map(p=>p.oreKwh).filter(Number.isFinite)||[];
-      drawSpark(pts,key);
+    const statusEl = document.getElementById("mini-status");
+    const noteEl = document.getElementById("mini-note");
+    noteEl.textContent = "";
 
+    try{
+      statusEl.textContent = "laddar…";
+      const r = await fetch(DATA_URL, { cache:"no-store" });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const j = await r.json();
+
+      const key = todayKeyStockholm();
+      const day = j?.days?.[key];
+
+      // Verifierad struktur: days[YYYY-MM-DD].points[].oreKwh
+      // Källa: uploaded history.json
+      const pts = (day?.points || [])
+        .map(p => p?.oreKwh)
+        .filter(Number.isFinite);
+
+      drawSpark(pts, key);
+
+      const updatedAt = j?.meta?.updatedAt;
       document.getElementById("sys-updated").textContent =
-        new Date(j.meta.updatedAt).toLocaleString("sv-SE");
+        updatedAt ? new Date(updatedAt).toLocaleString("sv-SE") : "—";
+
+      statusEl.textContent = "ok";
       document.getElementById("sys-status").textContent = "OK";
-    }catch{
-      document.getElementById("mini-status").textContent="fel";
-      document.getElementById("sys-status").textContent="Fel";
+
+    } catch (e) {
+      statusEl.textContent = "fel";
+      document.getElementById("sys-status").textContent = "Fel";
+      document.getElementById("sparkText").textContent = "Fel: " + (e?.message || String(e));
+      noteEl.textContent = "Kontrollera att /spotprices/history.json är åtkomlig och giltig JSON.";
     }
   }
 
+  document.getElementById("refresh").addEventListener("click", loadMini);
   loadMini();
 </script>
 </body>
