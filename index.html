@@ -3,139 +3,194 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Rossöhamn</title>
-  <meta name="description" content="Rossöhamn – information, kontakt och uppdateringar." />
-  <style>
-    :root { color-scheme: light; }
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      margin: 0;
-      line-height: 1.5;
-    }
-    header {
-      padding: 40px 20px 18px;
-      border-bottom: 1px solid #e6e6e6;
-      background: #fff;
-    }
-    .wrap { max-width: 980px; margin: 0 auto; }
-    .brand {
-      display: flex;
-      align-items: baseline;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    h1 { margin: 0; font-size: 2rem; letter-spacing: 0.2px; }
-    .tagline { margin: 8px 0 0; color: #555; }
-    nav { margin-top: 18px; display: flex; gap: 14px; flex-wrap: wrap; }
-    nav a {
-      color: #0b57d0;
-      text-decoration: none;
-      padding: 6px 10px;
-      border-radius: 10px;
-    }
-    nav a:hover { background: #f2f6ff; }
-    main { padding: 26px 20px 44px; background: #fafafa; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-      margin-top: 18px;
-    }
-    .card {
-      background: #fff;
-      border: 1px solid #e6e6e6;
-      border-radius: 16px;
-      padding: 16px;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.04);
-    }
-    .card h2 { margin: 0 0 8px; font-size: 1.1rem; }
-    .card p { margin: 0; color: #444; }
-    footer {
-      padding: 18px 20px;
-      border-top: 1px solid #e6e6e6;
-      background: #fff;
-      color: #666;
-      font-size: 0.95rem;
-    }
-    .pill {
-      display: inline-block;
-      border: 1px solid #e6e6e6;
-      border-radius: 999px;
-      padding: 2px 10px;
-      font-size: 0.85rem;
-      color: #666;
-      background: #fff;
-      margin-left: 8px;
-    }
-  </style>
+  <title>Rossöhamn – Automation & Data</title>
+  <meta name="description" content="Rossöhamn – automatisering, datahantering och elpriser." />
+
+  <!-- Samma bas-stil som spotprices -->
+  <link rel="stylesheet" href="/spotprices/styles.css" />
+
+  <!-- Endast startsidans tillägg -->
+  <link rel="stylesheet" href="/assets/home.css" />
 </head>
+
 <body>
-  <header>
-    <div class="wrap">
-      <div class="brand">
-        <h1>Rossöhamn</h1>
-        <span class="pill">rossohamn.se</span>
+<main class="wrap">
+
+  <!-- HEADER -->
+  <header class="card">
+    <div class="row row-space">
+      <div class="row">
+        <div class="title">Rossöhamn – Automation</div>
+        <span class="pill">data</span>
+        <span class="pill">jobs</span>
+        <span class="pill">spotpriser</span>
       </div>
-      <p class="tagline">Välkommen till Rossöhamn — information, kontakt och uppdateringar.</p>
-      <nav>
-        <a href="/">Hem</a>
-        <a href="#info">Information</a>
-        <a href="#kontakt">Kontakt</a>
-        <a href="/spotprices/">Spotpriser</a>
+
+      <nav class="row nav">
+        <a class="navlink active" href="/">Hem</a>
+        <a class="navlink" href="#automation">Automation</a>
+        <a class="navlink" href="#aktuellt">Aktuellt</a>
+        <a class="navlink cta" href="/spotprices/">Spotpriser</a>
       </nav>
     </div>
+
+    <p class="meta" style="margin-top:10px;">
+      Startsida för automatisering och annan datahantering.  
+      Spotpriser är första publika verktyget.
+    </p>
   </header>
 
-  <main>
-    <div class="wrap">
-      <section id="info">
-        <div class="card">
-          <h2>Om Rossöhamn</h2>
-          <p>
-            Här kan du samla praktisk information, nyheter och annat för Rossöhamn.
-            Sidan är byggd som en enkel statisk webbplats (GitHub Pages) och kan byggas ut över tid.
-          </p>
-        </div>
-
-        <div class="grid">
-          <div class="card">
-            <h2>Aktuellt</h2>
-            <p>Här kan du lägga korta uppdateringar och länkar när du vill.</p>
-          </div>
-          <div class="card">
-            <h2>Service</h2>
-            <p>Öppettider, kontaktvägar, felanmälan eller annan serviceinformation.</p>
-          </div>
-          <div class="card">
-            <h2>Spotpriser</h2>
-            <p>
-              På <strong>/spotprices/</strong> kan du senare visa elpriser (graf + kommande dygn)
-              från dina HomeyScript-exporter.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section id="kontakt" style="margin-top: 16px;">
-        <div class="card">
-          <h2>Kontakt</h2>
-          <p>
-            Lägg in e-post/telefon här när du vill.<br/>
-            Exempel: <a href="mailto:info@rossohamn.se">info@rossohamn.se</a>
-          </p>
-        </div>
-      </section>
+  <!-- MINI-GRAF -->
+  <section class="card">
+    <div class="row row-space">
+      <div class="row">
+        <div class="title">Dagens elpris</div>
+        <span class="pill" id="mini-status">laddar…</span>
+      </div>
+      <a class="btn" href="/spotprices/">Öppna spotpriser</a>
     </div>
-  </main>
 
-  <footer>
-    <div class="wrap">
-      © <span id="year"></span> Rossöhamn
+    <a href="/spotprices/" class="miniChartLink">
+      <svg id="spark" viewBox="0 0 1000 180" preserveAspectRatio="none">
+        <rect width="1000" height="180" class="spark-bg"></rect>
+        <path id="sparkFill" class="spark-fill"></path>
+        <path id="sparkLine" class="spark-line"></path>
+        <text id="sparkText" x="14" y="26" class="spark-text">Hämtar data…</text>
+      </svg>
+    </a>
+
+    <div class="row small">
+      <span id="mini-meta"></span>
+    </div>
+  </section>
+
+  <!-- AUTOMATION -->
+  <section class="card" id="automation">
+    <div class="row row-space">
+      <div class="title">Automation</div>
+      <span class="pill">översikt</span>
+    </div>
+
+    <div class="grid">
+      <div class="tile">
+        <div class="tile-title">Senaste uppdatering</div>
+        <div class="small" id="sys-updated">—</div>
+        <div class="meta">history.json</div>
+      </div>
+
+      <div class="tile">
+        <div class="tile-title">Systemstatus</div>
+        <div class="small" id="sys-status">—</div>
+        <div class="meta">Datapipeline</div>
+      </div>
+
+      <a class="tile" href="/spotprices/">
+        <div class="tile-title">Spotpriser</div>
+        <div class="small">Dashboard</div>
+        <div class="meta">Graf · tabell · historik</div>
+      </a>
+
+      <div class="tile">
+        <div class="tile-title">Kommande</div>
+        <div class="small">—</div>
+        <div class="meta">Fler datakällor</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AKTUELLT -->
+  <section class="card" id="aktuellt">
+    <div class="row row-space">
+      <div class="title">Aktuellt</div>
+      <span class="pill">notiser</span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:140px;">Datum</th>
+          <th>Information</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="small">—</td>
+          <td>Spotpriser uppdateras dagligen via automatiserad pipeline.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="card">
+    <div class="row row-space">
+      <div class="small">© <span id="year"></span> Rossöhamn</div>
+      <div class="row">
+        <a class="navlink" href="/spotprices/">Spotpriser</a>
+        <a class="navlink" href="#automation">Automation</a>
+        <a class="navlink" href="#aktuellt">Aktuellt</a>
+      </div>
     </div>
   </footer>
 
-  <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-  </script>
+</main>
+
+<!-- SCRIPT -->
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  const DATA_URL = "/spotprices/history.json";
+
+  function todayKeySE() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  }
+
+  function drawSpark(points, label) {
+    const W=1000,H=180,p=14;
+    const line=document.getElementById("sparkLine");
+    const fill=document.getElementById("sparkFill");
+    const text=document.getElementById("sparkText");
+
+    if(points.length<2){ text.textContent="Ingen data"; return; }
+
+    const min=Math.min(...points), max=Math.max(...points);
+    const span=max-min||1;
+    const xs=(W-p*2)/(points.length-1);
+    const y=v=>(H-p)-((v-min)/span)*(H-p*2);
+
+    let d="";
+    points.forEach((v,i)=>{
+      d+=`${i?"L":"M"}${p+i*xs} ${y(v)} `;
+    });
+
+    line.setAttribute("d",d);
+    fill.setAttribute("d",`${d}L ${p+(points.length-1)*xs} ${H-p} L ${p} ${H-p} Z`);
+    text.textContent="";
+    document.getElementById("mini-meta").textContent =
+      `Min ${min.toFixed(1)} öre · Max ${max.toFixed(1)} öre (${label})`;
+    document.getElementById("mini-status").textContent="ok";
+  }
+
+  async function loadMini(){
+    try{
+      const r=await fetch(DATA_URL,{cache:"no-store"});
+      const j=await r.json();
+      const key=todayKeySE();
+      const day=j.days?.[key];
+      const pts=day?.points?.map(p=>p.oreKwh).filter(Number.isFinite)||[];
+      drawSpark(pts,key);
+
+      document.getElementById("sys-updated").textContent =
+        new Date(j.meta.updatedAt).toLocaleString("sv-SE");
+      document.getElementById("sys-status").textContent = "OK";
+    }catch{
+      document.getElementById("mini-status").textContent="fel";
+      document.getElementById("sys-status").textContent="Fel";
+    }
+  }
+
+  loadMini();
+</script>
 </body>
 </html>
