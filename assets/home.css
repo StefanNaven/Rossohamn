@@ -11,13 +11,19 @@
 .nav .navlink:hover{ background:#1e1e1e; border-color:#6b6b6b; }
 .nav .navlink.active{ background:#1e1e1e; border-color:#6b6b6b; }
 
+/* Tiles */
 .grid{
   display:grid;
   grid-template-columns:repeat(4,minmax(0,1fr));
   gap:10px;
   margin-top:10px;
 }
-
+.grid3{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin-top:10px;
+}
 .tile{
   border:1px solid #2a2a2a;
   border-radius:12px;
@@ -28,18 +34,30 @@
 .tile:hover{ background:#1e1e1e; border-color:#6b6b6b; }
 .tile-title{ font-weight:700; margin-bottom:6px; }
 
+/* Elpriser: text + minigraf sida vid sida */
+.priceGrid{
+  display:grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap:12px;
+  margin-top:10px;
+  align-items: stretch;
+}
+.priceInfo{ min-width: 0; }
+.miniSpark{ display:block; text-decoration:none; }
+
 /* Mini chart */
-.miniChartLink{ display:block; margin-top:10px; }
-#spark{ width:100%; height:180px; }
+#spark{ width:100%; height: 160px; display:block; border-radius:12px; }
 .spark-bg{ fill:#0f0f0f; stroke:#2a2a2a; stroke-width:2; }
 .spark-line{ fill:none; stroke:#9fd4ff; stroke-width:3; }
 .spark-fill{ fill:rgba(159,212,255,.12); }
 .spark-text{ fill:#ccc; font-size:14px; }
 
 /* Responsive */
-@media(max-width:720px){
+@media(max-width:900px){
   .grid{ grid-template-columns:repeat(2,1fr); }
-  #spark{ height:160px; }
+  .grid3{ grid-template-columns:1fr; }
+  .priceGrid{ grid-template-columns:1fr; }
+  #spark{ height:150px; }
 }
 @media(max-width:420px){
   .grid{ grid-template-columns:1fr; }
