@@ -119,6 +119,15 @@
     return `${y2}-${m2}-${d2}`;
   }
 
+  function slotToTime(slotIndex, resolutionMinutes) {
+    const rm = Number(resolutionMinutes) || 15;
+    const total = slotIndex * rm;
+    const hh = Math.floor(total / 60) % 24;
+    const mm = total % 60;
+    return String(hh).padStart(2,"0") + ":" + String(mm).padStart(2,"0");
+  }
+
+
   function getParam(name) {
     const u = new URL(location.href);
     return u.searchParams.get(name);
@@ -232,9 +241,10 @@
 
       for (let i = 0; i < day.points.length; i++) {
         const p = day.points[i];
-        labels.push(p ? `${dayKey.slice(5)} ${p.time}` : `${dayKey.slice(5)} —`);
+        const t = slotToTime(i, day.resolutionMinutes);
+        labels.push(`${dayKey.slice(5)} ${t}`);
         series.push((p && typeof p[state.metric] === "number") ? p[state.metric] : null);
-        refs.push({ dayKey, time: p?.time ?? "" });
+        refs.push({ dayKey, time: t });
       }
     }
     return { labels, series, refs };
@@ -313,9 +323,9 @@
 
   function windowTimeTextSingleDay(dayKey, day, win) {
     if (!win) return "—";
-    const start = day?.points?.[win.startIdx]?.time ?? "";
-    const end = day?.points?.[win.endIdx]?.time ?? "";
-    if (!start || !end) return "—";
+    const rm = day?.resolutionMinutes ?? 15;
+    const start = slotToTime(win.startIdx, rm);
+    const end = slotToTime(win.endIdx, rm);
     return `${dayKey} ${start} → ${dayKey} ${end}`;
   }
 
