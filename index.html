@@ -31,6 +31,8 @@
         <a class="navlink" href="#aktuellt">Aktuellt</a>
         <a class="navlink" href="#automation">Automation</a>
         <a class="navlink" href="#elpriser">Elpriser</a>
+        <a class="navlink" href="#whatsmyip">What’s my IP</a>
+        <a class="navlink" href="#clientinfo">Vad sidan ser om dig</a>
         <a class="navlink cta" href="/spotprices/">Spotpriser</a>
       </nav>
     </div>
@@ -40,27 +42,58 @@
     </p>
   </header>
 
-  <!-- Segment: Aktuellt / Nyheter -->
-  <section class="card" id="aktuellt">
-    <div class="row row-space">
-      <div class="title">Aktuellt</div>
-      <span class="pill">nyheter</span>
-    </div>
+  <!-- Top row: Aktuellt + What's my IP (två kort bredvid varandra) -->
+  <section class="twoCol">
+    <!-- Segment: Aktuellt / Nyheter -->
+    <section class="card" id="aktuellt">
+      <div class="row row-space">
+        <div class="title">Aktuellt</div>
+        <span class="pill">nyheter</span>
+      </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th style="width:140px;">Datum</th>
-          <th>Information</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="small">—</td>
-          <td>Här kan du publicera notiser till andra (fritid, hamninfo, uppdateringar).</td>
-        </tr>
-      </tbody>
-    </table>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:140px;">Datum</th>
+            <th>Information</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="small">—</td>
+            <td>Här kan du publicera notiser till andra (fritid, hamninfo, uppdateringar).</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- What's my IP -->
+    <section class="card" id="whatsmyip">
+      <div class="row row-space">
+        <div class="title">What’s my IP</div>
+        <span class="pill" id="ip-status">laddar…</span>
+      </div>
+
+      <div class="kv">
+        <div class="kv-row">
+          <div class="small">Public IP</div>
+          <div class="meta" id="ip-public">—</div>
+        </div>
+        <div class="kv-row">
+          <div class="small">ISP / ASN</div>
+          <div class="meta" id="ip-isp">—</div>
+        </div>
+        <div class="kv-row">
+          <div class="small">Plats</div>
+          <div class="meta" id="ip-loc">—</div>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <button class="btn" type="button" id="ip-refresh">Uppdatera</button>
+        <span class="small" id="ip-note"></span>
+      </div>
+    </section>
   </section>
 
   <!-- Segment: Automation -->
@@ -93,6 +126,61 @@
         <div class="tile-title">Homey (framtid)</div>
         <div class="small">—</div>
         <div class="meta">Status/metrics</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vad sidan ser om dig -->
+  <section class="card" id="clientinfo">
+    <div class="row row-space">
+      <div class="title">Vad sidan ser om dig</div>
+      <span class="pill" id="client-status">laddar…</span>
+    </div>
+
+    <p class="meta" style="margin-top:6px;">
+      Detta är teknisk information som din webbläsare automatiskt delar när du besöker sidan.
+      Ingen information sparas eller kopplas till dig som person.
+    </p>
+
+    <div class="kv">
+      <div class="kv-row">
+        <div class="small">Publik IP</div>
+        <div class="meta" id="ci-ip">—</div>
+      </div>
+
+      <div class="kv-row">
+        <div class="small">Plats (ungefärlig)</div>
+        <div class="meta" id="ci-location">—</div>
+      </div>
+
+      <div class="kv-row">
+        <div class="small">ISP / ASN</div>
+        <div class="meta" id="ci-isp">—</div>
+      </div>
+
+      <div class="kv-row">
+        <div class="small">Webbläsare (User-Agent)</div>
+        <div class="meta" id="ci-browser">—</div>
+      </div>
+
+      <div class="kv-row">
+        <div class="small">Operativsystem (User-Agent)</div>
+        <div class="meta" id="ci-os">—</div>
+      </div>
+
+      <div class="kv-row">
+        <div class="small">Språk</div>
+        <div class="meta" id="ci-lang">—</div>
+      </div>
+
+      <div class="kv-row">
+        <div class="small">Tidzon</div>
+        <div class="meta" id="ci-tz">—</div>
+      </div>
+
+      <div class="kv-row">
+        <div class="small">Skärm</div>
+        <div class="meta" id="ci-screen">—</div>
       </div>
     </div>
   </section>
@@ -132,7 +220,7 @@
     </div>
   </section>
 
-  <!-- Segment: Information (för “publiceringar” och övrigt) -->
+  <!-- Segment: Information -->
   <section class="card" id="info">
     <div class="row row-space">
       <div class="title">Information</div>
@@ -168,6 +256,8 @@
         <a class="navlink" href="#aktuellt">Aktuellt</a>
         <a class="navlink" href="#automation">Automation</a>
         <a class="navlink" href="#elpriser">Elpriser</a>
+        <a class="navlink" href="#whatsmyip">What’s my IP</a>
+        <a class="navlink" href="#clientinfo">Vad sidan ser om dig</a>
         <a class="navlink" href="/spotprices/">Spotpriser</a>
       </div>
     </div>
@@ -237,8 +327,6 @@
       const key = todayKeyStockholm();
       const day = j?.days?.[key];
 
-      // Verifierad struktur: days[YYYY-MM-DD].points[].oreKwh
-      // Källa: uploaded history.json
       const pts = (day?.points || [])
         .map(p => p?.oreKwh)
         .filter(Number.isFinite);
@@ -261,7 +349,101 @@
   }
 
   document.getElementById("refresh").addEventListener("click", loadMini);
+
+  // Shared fetch helper
+  async function fetchJson(url) {
+    const r = await fetch(url, { cache: "no-store" });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return await r.json();
+  }
+
+  // What's my IP
+  async function loadWhatsMyIp() {
+    const status = document.getElementById("ip-status");
+    const note = document.getElementById("ip-note");
+    const ipPublic = document.getElementById("ip-public");
+    const ipIsp = document.getElementById("ip-isp");
+    const ipLoc = document.getElementById("ip-loc");
+
+    note.textContent = "";
+    status.textContent = "laddar…";
+    ipPublic.textContent = "—";
+    ipIsp.textContent = "—";
+    ipLoc.textContent = "—";
+
+    try {
+      const ip = await fetchJson("https://api.ipify.org?format=json");
+      ipPublic.textContent = ip?.ip || "okänt";
+
+      try {
+        const info = await fetchJson("https://ipapi.co/json/");
+        const asn = info?.asn ? info.asn : "";
+        const org = info?.org ? info.org : (info?.org_name || "");
+        ipIsp.textContent = (asn && org) ? `${asn} · ${org}` : (org || asn || "—");
+
+        const city = info?.city || "";
+        const region = info?.region || "";
+        const country = info?.country_name || info?.country || "";
+        const loc = [city, region, country].filter(Boolean).join(", ");
+        ipLoc.textContent = loc || "—";
+      } catch {
+        note.textContent = "Plats/ISP kunde inte hämtas (blockerad eller otillgänglig).";
+      }
+
+      status.textContent = "ok";
+    } catch {
+      status.textContent = "fel";
+      note.textContent = "IP kunde inte hämtas (nätverk/adblocker/CSP).";
+    }
+  }
+
+  document.getElementById("ip-refresh").addEventListener("click", loadWhatsMyIp);
+
+  // Vad sidan ser om dig
+  async function loadClientInfo() {
+    const status = document.getElementById("client-status");
+    status.textContent = "laddar…";
+
+    const ua = navigator.userAgent || "—";
+    const lang = navigator.language || (navigator.languages ? navigator.languages.join(", ") : "—");
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "—";
+    const screenInfo = `${window.screen.width}×${window.screen.height} @ ${window.devicePixelRatio || 1}x`;
+
+    document.getElementById("ci-lang").textContent = lang;
+    document.getElementById("ci-tz").textContent = tz;
+    document.getElementById("ci-screen").textContent = screenInfo;
+
+    // Visa UA rakt av (ingen gissning/parsning)
+    document.getElementById("ci-browser").textContent = ua;
+    document.getElementById("ci-os").textContent = ua;
+
+    try {
+      const ip = await fetchJson("https://api.ipify.org?format=json");
+      document.getElementById("ci-ip").textContent = ip?.ip || "okänt";
+
+      try {
+        const info = await fetchJson("https://ipapi.co/json/");
+        const loc = [info?.city, info?.region, info?.country_name].filter(Boolean).join(", ");
+        document.getElementById("ci-location").textContent = loc || "—";
+        document.getElementById("ci-isp").textContent = [info?.asn, info?.org].filter(Boolean).join(" · ") || "—";
+      } catch {
+        document.getElementById("ci-location").textContent = "Ej tillgängligt";
+        document.getElementById("ci-isp").textContent = "Ej tillgängligt";
+      }
+
+      status.textContent = "ok";
+    } catch {
+      document.getElementById("ci-ip").textContent = "Ej tillgängligt";
+      document.getElementById("ci-location").textContent = "Ej tillgängligt";
+      document.getElementById("ci-isp").textContent = "Ej tillgängligt";
+      status.textContent = "delvis";
+    }
+  }
+
+  // initial load
   loadMini();
+  loadWhatsMyIp();
+  loadClientInfo();
 </script>
 </body>
 </html>
