@@ -17,7 +17,7 @@
 <main class="wrap">
 
   <!-- Header -->
-  <header class="card">
+  <header class="card hero">
     <div class="row row-space">
       <div class="row">
         <div class="title">Rossöhamn</div>
@@ -32,7 +32,6 @@
         <a class="navlink" href="#automation">Automation</a>
         <a class="navlink" href="#elpriser">Elpriser</a>
         <a class="navlink" href="#whatsmyip">What’s my IP</a>
-        <a class="navlink" href="#clientinfo">Vad sidan ser om dig</a>
         <a class="navlink cta" href="/spotprices/">Spotpriser</a>
       </nav>
     </div>
@@ -42,7 +41,7 @@
     </p>
   </header>
 
-  <!-- Top row: Aktuellt + What's my IP (två kort bredvid varandra) -->
+  <!-- Top row: Aktuellt + What's my IP -->
   <section class="twoCol">
     <!-- Segment: Aktuellt / Nyheter -->
     <section class="card" id="aktuellt">
@@ -130,61 +129,6 @@
     </div>
   </section>
 
-  <!-- Vad sidan ser om dig -->
-  <section class="card" id="clientinfo">
-    <div class="row row-space">
-      <div class="title">Vad sidan ser om dig</div>
-      <span class="pill" id="client-status">laddar…</span>
-    </div>
-
-    <p class="meta" style="margin-top:6px;">
-      Detta är teknisk information som din webbläsare automatiskt delar när du besöker sidan.
-      Ingen information sparas eller kopplas till dig som person.
-    </p>
-
-    <div class="kv">
-      <div class="kv-row">
-        <div class="small">Publik IP</div>
-        <div class="meta" id="ci-ip">—</div>
-      </div>
-
-      <div class="kv-row">
-        <div class="small">Plats (ungefärlig)</div>
-        <div class="meta" id="ci-location">—</div>
-      </div>
-
-      <div class="kv-row">
-        <div class="small">ISP / ASN</div>
-        <div class="meta" id="ci-isp">—</div>
-      </div>
-
-      <div class="kv-row">
-        <div class="small">Webbläsare (User-Agent)</div>
-        <div class="meta" id="ci-browser">—</div>
-      </div>
-
-      <div class="kv-row">
-        <div class="small">Operativsystem (User-Agent)</div>
-        <div class="meta" id="ci-os">—</div>
-      </div>
-
-      <div class="kv-row">
-        <div class="small">Språk</div>
-        <div class="meta" id="ci-lang">—</div>
-      </div>
-
-      <div class="kv-row">
-        <div class="small">Tidzon</div>
-        <div class="meta" id="ci-tz">—</div>
-      </div>
-
-      <div class="kv-row">
-        <div class="small">Skärm</div>
-        <div class="meta" id="ci-screen">—</div>
-      </div>
-    </div>
-  </section>
-
   <!-- Segment: Elpriser (minigraf vid sidan) -->
   <section class="card" id="elpriser">
     <div class="row row-space">
@@ -193,7 +137,6 @@
     </div>
 
     <div class="priceGrid">
-      <!-- vänster: text + actions -->
       <div class="priceInfo">
         <p class="meta" style="margin-top:0;">
           Miniöversikt för idag (öre/kWh). Klicka grafen eller knappen för full vy.
@@ -208,7 +151,6 @@
         <div class="small" id="mini-note" style="margin-top:6px;"></div>
       </div>
 
-      <!-- höger: minigraf -->
       <a href="/spotprices/" class="miniSpark" aria-label="Öppna spotpriser">
         <svg id="spark" viewBox="0 0 1000 160" preserveAspectRatio="none">
           <rect width="1000" height="160" class="spark-bg"></rect>
@@ -257,13 +199,52 @@
         <a class="navlink" href="#automation">Automation</a>
         <a class="navlink" href="#elpriser">Elpriser</a>
         <a class="navlink" href="#whatsmyip">What’s my IP</a>
-        <a class="navlink" href="#clientinfo">Vad sidan ser om dig</a>
         <a class="navlink" href="/spotprices/">Spotpriser</a>
       </div>
     </div>
   </footer>
 
 </main>
+
+<!-- Kompakt info-widget nere i hörnet -->
+<aside class="cornerWidget" id="clientWidget" aria-label="Teknisk info">
+  <button class="cwBtn" id="cwToggle" type="button" aria-expanded="false">
+    <span class="cwDot" aria-hidden="true"></span>
+    <span class="cwTitle">Teknisk info</span>
+    <span class="cwState pill" id="client-status-mini">…</span>
+  </button>
+
+  <div class="cwPanel" id="cwPanel" hidden>
+    <div class="cwRow">
+      <div class="small">IP</div>
+      <div class="meta cwValue" id="ci-ip">—</div>
+    </div>
+    <div class="cwRow">
+      <div class="small">Plats</div>
+      <div class="meta cwValue" id="ci-location">—</div>
+    </div>
+    <div class="cwRow">
+      <div class="small">ISP/ASN</div>
+      <div class="meta cwValue" id="ci-isp">—</div>
+    </div>
+    <div class="cwRow">
+      <div class="small">Språk</div>
+      <div class="meta cwValue" id="ci-lang">—</div>
+    </div>
+    <div class="cwRow">
+      <div class="small">Tidzon</div>
+      <div class="meta cwValue" id="ci-tz">—</div>
+    </div>
+    <div class="cwRow">
+      <div class="small">Skärm</div>
+      <div class="meta cwValue" id="ci-screen">—</div>
+    </div>
+
+    <div class="cwHint small">
+      Visar teknisk information från webbläsaren + publik IP. Inget sparas.
+    </div>
+  </div>
+</aside>
 
 <script>
   document.getElementById("year").textContent = new Date().getFullYear();
@@ -399,12 +380,20 @@
 
   document.getElementById("ip-refresh").addEventListener("click", loadWhatsMyIp);
 
-  // Vad sidan ser om dig
-  async function loadClientInfo() {
-    const status = document.getElementById("client-status");
-    status.textContent = "laddar…";
+  // Corner widget: teknisk info (kompakt)
+  const cwToggle = document.getElementById("cwToggle");
+  const cwPanel = document.getElementById("cwPanel");
+  cwToggle.addEventListener("click", () => {
+    const expanded = cwToggle.getAttribute("aria-expanded") === "true";
+    cwToggle.setAttribute("aria-expanded", String(!expanded));
+    cwPanel.hidden = expanded;
+  });
 
-    const ua = navigator.userAgent || "—";
+  async function loadClientWidget() {
+    const statusMini = document.getElementById("client-status-mini");
+    statusMini.textContent = "…";
+
+    // Lokalt (alltid)
     const lang = navigator.language || (navigator.languages ? navigator.languages.join(", ") : "—");
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "—";
     const screenInfo = `${window.screen.width}×${window.screen.height} @ ${window.devicePixelRatio || 1}x`;
@@ -413,10 +402,7 @@
     document.getElementById("ci-tz").textContent = tz;
     document.getElementById("ci-screen").textContent = screenInfo;
 
-    // Visa UA rakt av (ingen gissning/parsning)
-    document.getElementById("ci-browser").textContent = ua;
-    document.getElementById("ci-os").textContent = ua;
-
+    // IP + ev. geo (kan blockeras)
     try {
       const ip = await fetchJson("https://api.ipify.org?format=json");
       document.getElementById("ci-ip").textContent = ip?.ip || "okänt";
@@ -426,24 +412,24 @@
         const loc = [info?.city, info?.region, info?.country_name].filter(Boolean).join(", ");
         document.getElementById("ci-location").textContent = loc || "—";
         document.getElementById("ci-isp").textContent = [info?.asn, info?.org].filter(Boolean).join(" · ") || "—";
+        statusMini.textContent = "ok";
       } catch {
         document.getElementById("ci-location").textContent = "Ej tillgängligt";
         document.getElementById("ci-isp").textContent = "Ej tillgängligt";
+        statusMini.textContent = "delvis";
       }
-
-      status.textContent = "ok";
     } catch {
       document.getElementById("ci-ip").textContent = "Ej tillgängligt";
       document.getElementById("ci-location").textContent = "Ej tillgängligt";
       document.getElementById("ci-isp").textContent = "Ej tillgängligt";
-      status.textContent = "delvis";
+      statusMini.textContent = "delvis";
     }
   }
 
   // initial load
   loadMini();
   loadWhatsMyIp();
-  loadClientInfo();
+  loadClientWidget();
 </script>
 </body>
 </html>
