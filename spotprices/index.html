@@ -1,3 +1,4 @@
+```html
 <!doctype html>
 <html lang="sv">
 <head>
@@ -69,6 +70,20 @@
       </div>
     </div>
 
+    <!-- NYTT: Graf för "från 14:00 och framåt" (byggs endast från history.json) -->
+    <div class="card">
+      <div class="row" style="justify-content:space-between;">
+        <div style="font-weight:700;">Från kl 14:00 och framåt</div>
+        <div class="small" id="summaryNote14">—</div>
+      </div>
+
+      <div style="margin-top:10px;" class="chartWrap">
+        <canvas id="chart14"></canvas>
+      </div>
+
+      <div id="summary14" style="margin-top:10px;"></div>
+    </div>
+
     <div class="card">
       <div class="row" style="justify-content:space-between;">
         <div style="font-weight:700;">Summering</div>
@@ -127,6 +142,12 @@
     return String(hh).padStart(2,"0") + ":" + String(mm).padStart(2,"0");
   }
 
+  function timeToIndex(timeStr, resolutionMinutes) {
+    // "14:00" -> index i points-arrayen
+    const [hh, mm] = timeStr.split(":").map(Number);
+    const rm = Number(resolutionMinutes) || 15;
+    return Math.floor((hh * 60 + mm) / rm);
+  }
 
   function getParam(name) {
     const u = new URL(location.href);
@@ -288,11 +309,13 @@
     return g;
   }
 
-  // "Now" vertical line for today's single-day view
+  // "Now" vertical line for today's single-day view (only on canvas id="chart")
   const nowLinePlugin = {
     id: "nowLine",
     afterDraw(chart) {
       if (state.tab !== "today") return;
+      if (chart?.canvas?.id !== "chart") return;
+
       const xScale = chart.scales.x;
       if (!xScale) return;
 
@@ -320,6 +343,7 @@
   Chart.register(nowLinePlugin);
 
   let chart = null;
+  let chart14 = null;
 
   function windowTimeTextSingleDay(dayKey, day, win) {
     if (!win) return "—";
@@ -379,6 +403,46 @@
     `;
   }
 
+  function renderSummaryTo(noteElId, summaryElId, { stats, win2h, win4h, win8h, infoText, timeText2h, timeText4h, timeText8h, noteText }) {
+    const dec = decimals();
+
+    el(noteElId).textContent = noteText;
+
+    const row = (label, win, hours, timeText) => {
+      if (!win) return `
+        <tr>
+          <td>${label}</td><td>—</td><td>—</td><td>Inget komplett ${hours}h-fönster</td>
+        </tr>`;
+      return `
+        <tr>
+          <td>${label}</td>
+          <td><b>${fmtNum(win.avg, dec)}</b> ${unitLabel()}</td>
+          <td>${timeText}</td>
+          <td>${state.fillGaps ? "Kan inkludera extrapolerade punkter" : "Endast rådata utan null"}</td>
+        </tr>`;
+    };
+
+    el(summaryElId).innerHTML = `
+      <div class="row">
+        <span class="pill">${infoText}</span>
+        <span class="pill">Medel: <b>${fmtNum(stats.avg, dec)}</b> ${unitLabel()}</span>
+        <span class="pill">Min: <b>${fmtNum(stats.min, dec)}</b></span>
+        <span class="pill">Max: <b>${fmtNum(stats.max, dec)}</b></span>
+        <span class="pill">Punkter: <b>${stats.count}</b></span>
+        ${state.fillGaps ? `<span class="pill">Extrapolering: <b>ON</b> (≤8)</span>` : `<span class="pill">Extrapolering: <b>OFF</b></span>`}
+      </div>
+
+      <table style="margin-top:10px;">
+        <thead><tr><th>Fönster</th><th>Medel</th><th>Tidsintervall</th><th>Not</th></tr></thead>
+        <tbody>
+          ${row("Billigaste 2h", win2h, 2, timeText2h)}
+          ${row("Billigaste 4h", win4h, 4, timeText4h)}
+          ${row("Billigaste 8h", win8h, 8, timeText8h)}
+        </tbody>
+      </table>
+    `;
+  }
+
   // Legend click: block toggling of the main price curve (men låt highlights 2h/4h/8h gå att slå av/på)
   function legendOnClick(e, legendItem, legend) {
     const chart = legend.chart;
@@ -386,7 +450,7 @@
     const ds = chart.data.datasets[idx];
     if (!ds) return;
 
-    // Main series = första datasetet (label = unitLabel())
+    // Main series = första datasetet
     if (idx === 0) return;
 
     // Toggle only for highlight + reference lines
@@ -624,9 +688,169 @@
     });
   }
 
+  // NYTT: rendera graf 14:00->framåt från history.json (idag 14:00 + imorgon om present>0)
+  function renderPublishWindowFromHistory() {
+    const ctx = el("chart14")?.getContext?.("2d");
+    if (!ctx) return;
+
+    const days = state.data?.days || {};
+    const todayKey = stockholmTodayIsoDate();
+    const tomorrowKey = addDays(todayKey, 1);
+
+    const today = days[todayKey];
+    const tomorrow = days[tomorrowKey];
+
+    if (!today || !Array.isArray(today.points)) {
+      if (chart14) chart14.destroy();
+      chart14 = null;
+      el("summaryNote14").textContent = "Saknar data för idag i history.json";
+      el("summary14").innerHTML = "";
+      return;
+    }
+
+    const rm = Number(today.resolutionMinutes) || 15;
+    const startIdx = timeToIndex("14:00", rm);
+
+    const labels = [];
+    const rawSeries = [];
+    const refs = [];
+
+    // idag från 14:00 ->
+    for (let i = startIdx; i < today.points.length; i++) {
+      const p = today.points[i];
+      labels.push(`${todayKey} ${p.time}`);
+      rawSeries.push((p && typeof p[state.metric] === "number") ? p[state.metric] : null);
+      refs.push({ dayKey: todayKey, time: p.time });
+    }
+
+    // imorgon om present>0
+    const hasTomorrow =
+      !!tomorrow &&
+      Array.isArray(tomorrow.points) &&
+      Number(tomorrow.present) > 0;
+
+    if (hasTomorrow) {
+      for (let i = 0; i < tomorrow.points.length; i++) {
+        const p = tomorrow.points[i];
+        labels.push(`${tomorrowKey} ${p.time}`);
+        rawSeries.push((p && typeof p[state.metric] === "number") ? p[state.metric] : null);
+        refs.push({ dayKey: tomorrowKey, time: p.time });
+      }
+    }
+
+    const series = state.fillGaps ? fillSmallGapsLinear(rawSeries, 8) : rawSeries;
+
+    const stats = computeStats(series);
+
+    const win2h = cheapestWindow(series, 8);
+    const win4h = cheapestWindow(series, 16);
+    const win8h = cheapestWindow(series, 32);
+
+    const hi2 = buildHighlightSeries(series, win2h);
+    const hi4 = buildHighlightSeries(series, win4h);
+    const hi8 = buildHighlightSeries(series, win8h);
+
+    const datasets = [
+      {
+        label: `${unitLabel()} (från 14:00)`,
+        data: series,
+        spanGaps: false,
+        pointRadius: 0,
+        borderWidth: 2,
+        tension: 0.2,
+        borderColor: lineGradientColor,
+        borderJoinStyle: "round",
+        borderCapStyle: "round"
+      }
+    ];
+
+    if (hi8) datasets.push({ label: "Billigaste 8h", data: hi8, pointRadius: 0, borderWidth: 6, tension: 0.2, borderColor: "rgba(255,255,255,0.40)" });
+    if (hi4) datasets.push({ label: "Billigaste 4h", data: hi4, pointRadius: 0, borderWidth: 5, tension: 0.2, borderColor: "rgba(120,220,255,0.85)" });
+    if (hi2) datasets.push({ label: "Billigaste 2h", data: hi2, pointRadius: 0, borderWidth: 6, tension: 0.2, borderColor: "rgba(255,215,120,0.95)" });
+
+    if (state.krLines) {
+      const y1 = sekKwhToMetricY(1);
+      const y2 = sekKwhToMetricY(2);
+      const y3 = sekKwhToMetricY(3);
+
+      const addH = (y, label) => {
+        if (typeof y !== "number" || Number.isNaN(y)) return;
+        datasets.push({
+          label,
+          data: labels.map(() => y),
+          pointRadius: 0,
+          borderWidth: 1,
+          borderDash: [4,4],
+          borderColor: "rgba(255,255,255,0.25)"
+        });
+      };
+
+      addH(y1, "≈ 1 kr/kWh");
+      addH(y2, "≈ 2 kr/kWh");
+      addH(y3, "≈ 3 kr/kWh");
+    }
+
+    const title = hasTomorrow
+      ? `Från ${todayKey} 14:00 → ${tomorrowKey} 23:45 (${unitLabel()})`
+      : `Från ${todayKey} 14:00 → ${todayKey} 23:45 (${unitLabel()})`;
+
+    if (chart14) chart14.destroy();
+    chart14 = new Chart(ctx, {
+      type: "line",
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+          legend: { display: true, onClick: legendOnClick },
+          title: { display: true, text: title },
+          tooltip: {
+            enabled: true,
+            callbacks: {
+              title: (items) => items?.[0]?.label || "",
+              label: (c) => {
+                const v = c.parsed?.y;
+                if (v === null || v === undefined || Number.isNaN(v)) return "—";
+                return `${c.dataset.label}: ${v.toFixed(decimals())}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } },
+          y: { title: { display: true, text: unitLabel() } }
+        }
+      }
+    });
+
+    const noteText = hasTomorrow
+      ? (state.fillGaps
+          ? "Inkluderar imorgon. Billigaste fönster kan använda extrapolerade punkter (≤8 null i rad)."
+          : "Inkluderar imorgon. Billigaste fönster kräver komplett fönster (inga null).")
+      : "Imorgon saknas i history.json (visar bara idag från 14:00).";
+
+    renderSummaryTo("summaryNote14", "summary14", {
+      stats,
+      win2h,
+      win4h,
+      win8h,
+      infoText: hasTomorrow
+        ? `Intervall: <b>${todayKey} 14:00</b> → <b>${tomorrowKey} 23:45</b>`
+        : `Intervall: <b>${todayKey} 14:00</b> → <b>${todayKey} 23:45</b>`,
+      timeText2h: windowTimeTextRange(refs, win2h),
+      timeText4h: windowTimeTextRange(refs, win4h),
+      timeText8h: windowTimeTextRange(refs, win8h),
+      noteText
+    });
+  }
+
   function render() {
     // Ensure day dropdown always populated
     if (!state.data?.days) return;
+
+    // NYTT: alltid rendera 14:00-grafen (den följer metric/fillGaps/krLines)
+    renderPublishWindowFromHistory();
 
     if (state.tab === "today") {
       state.selectedDate = stockholmTodayIsoDate();
@@ -750,6 +974,12 @@
       el("meta").innerHTML = `<div style="color:#ff9a9a;"><b>Fel:</b> ${e.message}</div>`;
       if (chart) chart.destroy();
       chart = null;
+
+      if (chart14) chart14.destroy();
+      chart14 = null;
+      el("summaryNote14").textContent = "";
+      el("summary14").innerHTML = "";
+
       el("summary").innerHTML = "";
     }
   }
@@ -799,3 +1029,4 @@
 </script>
 </body>
 </html>
+```
