@@ -1,3 +1,11 @@
+Ja, det går.
+
+Nedan är en komplett omskriven `index.html` där:
+
+1. **Graf “Från 14:00 och framåt” ligger under Summering-rutan** (som du ville).
+2. Om morgondagen saknas: **grafen visar ändå hela intervallet** (idag 14:00→23:45 + imorgon 00:00→23:45) men **imorgondagens punkter är `null`**.
+3. Det visas en **tydlig text i grafen** (Chart.js plugin) när morgondagen saknas: *“Morgondagens priser är ännu inte publicerade”*.
+
 ```html
 <!doctype html>
 <html lang="sv">
@@ -70,10 +78,18 @@
       </div>
     </div>
 
-    <!-- NYTT: Graf för "från 14:00 och framåt" (byggs endast från history.json) -->
     <div class="card">
       <div class="row" style="justify-content:space-between;">
-        <div style="font-weight:700;">Från kl 14:00 och framåt</div>
+        <div style="font-weight:700;">Summering</div>
+        <div class="small" id="summaryNote">Billigaste fönster kräver komplett fönster (inga null)</div>
+      </div>
+      <div id="summary" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- NYTT: Graf 2 + summering, UNDER huvud-summeringen -->
+    <div class="card">
+      <div class="row" style="justify-content:space-between;">
+        <div style="font-weight:700;">Från kl 14:00 och framåt (idag + imorgon)</div>
         <div class="small" id="summaryNote14">—</div>
       </div>
 
@@ -82,14 +98,6 @@
       </div>
 
       <div id="summary14" style="margin-top:10px;"></div>
-    </div>
-
-    <div class="card">
-      <div class="row" style="justify-content:space-between;">
-        <div style="font-weight:700;">Summering</div>
-        <div class="small" id="summaryNote">Billigaste fönster kräver komplett fönster (inga null)</div>
-      </div>
-      <div id="summary" style="margin-top:10px;"></div>
     </div>
 
     <div class="card small">
@@ -111,6 +119,9 @@
     fillGaps: false,
     krLines: false,
   };
+
+  // används av plugin för att skriva text i graf 2 när imorgon saknas
+  let publishWindowHasTomorrow = true;
 
   // ----- Time helpers -----
   function stockholmTodayIsoDate() {
@@ -143,7 +154,6 @@
   }
 
   function timeToIndex(timeStr, resolutionMinutes) {
-    // "14:00" -> index i points-arrayen
     const [hh, mm] = timeStr.split(":").map(Number);
     const rm = Number(resolutionMinutes) || 15;
     return Math.floor((hh * 60 + mm) / rm);
@@ -160,7 +170,6 @@
   }
 
   function decimals() {
-    // öre kan visas med 2, SEK/EUR med 4 för jämförelse
     return (state.metric === "oreKwh") ? 2 : 4;
   }
 
@@ -173,7 +182,6 @@
     }
   }
 
-  // Convert "1 SEK/kWh" reference lines into the currently selected unit.
   function sekKwhToMetricY(sekKwhValue) {
     if (typeof sekKwhValue !== "number") return null;
 
@@ -184,7 +192,6 @@
       const eursek = Number(state.data?.meta?.eursek);
       if (!eursek || Number.isNaN(eursek)) return null;
 
-      // 1 SEK/kWh = 1000 SEK/MWh
       const sekPerMwh = sekKwhValue * 1000.0;
       const eurPerMwh = sekPerMwh / eursek;
       return eurPerMwh;
@@ -205,7 +212,6 @@
     return { avg: sum / vals.length, min, max, count: vals.length };
   }
 
-  // Fill short gaps (internal only) with linear interpolation.
   function fillSmallGapsLinear(values, maxGap = 8) {
     const out = values.slice();
     let i = 0;
@@ -236,7 +242,6 @@
     return out;
   }
 
-  // ----- Data builders -----
   function buildDayLabels(day) {
     return day.points.map(p => p ? p.time : "");
   }
@@ -254,7 +259,7 @@
   function buildRangeLabelsAndSeries(keys) {
     const labels = [];
     const series = [];
-    const refs = []; // {dayKey,time}
+    const refs = [];
 
     for (const dayKey of keys) {
       const day = state.data.days[dayKey];
@@ -271,7 +276,6 @@
     return { labels, series, refs };
   }
 
-  // Cheapest continuous window over a series (no nulls in window).
   function cheapestWindow(series, slots) {
     let best = null;
     for (let i = 0; i <= series.length - slots; i++) {
@@ -296,20 +300,19 @@
     return out;
   }
 
-  // Rainbow-ish gradient for the main line (green -> blue -> red)
   function lineGradientColor(ctx) {
     const { chart } = ctx;
     const { ctx: c, chartArea } = chart;
     if (!chartArea) return "#9fd4ff";
 
     const g = c.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-    g.addColorStop(0.00, "#2ecc71"); // low
-    g.addColorStop(0.50, "#3498db"); // mid
-    g.addColorStop(1.00, "#e74c3c"); // high
+    g.addColorStop(0.00, "#2ecc71");
+    g.addColorStop(0.50, "#3498db");
+    g.addColorStop(1.00, "#e74c3c");
     return g;
   }
 
-  // "Now" vertical line for today's single-day view (only on canvas id="chart")
+  // "Now" vertical line (bara på canvas id="chart" och tab "today")
   const nowLinePlugin = {
     id: "nowLine",
     afterDraw(chart) {
@@ -319,7 +322,6 @@
       const xScale = chart.scales.x;
       if (!xScale) return;
 
-      // 15-min resolution => 4 points/hour
       const now = new Date();
       const hh = Number(new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Stockholm", hour: "2-digit" }).format(now));
       const mm = Number(new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Stockholm", minute: "2-digit" }).format(now));
@@ -340,7 +342,31 @@
     }
   };
 
-  Chart.register(nowLinePlugin);
+  // Text-overlay i graf 2 när imorgon saknas
+  const publishWindowNoticePlugin = {
+    id: "publishWindowNotice",
+    afterDraw(chart) {
+      if (chart?.canvas?.id !== "chart14") return;
+      if (publishWindowHasTomorrow) return;
+
+      const area = chart.chartArea;
+      if (!area) return;
+
+      const ctx = chart.ctx;
+      ctx.save();
+      ctx.font = "600 14px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      ctx.fillStyle = "rgba(255, 220, 220, 0.92)";
+      ctx.textAlign = "center";
+
+      const x = (area.left + area.right) / 2;
+      const y = area.top + 18;
+
+      ctx.fillText("Morgondagens priser är ännu inte publicerade", x, y);
+      ctx.restore();
+    }
+  };
+
+  Chart.register(nowLinePlugin, publishWindowNoticePlugin);
 
   let chart = null;
   let chart14 = null;
@@ -405,7 +431,6 @@
 
   function renderSummaryTo(noteElId, summaryElId, { stats, win2h, win4h, win8h, infoText, timeText2h, timeText4h, timeText8h, noteText }) {
     const dec = decimals();
-
     el(noteElId).textContent = noteText;
 
     const row = (label, win, hours, timeText) => {
@@ -443,17 +468,14 @@
     `;
   }
 
-  // Legend click: block toggling of the main price curve (men låt highlights 2h/4h/8h gå att slå av/på)
   function legendOnClick(e, legendItem, legend) {
     const chart = legend.chart;
     const idx = legendItem.datasetIndex;
     const ds = chart.data.datasets[idx];
     if (!ds) return;
 
-    // Main series = första datasetet
     if (idx === 0) return;
 
-    // Toggle only for highlight + reference lines
     const meta = chart.getDatasetMeta(idx);
     meta.hidden = meta.hidden === null ? !chart.data.datasets[idx].hidden : null;
     chart.update();
@@ -498,12 +520,10 @@
       }
     ];
 
-    // Highlight order: 8h -> 4h -> 2h (so 2h sits on top)
     if (hi8) datasets.push({ label: "Billigaste 8h", data: hi8, pointRadius: 0, borderWidth: 6, tension: 0.2, borderColor: "rgba(255,255,255,0.40)" });
     if (hi4) datasets.push({ label: "Billigaste 4h", data: hi4, pointRadius: 0, borderWidth: 5, tension: 0.2, borderColor: "rgba(120,220,255,0.85)" });
     if (hi2) datasets.push({ label: "Billigaste 2h", data: hi2, pointRadius: 0, borderWidth: 6, tension: 0.2, borderColor: "rgba(255,215,120,0.95)" });
 
-    // Reference lines 1/2/3 kr/kWh converted to current metric
     if (state.krLines) {
       const y1 = sekKwhToMetricY(1);
       const y2 = sekKwhToMetricY(2);
@@ -688,7 +708,8 @@
     });
   }
 
-  // NYTT: rendera graf 14:00->framåt från history.json (idag 14:00 + imorgon om present>0)
+  // NYTT: rendera graf 14:00->framåt från history.json.
+  // Om imorgon saknas: fyll ändå upp hela imorgon med null-värden så x-axeln blir komplett.
   function renderPublishWindowFromHistory() {
     const ctx = el("chart14")?.getContext?.("2d");
     if (!ctx) return;
@@ -703,12 +724,14 @@
     if (!today || !Array.isArray(today.points)) {
       if (chart14) chart14.destroy();
       chart14 = null;
+      publishWindowHasTomorrow = false;
       el("summaryNote14").textContent = "Saknar data för idag i history.json";
       el("summary14").innerHTML = "";
       return;
     }
 
     const rm = Number(today.resolutionMinutes) || 15;
+    const expectedSlotsPerDay = Math.floor((24 * 60) / rm);
     const startIdx = timeToIndex("14:00", rm);
 
     const labels = [];
@@ -716,26 +739,34 @@
     const refs = [];
 
     // idag från 14:00 ->
-    for (let i = startIdx; i < today.points.length; i++) {
+    for (let i = startIdx; i < expectedSlotsPerDay; i++) {
       const p = today.points[i];
-      labels.push(`${todayKey} ${p.time}`);
+      const t = slotToTime(i, rm);
+      labels.push(`${todayKey} ${t}`);
       rawSeries.push((p && typeof p[state.metric] === "number") ? p[state.metric] : null);
-      refs.push({ dayKey: todayKey, time: p.time });
+      refs.push({ dayKey: todayKey, time: t });
     }
 
-    // imorgon om present>0
+    // imorgon
     const hasTomorrow =
       !!tomorrow &&
       Array.isArray(tomorrow.points) &&
       Number(tomorrow.present) > 0;
 
-    if (hasTomorrow) {
-      for (let i = 0; i < tomorrow.points.length; i++) {
+    publishWindowHasTomorrow = hasTomorrow;
+
+    for (let i = 0; i < expectedSlotsPerDay; i++) {
+      const t = slotToTime(i, rm);
+      labels.push(`${tomorrowKey} ${t}`);
+
+      if (hasTomorrow) {
         const p = tomorrow.points[i];
-        labels.push(`${tomorrowKey} ${p.time}`);
         rawSeries.push((p && typeof p[state.metric] === "number") ? p[state.metric] : null);
-        refs.push({ dayKey: tomorrowKey, time: p.time });
+      } else {
+        rawSeries.push(null);
       }
+
+      refs.push({ dayKey: tomorrowKey, time: t });
     }
 
     const series = state.fillGaps ? fillSmallGapsLinear(rawSeries, 8) : rawSeries;
@@ -792,7 +823,7 @@
 
     const title = hasTomorrow
       ? `Från ${todayKey} 14:00 → ${tomorrowKey} 23:45 (${unitLabel()})`
-      : `Från ${todayKey} 14:00 → ${todayKey} 23:45 (${unitLabel()})`;
+      : `Från ${todayKey} 14:00 → ${tomorrowKey} 23:45 (${unitLabel()})`;
 
     if (chart14) chart14.destroy();
     chart14 = new Chart(ctx, {
@@ -828,16 +859,14 @@
       ? (state.fillGaps
           ? "Inkluderar imorgon. Billigaste fönster kan använda extrapolerade punkter (≤8 null i rad)."
           : "Inkluderar imorgon. Billigaste fönster kräver komplett fönster (inga null).")
-      : "Imorgon saknas i history.json (visar bara idag från 14:00).";
+      : "Imorgon saknas i history.json (timmar visas som tomma).";
 
     renderSummaryTo("summaryNote14", "summary14", {
       stats,
       win2h,
       win4h,
       win8h,
-      infoText: hasTomorrow
-        ? `Intervall: <b>${todayKey} 14:00</b> → <b>${tomorrowKey} 23:45</b>`
-        : `Intervall: <b>${todayKey} 14:00</b> → <b>${todayKey} 23:45</b>`,
+      infoText: `Intervall: <b>${todayKey} 14:00</b> → <b>${tomorrowKey} 23:45</b>`,
       timeText2h: windowTimeTextRange(refs, win2h),
       timeText4h: windowTimeTextRange(refs, win4h),
       timeText8h: windowTimeTextRange(refs, win8h),
@@ -846,10 +875,9 @@
   }
 
   function render() {
-    // Ensure day dropdown always populated
     if (!state.data?.days) return;
 
-    // NYTT: alltid rendera 14:00-grafen (den följer metric/fillGaps/krLines)
+    // alltid rendera 14:00-grafen (den följer metric/fillGaps/krLines)
     renderPublishWindowFromHistory();
 
     if (state.tab === "today") {
@@ -972,15 +1000,18 @@
       setTab("today");
     } catch (e) {
       el("meta").innerHTML = `<div style="color:#ff9a9a;"><b>Fel:</b> ${e.message}</div>`;
+
       if (chart) chart.destroy();
       chart = null;
 
       if (chart14) chart14.destroy();
       chart14 = null;
-      el("summaryNote14").textContent = "";
-      el("summary14").innerHTML = "";
+      publishWindowHasTomorrow = true;
 
       el("summary").innerHTML = "";
+      el("summaryNote").textContent = "";
+      el("summary14").innerHTML = "";
+      el("summaryNote14").textContent = "";
     }
   }
 
