@@ -318,11 +318,25 @@ import { attachCostExamples } from "./cost-examples.js";
   }
 
   // "Now" vertical line (bara på canvas id="chart" och tab "today")
+<!-- Ersätt din nowLinePlugin med denna (enda ändringen du behöver i index.html) -->
+<script type="module">
+import { attachCostExamples } from "./cost-examples.js";
+
+(() => {
+  // ... din befintliga kod ...
+
+  // ----- REPLACE: nowLinePlugin -----
   const nowLinePlugin = {
     id: "nowLine",
     afterDraw(chart) {
-      if (state.tab !== "today") return;
-      if (chart?.canvas?.id !== "chart") return;
+      // Rita "nu"-linje på båda graferna:
+      // - chart: bara när tab = today (som innan)
+      // - chart14: alltid (den visar alltid från idag 14:00 -> imorgon)
+      const isMain = chart?.canvas?.id === "chart";
+      const is14   = chart?.canvas?.id === "chart14";
+
+      if (!isMain && !is14) return;
+      if (isMain && state.tab !== "today") return; // behåll gamla beteendet för huvudgraf
 
       const xScale = chart.scales.x;
       if (!xScale) return;
@@ -330,9 +344,33 @@ import { attachCostExamples } from "./cost-examples.js";
       const now = new Date();
       const hh = Number(new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Stockholm", hour: "2-digit" }).format(now));
       const mm = Number(new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Stockholm", minute: "2-digit" }).format(now));
-      const slot = hh * 4 + Math.floor(mm / 15);
 
-      const x = xScale.getPixelForValue(slot);
+      // Vi antar 15-min upplösning i "nu"-visaren (som tidigare),
+      // men om history.json har annan upplösning: läs den från första dagens resolutionMinutes.
+      const rm =
+        Number(state.data?.days?.[stockholmTodayIsoDate()]?.resolutionMinutes) ||
+        Number(state.data?.meta?.resolutionMinutes) ||
+        15;
+
+      const slotsPerHour = Math.max(1, Math.round(60 / rm));
+      const slotNow = hh * slotsPerHour + Math.floor(mm / rm);
+
+      // Index i graf 2 börjar vid 14:00 idag (startIdx) och fortsätter med imorgon.
+      let xIndex = slotNow;
+
+      if (is14) {
+        const startIdx = Math.floor((14 * 60) / rm);
+        if (slotNow >= startIdx) {
+          // idag efter 14:00: 0..(slut av idag)
+          xIndex = slotNow - startIdx;
+        } else {
+          // före 14:00: linjen hamnar i "imorgon"-delen (eftersom grafen börjar 14:00)
+          const slotsPerDay = Math.floor((24 * 60) / rm);
+          xIndex = (slotsPerDay - startIdx) + slotNow;
+        }
+      }
+
+      const x = xScale.getPixelForValue(xIndex);
       if (!Number.isFinite(x)) return;
 
       const ctx = chart.ctx;
@@ -346,6 +384,7 @@ import { attachCostExamples } from "./cost-examples.js";
       ctx.restore();
     }
   };
+
 
   // Text-overlay i graf 2 när imorgon saknas
   const publishWindowNoticePlugin = {
