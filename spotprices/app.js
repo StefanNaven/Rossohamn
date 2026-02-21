@@ -664,169 +664,138 @@ import { attachCostExamples } from "./cost-examples.js";
 
   // rendera graf 14:00->framåt från history.json.
   // Om imorgon saknas: fyll ändå upp hela imorgon med null-värden så x-axeln blir komplett.
-  function renderPublishWindowFromHistory() {
-    const ctx = el("chart14")?.getContext?.("2d");
-    if (!ctx) return;
+function renderPublishWindowFromHistory() {
+  const ctx = el("chart14")?.getContext?.("2d");
+  if (!ctx) return;
 
-    const days = state.data?.days || {};
-    const todayKey = stockholmTodayIsoDate();
-    const tomorrowKey = addDays(todayKey, 1);
+  const days = state.data?.days || {};
+  const todayKey = stockholmTodayIsoDate();
+  const tomorrowKey = addDays(todayKey, 1);
 
-    const today = days[todayKey];
-    const tomorrow = days[tomorrowKey];
+  const today = days[todayKey];
+  const tomorrow = days[tomorrowKey];
 
-    if (!today || !Array.isArray(today.points)) {
-      if (chart14) chart14.destroy();
-      chart14 = null;
-      publishWindowHasTomorrow = true; // visa inte "imorgon saknas"-overlay om idag saknas helt
-      el("summaryNote14").textContent = "Saknar data för idag i history.json";
-      el("summary14").innerHTML = "";
-      return;
-    }
-
-    const rm = Number(today.resolutionMinutes) || 15;
-    const expectedSlotsPerDay = Math.floor((24 * 60) / rm);
-    const startIdx = timeToIndex("14:00", rm);
-
-    const labels = [];
-    const rawSeries = [];
-    const refs = [];
-
-    // idag från 14:00 ->
-    for (let i = startIdx; i < expectedSlotsPerDay; i++) {
-      const p = today.points[i];
-      const t = slotToTime(i, rm);
-      labels.push(`${todayKey} ${t}`);
-      rawSeries.push((p && typeof p[state.metric] === "number") ? p[state.metric] : null);
-      refs.push({ dayKey: todayKey, time: t });
-    }
-
-    // imorgon
-    const hasTomorrow =
-      !!tomorrow &&
-      Array.isArray(tomorrow.points) &&
-      Number(tomorrow.present) > 0;
-
-    publishWindowHasTomorrow = hasTomorrow;
-
-    for (let i = 0; i < expectedSlotsPerDay; i++) {
-      const t = slotToTime(i, rm);
-      labels.push(`${tomorrowKey} ${t}`);
-
-      if (hasTomorrow) {
-        const p = tomorrow.points[i];
-        rawSeries.push((p && typeof p[state.metric] === "number") ? p[state.metric] : null);
-      } else {
-        rawSeries.push(null);
-      }
-
-      refs.push({ dayKey: tomorrowKey, time: t });
-    }
-
-    const series = state.fillGaps ? fillSmallGapsLinear(rawSeries, 8) : rawSeries;
-
-    const stats = computeStats(series);
-
-    const win2h = cheapestWindow(series, 8);
-    const win4h = cheapestWindow(series, 16);
-    const win8h = cheapestWindow(series, 32);
-
-    const hi2 = buildHighlightSeries(series, win2h);
-    const hi4 = buildHighlightSeries(series, win4h);
-    const hi8 = buildHighlightSeries(series, win8h);
-
-    const datasets = [
-      {
-        label: `${unitLabel()} (från 14:00)`,
-        data: series,
-        spanGaps: false,
-        pointRadius: 0,
-        borderWidth: 2,
-        tension: 0.2,
-        borderColor: lineGradientColor,
-        borderJoinStyle: "round",
-        borderCapStyle: "round"
-      }
-    ];
-
-    if (hi8) datasets.push({ label: "Billigaste 8h", data: hi8, pointRadius: 0, borderWidth: 6, tension: 0.2, borderColor: "rgba(255,255,255,0.40)" });
-    if (hi4) datasets.push({ label: "Billigaste 4h", data: hi4, pointRadius: 0, borderWidth: 5, tension: 0.2, borderColor: "rgba(120,220,255,0.85)" });
-    if (hi2) datasets.push({ label: "Billigaste 2h", data: hi2, pointRadius: 0, borderWidth: 6, tension: 0.2, borderColor: "rgba(255,215,120,0.95)" });
-
-    if (state.krLines) {
-      const y1 = sekKwhToMetricY(1);
-      const y2 = sekKwhToMetricY(2);
-      const y3 = sekKwhToMetricY(3);
-
-      const addH = (y, label) => {
-        if (typeof y !== "number" || Number.isNaN(y)) return;
-        datasets.push({
-          label,
-          data: labels.map(() => y),
-          pointRadius: 0,
-          borderWidth: 1,
-          borderDash: [4,4],
-          borderColor: "rgba(255,255,255,0.25)"
-        });
-      };
-
-      addH(y1, "≈ 1 kr/kWh");
-      addH(y2, "≈ 2 kr/kWh");
-      addH(y3, "≈ 3 kr/kWh");
-    }
-
-    const title = `Från ${todayKey} 14:00 → ${tomorrowKey} 23:45 (${unitLabel()})`;
-
+  if (!today || !Array.isArray(today.points)) {
     if (chart14) chart14.destroy();
-    chart14 = new Chart(ctx, {
-      type: "line",
-      data: { labels, datasets },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: { mode: "index", intersect: false },
-        plugins: {
-          legend: { display: true, onClick: legendOnClick },
-          title: { display: true, text: title },
-          tooltip: {
-            enabled: true,
-            callbacks: {
-              title: (items) => items?.[0]?.label || "",
-              label: (c) => {
-                const v = c.parsed?.y;
-                if (v === null || v === undefined || Number.isNaN(v)) return "—";
-                return `${c.dataset.label}: ${v.toFixed(decimals())}`;
-              }
-            }
-          }
-        },
-        scales: {
-          x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } },
-          y: { title: { display: true, text: unitLabel() } }
-        }
-      }
-    });
-
-    bindCostClicksIfReady();
-
-    const noteText = hasTomorrow
-      ? (state.fillGaps
-          ? "Inkluderar imorgon. Billigaste fönster kan använda extrapolerade punkter (≤8 null i rad)."
-          : "Inkluderar imorgon. Billigaste fönster kräver komplett fönster (inga null).")
-      : "Imorgon saknas i history.json (timmar visas som tomma).";
-
-    renderSummaryTo("summaryNote14", "summary14", {
-      stats,
-      win2h,
-      win4h,
-      win8h,
-      infoText: `Intervall: <b>${todayKey} 14:00</b> → <b>${tomorrowKey} 23:45</b>`,
-      timeText2h: windowTimeTextRange(refs, win2h),
-      timeText4h: windowTimeTextRange(refs, win4h),
-      timeText8h: windowTimeTextRange(refs, win8h),
-      noteText
-    });
+    chart14 = null;
+    el("summaryNote14").textContent = "Saknar data för idag.";
+    el("summary14").innerHTML = "";
+    return;
   }
+
+  const rm = Number(today.resolutionMinutes) || 15;
+  const slotsPerDay = Math.floor((24 * 60) / rm);
+
+  // --- Nuvarande tid (Stockholm) ---
+  const now = new Date();
+  const hh = Number(new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Stockholm", hour: "2-digit" }).format(now));
+  const mm = Number(new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Stockholm", minute: "2-digit" }).format(now));
+
+  const slotNow = Math.floor((hh * 60 + mm) / rm);
+
+  const slotsBack = Math.floor((2 * 60) / rm);
+  const slotsForward = Math.floor((18 * 60) / rm);
+
+  const startAbs = slotNow - slotsBack;
+  const endAbs = slotNow + slotsForward;
+
+  const labels = [];
+  const rawSeries = [];
+  const refs = [];
+
+  for (let abs = startAbs; abs <= endAbs; abs++) {
+
+    let dayKey, dayObj, slotIndex;
+
+    if (abs < 0) {
+      // igår (stöds ej → null)
+      continue;
+    }
+    else if (abs < slotsPerDay) {
+      dayKey = todayKey;
+      dayObj = today;
+      slotIndex = abs;
+    }
+    else {
+      dayKey = tomorrowKey;
+      dayObj = tomorrow;
+      slotIndex = abs - slotsPerDay;
+    }
+
+    const t = slotToTime(slotIndex, rm);
+    labels.push(`${dayKey} ${t}`);
+
+    if (dayObj && Array.isArray(dayObj.points)) {
+      const p = dayObj.points[slotIndex];
+      rawSeries.push((p && typeof p[state.metric] === "number") ? p[state.metric] : null);
+    } else {
+      rawSeries.push(null);
+    }
+
+    refs.push({ dayKey, time: t });
+  }
+
+  const series = state.fillGaps ? fillSmallGapsLinear(rawSeries, 8) : rawSeries;
+  const stats = computeStats(series);
+
+  const win2h = cheapestWindow(series, Math.floor((2*60)/rm));
+  const win4h = cheapestWindow(series, Math.floor((4*60)/rm));
+  const win8h = cheapestWindow(series, Math.floor((8*60)/rm));
+
+  const hi2 = buildHighlightSeries(series, win2h);
+  const hi4 = buildHighlightSeries(series, win4h);
+  const hi8 = buildHighlightSeries(series, win8h);
+
+  const datasets = [{
+    label: `${unitLabel()} (nu -2h → +18h)`,
+    data: series,
+    spanGaps: false,
+    pointRadius: 0,
+    borderWidth: 2,
+    tension: 0.2,
+    borderColor: lineGradientColor
+  }];
+
+  if (hi8) datasets.push({ label: "Billigaste 8h", data: hi8, pointRadius: 0, borderWidth: 6 });
+  if (hi4) datasets.push({ label: "Billigaste 4h", data: hi4, pointRadius: 0, borderWidth: 5 });
+  if (hi2) datasets.push({ label: "Billigaste 2h", data: hi2, pointRadius: 0, borderWidth: 6 });
+
+  if (chart14) chart14.destroy();
+
+  chart14 = new Chart(ctx, {
+    type: "line",
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { display: true, onClick: legendOnClick },
+        title: {
+          display: true,
+          text: `Nu -2h → +18h (${unitLabel()})`
+        }
+      },
+      scales: {
+        x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } },
+        y: { title: { display: true, text: unitLabel() } }
+      }
+    }
+  });
+
+  renderSummaryTo("summaryNote14", "summary14", {
+    stats,
+    win2h,
+    win4h,
+    win8h,
+    infoText: "Rörligt fönster runt nuvarande tid",
+    timeText2h: windowTimeTextRange(refs, win2h),
+    timeText4h: windowTimeTextRange(refs, win4h),
+    timeText8h: windowTimeTextRange(refs, win8h),
+    noteText: "Saknade timmar visas som tomma."
+  });
+}
+
 
   function render() {
     if (!state.data?.days) return;
