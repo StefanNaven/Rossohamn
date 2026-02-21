@@ -15,6 +15,8 @@ import { attachCostExamples } from "./cost-examples.js";
 
   // används av plugin för att skriva text i graf 2 när imorgon saknas
   let publishWindowHasTomorrow = true;
+  
+  let chart14Window = null; // { rm, slotsPerDay, startAbsUsed, endAbsUsed }
 
   // Cost-examples hooks (modul)
   let costHookMain = null;
@@ -236,14 +238,17 @@ import { attachCostExamples } from "./cost-examples.js";
       let xIndex = slotNow;
 
       if (is14) {
-        const startIdx = Math.floor((14 * 60) / rm);
-        const slotsPerDay = Math.floor((24 * 60) / rm);
-
-        if (slotNow >= startIdx) {
-          xIndex = slotNow - startIdx;               // idag-delen
-        } else {
-          xIndex = (slotsPerDay - startIdx) + slotNow; // imorgon-delen (före 14:00)
-        }
+        if (!chart14Window) return;
+      
+        const { rm: rm14, slotsPerDay: spd, startAbsUsed, endAbsUsed } = chart14Window;
+      
+        const slotsPerHour14 = Math.max(1, Math.round(60 / rm14));
+        const slotNow14 = hh * slotsPerHour14 + Math.floor(mm / rm14);
+      
+        const absNow = slotNow14; // "idag" i chart14-fönstret (som rendern byggde)
+        if (absNow < startAbsUsed || absNow > endAbsUsed) return;
+      
+        xIndex = absNow - startAbsUsed;
       }
 
       const x = xScale.getPixelForValue(xIndex);
@@ -699,11 +704,15 @@ function renderPublishWindowFromHistory() {
   const startAbs = slotNow - slotsBack;
   const endAbs = slotNow + slotsForward;
 
+  const startAbsUsed = Math.max(startAbs, 0);
+  const endAbsUsed = endAbs;
+  chart14Window = { rm, slotsPerDay, startAbsUsed, endAbsUsed };
+
   const labels = [];
   const rawSeries = [];
   const refs = [];
 
-  for (let abs = startAbs; abs <= endAbs; abs++) {
+  for (let abs = startAbsUsed; abs <= endAbs; abs++) {
 
     let dayKey, dayObj, slotIndex;
 
@@ -756,9 +765,32 @@ function renderPublishWindowFromHistory() {
     borderColor: lineGradientColor
   }];
 
-  if (hi8) datasets.push({ label: "Billigaste 8h", data: hi8, pointRadius: 0, borderWidth: 6 });
-  if (hi4) datasets.push({ label: "Billigaste 4h", data: hi4, pointRadius: 0, borderWidth: 5 });
-  if (hi2) datasets.push({ label: "Billigaste 2h", data: hi2, pointRadius: 0, borderWidth: 6 });
+  if (hi8) datasets.push({
+    label: "Billigaste 8h",
+    data: hi8,
+    pointRadius: 0,
+    borderWidth: 6,
+    tension: 0.2,
+    borderColor: "rgba(255,255,255,0.40)"
+  });
+  
+  if (hi4) datasets.push({
+    label: "Billigaste 4h",
+    data: hi4,
+    pointRadius: 0,
+    borderWidth: 5,
+    tension: 0.2,
+    borderColor: "rgba(120,220,255,0.85)"
+  });
+  
+  if (hi2) datasets.push({
+    label: "Billigaste 2h",
+    data: hi2,
+    pointRadius: 0,
+    borderWidth: 6,
+    tension: 0.2,
+    borderColor: "rgba(255,215,120,0.95)"
+  });
 
   if (chart14) chart14.destroy();
 
