@@ -1,3 +1,8 @@
+// lib/series.js
+
+// ------------------------
+// Stats & windows
+// ------------------------
 export function computeStats(series) {
   const vals = series.filter(v => typeof v === "number");
   if (!vals.length) return { avg: null, min: null, max: null, count: 0 };
@@ -63,4 +68,90 @@ export function buildHighlightSeries(series, win) {
     out[i] = series[i];
   }
   return out;
+}
+
+// ------------------------
+// Labels & series builders
+// ------------------------
+
+/**
+ * Bygger labels för ett dygn från day.points[].time
+ */
+export function buildDayLabels(day) {
+  return (day?.points || []).map(p => p ? p.time : "");
+}
+
+/**
+ * Bygger series (värden) för ett dygn från day.points[] och vald metric
+ */
+export function buildDaySeries(day, metric) {
+  return (day?.points || []).map(p =>
+    (p && typeof p[metric] === "number") ? p[metric] : null
+  );
+}
+
+/**
+ * Returnerar senaste nDays datum-keys (YYYY-MM-DD) från days-objektet
+ */
+export function buildRangeKeys(daysObj, nDays) {
+  const keys = Object.keys(daysObj || {}).sort();
+  if (!keys.length) return [];
+  return keys.slice(-nDays);
+}
+
+/**
+ * Bygger labels + series + refs för ett datumintervall (keys)
+ * - labels: "MM-DD HH:MM"
+ * - series: värde eller null
+ * - refs: {dayKey, time} för windowTimeTextRange()
+ *
+ * slotToTimeFn(i, resolutionMinutes) måste ges in (kommer från app.js)
+ */
+export function buildRangeLabelsAndSeries(daysObj, keys, metric, slotToTimeFn) {
+  const labels = [];
+  const series = [];
+  const refs = [];
+
+  for (const dayKey of keys) {
+    const day = daysObj?.[dayKey];
+    if (!day?.points) continue;
+
+    for (let i = 0; i < day.points.length; i++) {
+      const p = day.points[i];
+      const t = slotToTimeFn(i, day.resolutionMinutes);
+      labels.push(`${dayKey.slice(5)} ${t}`);
+      series.push((p && typeof p[metric] === "number") ? p[metric] : null);
+      refs.push({ dayKey, time: t });
+    }
+  }
+
+  return { labels, series, refs };
+}
+
+// ------------------------
+// Window time text helpers
+// ------------------------
+
+/**
+ * Text för fönster inom ett dygn: "YYYY-MM-DD HH:MM → YYYY-MM-DD HH:MM"
+ * slotToTimeFn(startIdx, rm) måste ges in (kommer från app.js)
+ */
+export function windowTimeTextSingleDay(dayKey, day, win, slotToTimeFn) {
+  if (!win) return "—";
+  const rm = day?.resolutionMinutes ?? 15;
+  const start = slotToTimeFn(win.startIdx, rm);
+  const end = slotToTimeFn(win.endIdx, rm);
+  return `${dayKey} ${start} → ${dayKey} ${end}`;
+}
+
+/**
+ * Text för fönster i en labels/range-serie (refs-array):
+ * "YYYY-MM-DD HH:MM → YYYY-MM-DD HH:MM"
+ */
+export function windowTimeTextRange(refs, win) {
+  if (!win) return "—";
+  const a = refs?.[win.startIdx];
+  const b = refs?.[win.endIdx];
+  if (!a?.dayKey || !a?.time || !b?.dayKey || !b?.time) return "—";
+  return `${a.dayKey} ${a.time} → ${b.dayKey} ${b.time}`;
 }
