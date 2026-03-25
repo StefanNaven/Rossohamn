@@ -1,0 +1,62 @@
+.gc-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.gc-subtitle {
+  margin-top: 6px;
+  opacity: 0.85;
+}
+
+.gc-links {
+  margin-top: 12px;
+}
+
+.gc-links a {
+  text-decoration: none;
+}
+
+.gc-top-grid {
+  margin-top: 18px;
+}
+
+.gc-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.gc-status-tile,
+.gc-table-tile {
+  margin-top: 18px;
+}
+
+.gc-table-header {
+  margin-bottom: 12px;
+}
+
+.gc-table-wrap {
+  overflow-x: auto;
+}
+
+.gc-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.gc-table th,
+.gc-table td {
+  padding: 12px 10px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.gc-table th {
+  font-weight: 700;
+}
+
+.gc-message {
+  margin-top: 12px;
+  opacity: 0.85;
+}
