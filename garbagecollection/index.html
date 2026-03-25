@@ -1,1 +1,96 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rossohamn – Garbage Collection</title>
 
+  <link rel="stylesheet" href="../assets/home.css" />
+  <link rel="stylesheet" href="./garbage.css" />
+</head>
+<body>
+  <main class="gc-page">
+    <section class="hero">
+      <div class="row-space">
+        <div>
+          <h1>Garbage Collection</h1>
+          <p class="gc-subtitle">Sophämtning för Konrad Olssons väg 10</p>
+        </div>
+      </div>
+
+      <div class="gc-links">
+        <a
+          href="https://www.stromstad.se/byggaboochmiljo/avfallochatervinning/sophamtning.4.47f506a2157fa40ebf68316c.html?query=Konrad+Olssons+v%C3%A4g+10"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Källa: Strömstads kommun
+        </a>
+      </div>
+    </section>
+
+    <section class="grid grid3 gc-top-grid">
+      <article class="tile">
+        <div class="tile-title">Adress</div>
+        <div id="addressValue" class="gc-value">Laddar…</div>
+      </article>
+
+      <article class="tile">
+        <div class="tile-title">Nästa Matavfall</div>
+        <div id="matavfallValue" class="gc-value">Laddar…</div>
+      </article>
+
+      <article class="tile">
+        <div class="tile-title">Nästa Restavfall</div>
+        <div id="restavfallValue" class="gc-value">Laddar…</div>
+      </article>
+    </section>
+
+    <section class="tile gc-status-tile">
+      <div class="tile-title">Status</div>
+      <div class="kv">
+        <div class="kv-row">
+          <span>Källa som visas</span>
+          <strong id="sourceMode">Laddar…</strong>
+        </div>
+        <div class="kv-row">
+          <span>Senast uppdaterad</span>
+          <strong id="updatedAtValue">Laddar…</strong>
+        </div>
+        <div class="kv-row">
+          <span>Live-status</span>
+          <strong id="liveStatusValue">Laddar…</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="tile gc-table-tile">
+      <div class="row-space gc-table-header">
+        <div class="tile-title">Ordinarie hämtningsdag</div>
+      </div>
+
+      <div class="gc-table-wrap">
+        <table class="gc-table">
+          <thead>
+            <tr>
+              <th>Hämtadress</th>
+              <th>Vad hämtas</th>
+              <th>Vecka/dag</th>
+              <th>Distrikt</th>
+            </tr>
+          </thead>
+          <tbody id="pickupTableBody">
+            <tr>
+              <td colspan="4">Laddar…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p id="tableMessage" class="gc-message"></p>
+    </section>
+  </main>
+
+  <script src="./garbage.js"></script>
+</body>
+</html>
