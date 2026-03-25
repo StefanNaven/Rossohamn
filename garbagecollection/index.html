@@ -14,7 +14,7 @@
       <div class="row-space">
         <div>
           <h1>Garbage Collection</h1>
-          <p class="gc-subtitle">Sophämtning för Konrad Olssons väg 10</p>
+          <p class="gc-subtitle">Sophämtning för Höjden</p>
         </div>
       </div>
 
@@ -50,38 +50,36 @@
       <div class="tile-title">Status</div>
       <div class="kv">
         <div class="kv-row">
-          <span>Källa som visas</span>
-          <strong id="sourceMode">Laddar…</strong>
-        </div>
-        <div class="kv-row">
-          <span>Senast uppdaterad</span>
+          <span>Senast uppdaterad hämtning</span>
           <strong id="updatedAtValue">Laddar…</strong>
         </div>
         <div class="kv-row">
-          <span>Live-status</span>
-          <strong id="liveStatusValue">Laddar…</strong>
+          <span>Senast uppdaterad infotabell</span>
+          <strong id="tableUpdatedAtValue">Laddar…</strong>
+        </div>
+        <div class="kv-row">
+          <span>Datakälla</span>
+          <strong id="sourceMode">Laddar…</strong>
         </div>
       </div>
     </section>
 
     <section class="tile gc-table-tile">
       <div class="row-space gc-table-header">
-        <div class="tile-title">Ordinarie hämtningsdag</div>
+        <div class="tile-title">Avvikande hämtningsdagar</div>
       </div>
 
       <div class="gc-table-wrap">
         <table class="gc-table">
           <thead>
             <tr>
-              <th>Hämtadress</th>
-              <th>Vad hämtas</th>
-              <th>Vecka/dag</th>
-              <th>Distrikt</th>
+              <th>Ordinarie hämtningsdag</th>
+              <th>Hämtas</th>
             </tr>
           </thead>
           <tbody id="pickupTableBody">
             <tr>
-              <td colspan="4">Laddar…</td>
+              <td colspan="2">Laddar…</td>
             </tr>
           </tbody>
         </table>
@@ -91,6 +89,6 @@
     </section>
   </main>
 
-  <script src="./lib/garbage.js"></script>
+  <script src="./garbage.js"></script>
 </body>
 </html>
