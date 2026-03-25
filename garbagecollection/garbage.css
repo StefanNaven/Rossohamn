@@ -1,74 +1,126 @@
-.gc-page {
+/* Endast tillägg/specifikt för Garbage Collection.
+   Bygger vidare på assets/home.css i stället för att skriva över allt. */
+
+.gc-page{
   max-width: 1100px;
   margin: 0 auto;
   padding: 24px;
 }
 
-.gc-subtitle {
-  margin-top: 6px;
-  opacity: 0.85;
+.gc-subtitle{
+  margin: 10px 0 0;
+  color: #bdbdbd;
 }
 
-.gc-links {
-  margin-top: 12px;
+.gc-links{
+  margin-top: 14px;
 }
 
-.gc-links a {
+.gc-links a{
+  color: #9fd4ff;
   text-decoration: none;
 }
 
-.gc-top-grid {
-  margin-top: 18px;
+.gc-links a:hover{
+  text-decoration: underline;
 }
 
-.gc-value {
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin-top: 8px;
-  line-height: 1.3;
+.gc-top-grid{
+  margin-top: 14px;
+}
+
+.gc-value{
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: #fff;
+  min-height: 2.2em;
 }
 
 .gc-status-tile,
-.gc-table-tile {
-  margin-top: 18px;
+.gc-table-tile{
+  margin-top: 14px;
 }
 
-.gc-table-header {
-  margin-bottom: 12px;
+.gc-table-header{
+  margin-bottom: 10px;
 }
 
-.gc-table-wrap {
+.gc-table-wrap{
   overflow-x: auto;
+  border: 1px solid #2a2a2a;
+  border-radius: 14px;
+  background: #0f0f0f;
 }
 
-.gc-table {
+.gc-table{
   width: 100%;
   border-collapse: collapse;
+  color: #fff;
 }
 
 .gc-table th,
-.gc-table td {
-  padding: 12px 10px;
+.gc-table td{
   text-align: left;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 12px 14px;
 }
 
-.gc-table th {
+.gc-table thead th{
   font-weight: 700;
+  color: #fff;
+  border-bottom: 1px solid #2a2a2a;
+  background: rgba(255,255,255,.02);
 }
 
-.gc-message {
+.gc-table tbody td{
+  border-top: 1px solid #242424;
+  color: #ddd;
+}
+
+.gc-table tbody tr:hover td{
+  background: rgba(255,255,255,.02);
+}
+
+.gc-message{
   margin-top: 12px;
-  opacity: 0.85;
+  color: #bdbdbd;
 }
 
-.gc-badge {
+.gc-badge{
   display: inline-block;
   margin-left: 8px;
-  padding: 3px 8px;
+  padding: 4px 8px;
   border-radius: 999px;
-  font-size: 0.8rem;
+  font-size: .78rem;
   font-weight: 700;
+  color: #0f0f0f;
+  background: #9fd4ff;
   vertical-align: middle;
-  background: rgba(255, 255, 255, 0.12);
+}
+
+.gc-note{
+  margin-top: 10px;
+  color: #bdbdbd;
+  font-size: .95rem;
+}
+
+.gc-muted{
+  color: #bdbdbd;
+}
+
+@media (max-width: 900px){
+  .gc-value{
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 520px){
+  .gc-page{
+    padding: 16px;
+  }
+
+  .gc-table th,
+  .gc-table td{
+    padding: 10px 12px;
+  }
 }
