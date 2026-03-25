@@ -1,0 +1,21 @@
+{
+  "updatedAt": "2026-03-22 12:35",
+  "source": {
+    "provider": "stromstad.se",
+    "type": "general-info-table"
+  },
+  "rows": [
+    {
+      "ordinaryDay": "fredag 3 april",
+      "collectedDay": "skärtorsdag 2 april"
+    },
+    {
+      "ordinaryDay": "måndag 2 april",
+      "collectedDay": "tisdag 7 april"
+    },
+    {
+      "ordinaryDay": "tisdag 7 april",
+      "collectedDay": "tisdag 7 april eller onsdag 8 april"
+    }
+  ]
+}
