@@ -1,8 +1,8 @@
 const CONFIG = {
-  publishedJsonUrl: './data/latest.json',
+  latestJsonUrl: './data/latest.json',
+  garbageTableJsonUrl: './data/garbagetable.json',
   sourceUrl:
     'https://www.stromstad.se/byggaboochmiljo/avfallochatervinning/sophamtning.4.47f506a2157fa40ebf68316c.html?query=Konrad+Olssons+v%C3%A4g+10',
-  sourceContainerId: 'svid12_4bb4c22719afcbb65a037948',
   fallbackAddress: 'Konrad Olssons väg 10',
 };
 
@@ -10,46 +10,6 @@ function setText(id, value) {
   const el = document.getElementById(id);
   if (!el) return;
   el.textContent = value ?? '–';
-}
-
-function formatDate(dateStr) {
-  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr || '–';
-
-  const [year, month, day] = dateStr.split('-').map(Number);
-  const date = new Date(year, month - 1, day);
-
-  return date.toLocaleDateString('sv-SE', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-}
-
-function renderRows(rows) {
-  const tbody = document.getElementById('pickupTableBody');
-  if (!tbody) return;
-
-  if (!Array.isArray(rows) || rows.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="4">Ingen tabelldata tillgänglig.</td>
-      </tr>
-    `;
-    return;
-  }
-
-  tbody.innerHTML = rows
-    .map((row) => {
-      return `
-        <tr>
-          <td>${escapeHtml(row.address || '')}</td>
-          <td>${escapeHtml(row.type || '')}</td>
-          <td>${escapeHtml(row.date || '')}</td>
-          <td>${escapeHtml(row.district || '')}</td>
-        </tr>
-      `;
-    })
-    .join('');
 }
 
 function escapeHtml(value) {
@@ -61,120 +21,123 @@ function escapeHtml(value) {
     .replaceAll("'", '&#39;');
 }
 
-async function loadPublishedJson() {
-  const res = await fetch(CONFIG.publishedJsonUrl, { cache: 'no-store' });
+function parseIsoDate(dateStr) {
+  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null;
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function formatDate(dateStr) {
+  const date = parseIsoDate(dateStr);
+  if (!date) return dateStr || '–';
+
+  return date.toLocaleDateString('sv-SE', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
+function isTomorrow(dateStr) {
+  const date = parseIsoDate(dateStr);
+  if (!date) return false;
+
+  const tomorrow = new Date();
+  tomorrow.setHours(0, 0, 0, 0);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  return (
+    date.getFullYear() === tomorrow.getFullYear() &&
+    date.getMonth() === tomorrow.getMonth() &&
+    date.getDate() === tomorrow.getDate()
+  );
+}
+
+function renderDateValue(elementId, dateStr) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+
+  const formatted = formatDate(dateStr);
+
+  if (isTomorrow(dateStr)) {
+    el.innerHTML = `${escapeHtml(formatted)} <span class="gc-badge">I morgon</span>`;
+  } else {
+    el.textContent = formatted;
+  }
+}
+
+async function loadJson(url) {
+  const res = await fetch(url, { cache: 'no-store' });
   if (!res.ok) {
-    throw new Error(`latest.json HTTP ${res.status}`);
+    throw new Error(`HTTP ${res.status} for ${url}`);
   }
   return await res.json();
 }
 
-function renderPublishedData(data) {
+function renderLatest(data) {
   setText('addressValue', data.address || CONFIG.fallbackAddress);
-  setText('matavfallValue', formatDate(data.matavfall));
-  setText('restavfallValue', formatDate(data.restavfall));
   setText('updatedAtValue', data.updatedAt || '–');
+
+  renderDateValue('matavfallValue', data.matavfall);
+  renderDateValue('restavfallValue', data.restavfall);
 }
 
-function parseLiveTableFromHtml(html) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
+function renderTable(rows) {
+  const tbody = document.getElementById('pickupTableBody');
+  if (!tbody) return;
 
-  const container = doc.getElementById(CONFIG.sourceContainerId);
-  if (!container) {
-    throw new Error(`Div saknas: ${CONFIG.sourceContainerId}`);
+  if (!Array.isArray(rows) || rows.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="2">Ingen infotabell tillgänglig.</td>
+      </tr>
+    `;
+    return;
   }
 
-  const table = container.querySelector('table');
-  if (!table) {
-    throw new Error('Tabell saknas i source-div');
-  }
-
-  const bodyRows = table.querySelectorAll('tbody tr');
-  const rows = Array.from(bodyRows).map((tr) => {
-    const cells = tr.querySelectorAll('td, th');
-
-    return {
-      address: cells[0]?.textContent.trim() || '',
-      type: cells[1]?.textContent.trim() || '',
-      date: cells[2]?.textContent.trim() || '',
-      district: cells[3]?.textContent.trim() || '',
-    };
-  });
-
-  return rows.filter((row) => row.address || row.type || row.date || row.district);
-}
-
-async function loadLiveRows() {
-  const res = await fetch(CONFIG.sourceUrl, { cache: 'no-store' });
-  if (!res.ok) {
-    throw new Error(`Källsidan svarade med HTTP ${res.status}`);
-  }
-
-  const html = await res.text();
-  return parseLiveTableFromHtml(html);
-}
-
-function buildRowsFromPublished(data) {
-  const rows = [];
-
-  if (data.matavfall) {
-    rows.push({
-      address: data.address || CONFIG.fallbackAddress,
-      type: 'Matavfall',
-      date: data.matavfall,
-      district: '',
-    });
-  }
-
-  if (data.restavfall) {
-    rows.push({
-      address: data.address || CONFIG.fallbackAddress,
-      type: 'Restavfall',
-      date: data.restavfall,
-      district: '',
-    });
-  }
-
-  return rows;
+  tbody.innerHTML = rows
+    .map((row) => `
+      <tr>
+        <td>${escapeHtml(row.ordinaryDay || '')}</td>
+        <td>${escapeHtml(row.collectedDay || '')}</td>
+      </tr>
+    `)
+    .join('');
 }
 
 async function init() {
-  let publishedData = null;
+  let latestOk = false;
+  let tableOk = false;
 
   try {
-    publishedData = await loadPublishedJson();
-    renderPublishedData(publishedData);
-    setText('sourceMode', 'Publicerad JSON');
+    const latest = await loadJson(CONFIG.latestJsonUrl);
+    renderLatest(latest);
+    latestOk = true;
   } catch (error) {
     setText('addressValue', CONFIG.fallbackAddress);
-    setText('matavfallValue', '–');
-    setText('restavfallValue', '–');
     setText('updatedAtValue', '–');
-    setText('sourceMode', 'Ingen JSON-data');
+    setText('matavfallValue', 'Kunde inte läsa');
+    setText('restavfallValue', 'Kunde inte läsa');
   }
 
   try {
-    const liveRows = await loadLiveRows();
-    renderRows(liveRows);
-    setText('liveStatusValue', 'OK');
-    setText('tableMessage', 'Live-tabell läst direkt från Strömstads kommun.');
+    const tableData = await loadJson(CONFIG.garbageTableJsonUrl);
+    renderTable(tableData.rows || []);
+    setText('tableUpdatedAtValue', tableData.updatedAt || '–');
+    setText('tableMessage', 'Visar publicerad infotabell.');
+    tableOk = true;
   } catch (error) {
-    setText('liveStatusValue', 'Misslyckades');
+    renderTable([]);
+    setText('tableUpdatedAtValue', '–');
+    setText('tableMessage', 'Kunde inte läsa garbagetable.json.');
+  }
 
-    if (publishedData) {
-      renderRows(buildRowsFromPublished(publishedData));
-      setText(
-        'tableMessage',
-        'Live-läsning misslyckades. Tabellen visas från publicerad JSON i stället.'
-      );
-    } else {
-      renderRows([]);
-      setText(
-        'tableMessage',
-        'Live-läsning misslyckades och ingen publicerad JSON kunde läsas.'
-      );
-    }
+  if (latestOk && tableOk) {
+    setText('sourceMode', 'GitHub JSON');
+  } else if (latestOk || tableOk) {
+    setText('sourceMode', 'Delvis tillgänglig');
+  } else {
+    setText('sourceMode', 'Ingen data tillgänglig');
   }
 }
 
