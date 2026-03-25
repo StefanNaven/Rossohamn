@@ -1,8 +1,8 @@
 {
-  "address": "Konrad Olssons väg 10",
-  "restavfall": "2026-03-22",
-  "matavfall": "2026-03-22",
-  "updatedAt": "2026-03-22 10:15",
+  "address": "Höjden",
+  "restavfall": "2026-03-25",
+  "matavfall": "2026-03-25",
+  "updatedAt": "2026-03-25 11:23",
   "source": {
     "provider": "homey"
   }
