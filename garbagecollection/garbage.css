@@ -1,15 +1,75 @@
-/* Endast tillägg/specifikt för Garbage Collection.
-   Bygger vidare på assets/home.css i stället för att skriva över allt. */
+/* garbage.css
+   Bygger vidare på assets/home.css
+   och justerar bara det som behövs för Garbage Collection.
+*/
+
+:root{
+  --gc-page-max: 1100px;
+  --gc-bg: #0b0f14;
+  --gc-surface: #10161d;
+  --gc-surface-2: #0f141a;
+  --gc-border: #25303b;
+  --gc-border-soft: #1d2630;
+  --gc-text: #edf3f8;
+  --gc-muted: #aab7c4;
+  --gc-accent: #9fd4ff;
+  --gc-accent-2: #77bce9;
+  --gc-good-bg: rgba(159,212,255,.14);
+  --gc-good-border: rgba(159,212,255,.28);
+}
+
+html, body{
+  background: radial-gradient(1200px 500px at 20% -10%, rgba(159,212,255,.08), transparent 55%),
+              radial-gradient(900px 400px at 100% 0%, rgba(255,190,120,.06), transparent 45%),
+              var(--gc-bg);
+  color: var(--gc-text);
+}
 
 .gc-page{
-  max-width: 1100px;
+  max-width: var(--gc-page-max);
   margin: 0 auto;
   padding: 24px;
 }
 
+.gc-page,
+.gc-page p,
+.gc-page span,
+.gc-page div,
+.gc-page td,
+.gc-page th,
+.gc-page strong,
+.gc-page h1,
+.gc-page h2,
+.gc-page h3{
+  color: var(--gc-text);
+}
+
+.gc-page a{
+  color: var(--gc-accent);
+}
+
+.hero{
+  margin-bottom: 12px;
+}
+
+.hero.tile{
+  border-color: var(--gc-border);
+  background:
+    linear-gradient(180deg, rgba(18,24,31,1), rgba(12,16,22,1));
+  padding: 20px 20px 18px;
+}
+
+.hero h1{
+  margin: 0;
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  line-height: 1.05;
+  letter-spacing: -.02em;
+}
+
 .gc-subtitle{
   margin: 10px 0 0;
-  color: #bdbdbd;
+  color: var(--gc-muted);
+  font-size: 1.02rem;
 }
 
 .gc-links{
@@ -17,7 +77,6 @@
 }
 
 .gc-links a{
-  color: #9fd4ff;
   text-decoration: none;
 }
 
@@ -26,64 +85,103 @@
 }
 
 .gc-top-grid{
-  margin-top: 14px;
+  margin-top: 0;
+}
+
+.tile{
+  border-color: var(--gc-border);
+  background:
+    linear-gradient(180deg, rgba(16,22,29,1), rgba(11,15,20,1));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.02);
+}
+
+.tile-title{
+  color: var(--gc-muted);
+  font-size: .88rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
 }
 
 .gc-value{
-  font-size: 1.9rem;
+  font-size: clamp(1.5rem, 2.2vw, 2rem);
   font-weight: 800;
   line-height: 1.15;
   color: #fff;
-  min-height: 2.2em;
+  min-height: 2.3em;
 }
 
 .gc-status-tile,
 .gc-table-tile{
-  margin-top: 14px;
+  margin-top: 12px;
+}
+
+.kv{
+  margin-top: 4px;
+}
+
+.kv-row{
+  border-top-color: var(--gc-border-soft);
+  padding-top: 10px;
+}
+
+.kv-row span{
+  color: var(--gc-muted);
+}
+
+.kv-row strong{
+  color: #fff;
+  text-align: right;
 }
 
 .gc-table-header{
   margin-bottom: 10px;
 }
 
+.gc-note{
+  margin: 0 0 12px;
+  color: var(--gc-muted);
+}
+
 .gc-table-wrap{
   overflow-x: auto;
-  border: 1px solid #2a2a2a;
+  border: 1px solid var(--gc-border);
   border-radius: 14px;
-  background: #0f0f0f;
+  background: var(--gc-surface-2);
 }
 
 .gc-table{
   width: 100%;
   border-collapse: collapse;
-  color: #fff;
-}
-
-.gc-table th,
-.gc-table td{
-  text-align: left;
-  padding: 12px 14px;
+  background: transparent;
 }
 
 .gc-table thead th{
+  padding: 12px 14px;
+  text-align: left;
   font-weight: 700;
   color: #fff;
-  border-bottom: 1px solid #2a2a2a;
-  background: rgba(255,255,255,.02);
+  background: rgba(159,212,255,.08);
+  border-bottom: 1px solid var(--gc-border);
 }
 
 .gc-table tbody td{
-  border-top: 1px solid #242424;
-  color: #ddd;
+  padding: 12px 14px;
+  text-align: left;
+  color: #dfe7ee;
+  border-top: 1px solid var(--gc-border-soft);
+}
+
+.gc-table tbody tr:nth-child(even) td{
+  background: rgba(255,255,255,.01);
 }
 
 .gc-table tbody tr:hover td{
-  background: rgba(255,255,255,.02);
+  background: rgba(159,212,255,.04);
 }
 
 .gc-message{
   margin-top: 12px;
-  color: #bdbdbd;
+  color: var(--gc-muted);
 }
 
 .gc-badge{
@@ -91,26 +189,17 @@
   margin-left: 8px;
   padding: 4px 8px;
   border-radius: 999px;
+  border: 1px solid var(--gc-good-border);
+  background: var(--gc-good-bg);
+  color: #dff3ff;
   font-size: .78rem;
   font-weight: 700;
-  color: #0f0f0f;
-  background: #9fd4ff;
   vertical-align: middle;
-}
-
-.gc-note{
-  margin-top: 10px;
-  color: #bdbdbd;
-  font-size: .95rem;
-}
-
-.gc-muted{
-  color: #bdbdbd;
 }
 
 @media (max-width: 900px){
   .gc-value{
-    font-size: 1.6rem;
+    font-size: 1.5rem;
   }
 }
 
@@ -119,8 +208,13 @@
     padding: 16px;
   }
 
-  .gc-table th,
-  .gc-table td{
+  .hero.tile,
+  .tile{
+    padding: 14px;
+  }
+
+  .gc-table thead th,
+  .gc-table tbody td{
     padding: 10px 12px;
   }
 }
