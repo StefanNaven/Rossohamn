@@ -249,6 +249,7 @@
 <script>
   document.getElementById("year").textContent = new Date().getFullYear();
   const DATA_URL = "/spotprices/history.json";
+  const GARBAGE_URL = "/garbagecollection/data/latest.json";
 
   function todayKeyStockholm() {
     const parts = new Intl.DateTimeFormat("sv-SE", {
@@ -336,6 +337,60 @@
     const r = await fetch(url, { cache: "no-store" });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     return await r.json();
+  }
+
+  function formatSvShortDate(value) {
+    if (!value) return "—";
+    const d = new Date(value);
+    if (isNaN(d)) return String(value);
+    return d.toLocaleDateString("sv-SE", {
+      weekday: "short",
+      day: "numeric",
+      month: "short"
+    });
+  }
+
+  function firstDefined(...values) {
+    return values.find(v => v !== undefined && v !== null && v !== "");
+  }
+
+  // Garbage collection tile
+  async function loadGarbageTile() {
+    const restEl = document.getElementById("gcRest");
+    const foodEl = document.getElementById("gcFood");
+    if (!restEl || !foodEl) return;
+
+    restEl.textContent = "Restavfall: laddar…";
+    foodEl.textContent = "Matavfall: laddar…";
+
+    try {
+      const j = await fetchJson(GARBAGE_URL);
+
+      const rest = firstDefined(
+        j?.nextRest,
+        j?.rest,
+        j?.restWaste,
+        j?.nextRestPickup,
+        j?.restDate,
+        j?.data?.nextRest
+      );
+
+      const food = firstDefined(
+        j?.nextFood,
+        j?.food,
+        j?.foodWaste,
+        j?.nextFoodPickup,
+        j?.foodDate,
+        j?.data?.nextFood
+      );
+
+      restEl.textContent = `Restavfall: ${formatSvShortDate(rest)}`;
+      foodEl.textContent = `Matavfall: ${formatSvShortDate(food)}`;
+    } catch (e) {
+      restEl.textContent = "Sophämtning: fel";
+      foodEl.textContent = "";
+      console.error("Garbage fetch failed:", e);
+    }
   }
 
   // What's my IP
@@ -428,6 +483,7 @@
 
   // initial load
   loadMini();
+  loadGarbageTile();
   loadWhatsMyIp();
   loadClientWidget();
 </script>
