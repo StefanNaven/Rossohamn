@@ -173,3 +173,16 @@
 
 /* Utility */
 .row-space{ justify-content:space-between; }
+
+#garbageTile div{
+  font-size: .95rem;
+  color:#bbb;
+}
+
+#garbageTile div:first-of-type{
+  margin-top:6px;
+}
+
+#garbageTile:hover{
+  border-color:#9fd4ff;
+}
