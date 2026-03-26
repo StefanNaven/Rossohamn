@@ -1,27 +1,25 @@
 /* garbage.css
    Bygger vidare på assets/home.css
-   och justerar bara det som behövs för Garbage Collection.
+   och håller sig så nära huvudsidans uttryck som möjligt.
 */
 
 :root{
   --gc-page-max: 1100px;
+
+  /* Mer lika huvudsidan */
   --gc-bg: #0b0f14;
-  --gc-surface: #10161d;
-  --gc-surface-2: #0f141a;
-  --gc-border: #25303b;
-  --gc-border-soft: #1d2630;
+  --gc-border: #2a2a2a;
+  --gc-border-soft: #242424;
   --gc-text: #edf3f8;
-  --gc-muted: #aab7c4;
+  --gc-muted: #b7b7b7;
   --gc-accent: #9fd4ff;
-  --gc-accent-2: #77bce9;
+
   --gc-good-bg: rgba(159,212,255,.14);
   --gc-good-border: rgba(159,212,255,.28);
 }
 
 html, body{
-  background: radial-gradient(1200px 500px at 20% -10%, rgba(159,212,255,.08), transparent 55%),
-              radial-gradient(900px 400px at 100% 0%, rgba(255,190,120,.06), transparent 45%),
-              var(--gc-bg);
+  background: var(--gc-bg);
   color: var(--gc-text);
 }
 
@@ -52,10 +50,10 @@ html, body{
   margin-bottom: 12px;
 }
 
+/* Låt hero följa huvudsidans tile-stil mycket närmare */
 .hero.tile{
   border-color: var(--gc-border);
-  background:
-    linear-gradient(180deg, rgba(18,24,31,1), rgba(12,16,22,1));
+  background: linear-gradient(180deg, rgba(16,16,16,1), rgba(12,12,12,1));
   padding: 20px 20px 18px;
 }
 
@@ -88,11 +86,15 @@ html, body{
   margin-top: 0;
 }
 
+/* Samma grundkänsla som på huvudsidan */
 .tile{
   border-color: var(--gc-border);
-  background:
-    linear-gradient(180deg, rgba(16,22,29,1), rgba(11,15,20,1));
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.02);
+  background: linear-gradient(180deg, rgba(16,16,16,1), rgba(12,12,12,1));
+}
+
+.tile:hover{
+  border-color: #6b6b6b;
+  background: linear-gradient(180deg, rgba(20,20,20,1), rgba(12,12,12,1));
 }
 
 .tile-title{
@@ -116,12 +118,12 @@ html, body{
 }
 
 .kv{
-  margin-top: 4px;
+  margin-top: 10px;
 }
 
 .kv-row{
   border-top-color: var(--gc-border-soft);
-  padding-top: 10px;
+  padding-top: 8px;
 }
 
 .kv-row span{
@@ -142,11 +144,12 @@ html, body{
   color: var(--gc-muted);
 }
 
+/* Tabellen får vara specialanpassad, men fortfarande i samma stilfamilj */
 .gc-table-wrap{
   overflow-x: auto;
   border: 1px solid var(--gc-border);
   border-radius: 14px;
-  background: var(--gc-surface-2);
+  background: #0f0f0f;
 }
 
 .gc-table{
@@ -160,7 +163,7 @@ html, body{
   text-align: left;
   font-weight: 700;
   color: #fff;
-  background: rgba(159,212,255,.08);
+  background: rgba(255,255,255,.03);
   border-bottom: 1px solid var(--gc-border);
 }
 
@@ -176,7 +179,7 @@ html, body{
 }
 
 .gc-table tbody tr:hover td{
-  background: rgba(159,212,255,.04);
+  background: rgba(255,255,255,.03);
 }
 
 .gc-message{
