@@ -367,23 +367,12 @@
     try {
       const j = await fetchJson(GARBAGE_URL);
 
-      const rest = firstDefined(
-        j?.nextRest,
-        j?.rest,
-        j?.restWaste,
-        j?.nextRestPickup,
-        j?.restDate,
-        j?.data?.nextRest
-      );
+      const rest = j?.restavfall;
+      const food = j?.matavfall;
 
-      const food = firstDefined(
-        j?.nextFood,
-        j?.food,
-        j?.foodWaste,
-        j?.nextFoodPickup,
-        j?.foodDate,
-        j?.data?.nextFood
-      );
+      if (!j?.restavfall || !j?.matavfall) {
+        throw new Error("Ogiltig garbage JSON");
+      }
 
       restEl.textContent = `Restavfall: ${formatSvShortDate(rest)}`;
       foodEl.textContent = `Matavfall: ${formatSvShortDate(food)}`;
