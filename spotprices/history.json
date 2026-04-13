@@ -5,11 +5,11 @@
     "timeZone": "Europe/Stockholm",
     "eursek": 10.836,
     "eursekDate": "2026-04-10",
-    "updatedAt": "2026-04-12T11:30:07.352Z",
+    "updatedAt": "2026-04-13T09:00:23.750Z",
     "includesTransferFee": false,
     "request": {
-      "periodStart": "202604100800",
-      "periodEnd": "202604151400"
+      "periodStart": "202604110600",
+      "periodEnd": "202604161200"
     }
   },
   "days": {
@@ -21768,8 +21768,8 @@
       "expected": 96,
       "resolutionMinutes": 15,
       "series": {
-        "idx": 1,
-        "mRID": "2",
+        "idx": 0,
+        "mRID": "1",
         "currency": "EUR",
         "unit": "MWH",
         "seriesStartUtc": "2026-04-10T22:00:00.000Z",
@@ -22443,8 +22443,8 @@
       "expected": 96,
       "resolutionMinutes": 15,
       "series": {
-        "idx": 2,
-        "mRID": "3",
+        "idx": 1,
+        "mRID": "2",
         "currency": "EUR",
         "unit": "MWH",
         "seriesStartUtc": "2026-04-11T22:00:00.000Z",
@@ -23130,8 +23130,8 @@
       "expected": 96,
       "resolutionMinutes": 15,
       "series": {
-        "idx": 3,
-        "mRID": "4",
+        "idx": 2,
+        "mRID": "3",
         "currency": "EUR",
         "unit": "MWH",
         "seriesStartUtc": "2026-04-12T22:00:00.000Z",
