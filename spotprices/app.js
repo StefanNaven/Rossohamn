@@ -271,6 +271,7 @@ import {
     const labels = buildDayLabels(day);
     const rawSeries = buildDaySeries(day, state.metric);
     const series = state.fillGaps ? fillSmallGapsLinear(rawSeries, 8) : rawSeries;
+    const chartMode = getEffectiveChartMode("singleDay");
 
     const stats = computeStats(series);
 
@@ -285,22 +286,44 @@ import {
     const hi8 = buildHighlightSeries(series, win8h);
 
     const datasets = [
-      {
-        label: unitLabel(),
-        data: series,
-        spanGaps: false,
-        pointRadius: 0,
-        borderWidth: 2,
-        tension: 0.2,
-        borderColor: lineGradientColor,
-        borderJoinStyle: "round",
-        borderCapStyle: "round"
-      }
+      chartMode === "bar"
+        ? {
+            type: "bar",
+            label: unitLabel(),
+            data: series,
+            backgroundColor: series.map(v =>
+              v === null || v === undefined || Number.isNaN(v)
+                ? "rgba(0,0,0,0)"
+                : "rgba(120, 190, 255, 0.65)"
+            ),
+            borderColor: series.map(v =>
+              v === null || v === undefined || Number.isNaN(v)
+                ? "rgba(0,0,0,0)"
+                : "rgba(120, 190, 255, 0.95)"
+            ),
+            borderWidth: 1,
+            barPercentage: 1.0,
+            categoryPercentage: 1.0
+          }
+        : {
+            type: "line",
+            label: unitLabel(),
+            data: series,
+            spanGaps: false,
+            pointRadius: 0,
+            borderWidth: 2,
+            tension: 0.2,
+            borderColor: lineGradientColor,
+            borderJoinStyle: "round",
+            borderCapStyle: "round"
+          }
     ];
 
-    if (hi8) datasets.push({ label: "Billigaste 8h", data: hi8, pointRadius: 0, borderWidth: 6, tension: 0.2, borderColor: "rgba(255,255,255,0.40)" });
-    if (hi4) datasets.push({ label: "Billigaste 4h", data: hi4, pointRadius: 0, borderWidth: 5, tension: 0.2, borderColor: "rgba(120,220,255,0.85)" });
-    if (hi2) datasets.push({ label: "Billigaste 2h", data: hi2, pointRadius: 0, borderWidth: 6, tension: 0.2, borderColor: "rgba(255,215,120,0.95)" });
+    if (chartMode === "line") {
+      if (hi8) datasets.push({ type: "line", label: "Billigaste 8h", data: hi8, pointRadius: 0, borderWidth: 6, tension: 0.2, borderColor: "rgba(255,255,255,0.40)" });
+      if (hi4) datasets.push({ type: "line", label: "Billigaste 4h", data: hi4, pointRadius: 0, borderWidth: 5, tension: 0.2, borderColor: "rgba(120,220,255,0.85)" });
+      if (hi2) datasets.push({ type: "line", label: "Billigaste 2h", data: hi2, pointRadius: 0, borderWidth: 6, tension: 0.2, borderColor: "rgba(255,215,120,0.95)" });
+    }
 
     if (state.krLines) {
       const y1 = sekKwhToMetricY(1);
@@ -329,7 +352,7 @@ import {
 
     if (chart) chart.destroy();
     chart = new Chart(ctx, {
-      type: "line",
+      type: chartMode,
       data: { labels, datasets },
       options: {
         responsive: true,
