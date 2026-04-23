@@ -46,7 +46,14 @@
           <option value="sekKwh">SEK/kWh</option>
           <option value="eurMwh">EUR/MWh</option>
         </select>
-
+        
+        <label class="small" for="chartMode">Visning</label>
+        <select id="chartMode" title="Auto = staplar för korta 15-minutersgrafer, linje för längre historik.">
+          <option value="auto" selected>Auto</option>
+          <option value="line">Linje</option>
+          <option value="bar">Staplar</option>
+        </select>
+        
         <label class="toggle small" title="Fyll bara korta luckor (max 8 null i rad) med linjär interpolation. Rådata ändras inte.">
           <input id="fillGaps" type="checkbox" />
           Extrapolera null (≤8)
