@@ -32,6 +32,7 @@ import {
     metric: "oreKwh",
     fillGaps: false,
     krLines: false,
+    chartMode: "auto",     // auto|line|bar
   };
 
   // används av plugin för att skriva text i graf 2 när imorgon saknas
@@ -95,6 +96,18 @@ import {
       case "eurMwh": return "EUR/MWh";
       default: return state.metric;
     }
+  }
+  
+  function getEffectiveChartMode(scope) {
+    if (state.chartMode === "line") return "line";
+    if (state.chartMode === "bar") return "bar";
+  
+    // auto
+    if (scope === "singleDay") return "bar";
+    if (scope === "publishWindow") return "bar";
+    if (scope === "range") return "line";
+  
+    return "line";
   }
 
   function sekKwhToMetricY(sekKwhValue) {
@@ -754,15 +767,22 @@ import {
     const fg = localStorage.getItem("rossohamn_fillGaps");
     state.fillGaps = (fg === "1");
     el("fillGaps").checked = state.fillGaps;
-
+  
     const kl = localStorage.getItem("rossohamn_krLines");
     state.krLines = (kl === "1");
     el("krLines").checked = state.krLines;
+  
+    const cm = localStorage.getItem("rossohamn_chartMode");
+    state.chartMode = (cm === "line" || cm === "bar" || cm === "auto") ? cm : "auto";
+  
+    const chartModeEl = el("chartMode");
+    if (chartModeEl) chartModeEl.value = state.chartMode;
   }
 
   function saveSettings() {
     localStorage.setItem("rossohamn_fillGaps", state.fillGaps ? "1" : "0");
     localStorage.setItem("rossohamn_krLines", state.krLines ? "1" : "0");
+    localStorage.setItem("rossohamn_chartMode", state.chartMode);
   }
 
   function stepDay(delta) {
@@ -818,6 +838,12 @@ import {
 
   // ----- Events -----
   el("reload").addEventListener("click", bootstrap);
+
+  el("chartMode")?.addEventListener("change", () => {
+    state.chartMode = el("chartMode").value;
+    saveSettings();
+    render();
+  });
 
   el("tab-today").addEventListener("click", () => setTab("today"));
   el("tab-tomorrow").addEventListener("click", () => setTab("tomorrow"));
