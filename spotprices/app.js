@@ -110,6 +110,41 @@ import {
     return "line";
   }
 
+  function buildBarColors(series, win2h, win4h, win8h) {
+    const isInside = (idx, win) =>
+      !!win &&
+      Number.isInteger(win.start) &&
+      Number.isInteger(win.len) &&
+      idx >= win.start &&
+      idx < (win.start + win.len);
+  
+    return {
+      backgroundColor: series.map((v, idx) => {
+        if (v === null || v === undefined || Number.isNaN(v)) {
+          return "rgba(0,0,0,0)";
+        }
+  
+        if (isInside(idx, win2h)) return "rgba(255,215,120,0.95)";
+        if (isInside(idx, win4h)) return "rgba(120,220,255,0.88)";
+        if (isInside(idx, win8h)) return "rgba(255,255,255,0.42)";
+  
+        return "rgba(120,190,255,0.65)";
+      }),
+  
+      borderColor: series.map((v, idx) => {
+        if (v === null || v === undefined || Number.isNaN(v)) {
+          return "rgba(0,0,0,0)";
+        }
+  
+        if (isInside(idx, win2h)) return "rgba(255,215,120,1)";
+        if (isInside(idx, win4h)) return "rgba(120,220,255,1)";
+        if (isInside(idx, win8h)) return "rgba(255,255,255,0.68)";
+  
+        return "rgba(120,190,255,0.95)";
+      })
+    };
+  }
+
   function sekKwhToMetricY(sekKwhValue) {
     if (typeof sekKwhValue !== "number") return null;
 
@@ -281,6 +316,8 @@ import {
     const win4h = cheapestWindow(series, 16);
     const win8h = cheapestWindow(series, 32);
 
+    const barColors = buildBarColors(series, win2h, win4h, win8h);
+
     const hi2 = buildHighlightSeries(series, win2h);
     const hi4 = buildHighlightSeries(series, win4h);
     const hi8 = buildHighlightSeries(series, win8h);
@@ -288,23 +325,15 @@ import {
     const datasets = [
       chartMode === "bar"
         ? {
-            type: "bar",
-            label: unitLabel(),
-            data: series,
-            backgroundColor: series.map(v =>
-              v === null || v === undefined || Number.isNaN(v)
-                ? "rgba(0,0,0,0)"
-                : "rgba(120, 190, 255, 0.65)"
-            ),
-            borderColor: series.map(v =>
-              v === null || v === undefined || Number.isNaN(v)
-                ? "rgba(0,0,0,0)"
-                : "rgba(120, 190, 255, 0.95)"
-            ),
-            borderWidth: 1,
-            barPercentage: 1.0,
-            categoryPercentage: 1.0
-          }
+          type: "bar",
+          label: unitLabel(),
+          data: series,
+          backgroundColor: barColors.backgroundColor,
+          borderColor: barColors.borderColor,
+          borderWidth: 1,
+          barPercentage: 1.0,
+          categoryPercentage: 1.0
+        }
         : {
             type: "line",
             label: unitLabel(),
@@ -318,6 +347,35 @@ import {
             borderCapStyle: "round"
           }
     ];
+
+    if (chartMode === "bar") {
+      datasets.push(
+        {
+          type: "line",
+          label: "Billigaste 8h",
+          data: labels.map(() => null),
+          pointRadius: 0,
+          borderWidth: 6,
+          borderColor: "rgba(46, 204, 113, 0.35)"
+        },
+        {
+          type: "line",
+          label: "Billigaste 4h",
+          data: labels.map(() => null),
+          pointRadius: 0,
+          borderWidth: 6,
+          borderColor: "rgba(46, 204, 113, 0.65)"
+        },
+        {
+          type: "line",
+          label: "Billigaste 2h",
+          data: labels.map(() => null),
+          pointRadius: 0,
+          borderWidth: 6,
+          borderColor: "rgba(46, 204, 113, 0.95)"
+        }
+      );
+    }
 
     if (chartMode === "line") {
       if (hi8) datasets.push({ type: "line", label: "Billigaste 8h", data: hi8, pointRadius: 0, borderWidth: 6, tension: 0.2, borderColor: "rgba(255,255,255,0.40)" });
