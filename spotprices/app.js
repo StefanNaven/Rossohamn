@@ -110,46 +110,40 @@ import {
     return "line";
   }
 
-function buildBarColors(series, win2h, win4h, win8h) {
-  const isInside = (idx, win) =>
-    !!win &&
-    Number.isInteger(win.start) &&
-    Number.isInteger(win.len) &&
-    idx >= win.start &&
-    idx < (win.start + win.len);
-
-  return {
-    backgroundColor: series.map((v, idx) => {
-      if (v === null || v === undefined || Number.isNaN(v)) {
-        return "rgba(0,0,0,0)";
-      }
-
-      // billigast 2h → stark grön
-      if (isInside(idx, win2h)) return "rgba(46, 204, 113, 0.95)";
-
-      // billigast 4h → medium grön
-      if (isInside(idx, win4h)) return "rgba(46, 204, 113, 0.65)";
-
-      // billigast 8h → svag grön
-      if (isInside(idx, win8h)) return "rgba(46, 204, 113, 0.35)";
-
-      // normal
-      return "rgba(120,190,255,0.65)";
-    }),
-
-    borderColor: series.map((v, idx) => {
-      if (v === null || v === undefined || Number.isNaN(v)) {
-        return "rgba(0,0,0,0)";
-      }
-
-      if (isInside(idx, win2h)) return "rgba(46, 204, 113, 1)";
-      if (isInside(idx, win4h)) return "rgba(46, 204, 113, 0.85)";
-      if (isInside(idx, win8h)) return "rgba(46, 204, 113, 0.6)";
-
-      return "rgba(120,190,255,0.95)";
-    })
-  };
-}
+  function buildBarColors(series, win2h, win4h, win8h) {
+    const isInside = (idx, win) =>
+      !!win &&
+      Number.isInteger(win.startIdx) &&
+      Number.isInteger(win.endIdx) &&
+      idx >= win.startIdx &&
+      idx <= win.endIdx;
+  
+    return {
+      backgroundColor: series.map((v, idx) => {
+        if (v === null || v === undefined || Number.isNaN(v)) {
+          return "rgba(0,0,0,0)";
+        }
+  
+        if (isInside(idx, win2h)) return "rgba(46, 204, 113, 0.95)";
+        if (isInside(idx, win4h)) return "rgba(46, 204, 113, 0.65)";
+        if (isInside(idx, win8h)) return "rgba(46, 204, 113, 0.35)";
+  
+        return "rgba(120,190,255,0.65)";
+      }),
+  
+      borderColor: series.map((v, idx) => {
+        if (v === null || v === undefined || Number.isNaN(v)) {
+          return "rgba(0,0,0,0)";
+        }
+  
+        if (isInside(idx, win2h)) return "rgba(46, 204, 113, 1)";
+        if (isInside(idx, win4h)) return "rgba(46, 204, 113, 0.85)";
+        if (isInside(idx, win8h)) return "rgba(46, 204, 113, 0.60)";
+  
+        return "rgba(120,190,255,0.95)";
+      })
+    };
+  }
 
   function sekKwhToMetricY(sekKwhValue) {
     if (typeof sekKwhValue !== "number") return null;
