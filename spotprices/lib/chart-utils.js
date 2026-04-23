@@ -20,6 +20,9 @@ export function legendOnClick(e, legendItem, legend) {
   const ds = chart.data.datasets[idx];
   if (!ds) return;
 
+  // Dummy legend-serier i stapelläge ska inte togglas
+  if (Array.isArray(ds.data) && ds.data.every(v => v === null)) return;
+
   // dataset[0] = huvudserien; den ska alltid vara synlig
   if (idx === 0) return;
 
