@@ -37,7 +37,7 @@ export function legendOnClick(e, legendItem, legend) {
  * @param {Object} deps
  * @param {() => boolean} deps.isMainTabToday   true om huvudgrafen ska rita nu-linje (ex state.tab==="today")
  * @param {() => number}  deps.getMainResolutionMinutes  resolutionMinutes för "today" (fallback 15)
- * @param {() => ({rm:number, slotsPerDay:number, startAbsUsed:number, endAbsUsed:number} | null)} deps.getChart14Window
+ * @param {() => ({rm:number, startUtcMs:number, endUtcMs:number} | null)} deps.getChart14Window
  */
 export function makeNowLinePlugin({ isMainTabToday, getMainResolutionMinutes, getChart14Window }) {
   return {
@@ -68,13 +68,13 @@ export function makeNowLinePlugin({ isMainTabToday, getMainResolutionMinutes, ge
         if (!w) return;
 
         const rm14 = Number(w.rm) || 15;
-        const slotsPerHour14 = Math.max(1, Math.round(60 / rm14));
-        const slotNow14 = hh * slotsPerHour14 + Math.floor(mm / rm14);
+        const startUtcMs = Number(w.startUtcMs);
+        const endUtcMs = Number(w.endUtcMs);
+        const nowMs = now.getTime();
+        if (!Number.isFinite(startUtcMs) || !Number.isFinite(endUtcMs)) return;
+        if (nowMs < startUtcMs || nowMs >= endUtcMs) return;
 
-        const absNow = slotNow14; // "idag"-slot i chart14-fönstrets absoluta index
-        if (absNow < w.startAbsUsed || absNow > w.endAbsUsed) return;
-
-        xIndex = absNow - w.startAbsUsed;
+        xIndex = Math.floor((nowMs - startUtcMs) / (rm14 * 60 * 1000));
       }
 
       const x = xScale.getPixelForValue(xIndex);

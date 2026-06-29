@@ -242,7 +242,7 @@
     </div>
 
     <div class="cwHint small">
-      Visar teknisk information från webbläsaren + publik IP. Inget sparas.
+      Visar teknisk information från webbläsaren samt uppgifter från externa IP-tjänster.
     </div>
   </div>
 </aside>
@@ -296,6 +296,55 @@
       `Idag (${label}) · Min ${min.toFixed(1)} öre/kWh · Max ${max.toFixed(1)} öre/kWh`;
   }
 
+
+  function dataStatus(history) {
+    const todayKey = todayKeyStockholm();
+    const tomorrowDate = new Date(`${todayKey}T12:00:00Z`);
+    tomorrowDate.setUTCDate(tomorrowDate.getUTCDate() + 1);
+    const tomorrowKey = tomorrowDate.toISOString().slice(0, 10);
+
+    const updatedAtRaw = history?.meta?.updatedAt;
+    const updatedAt = updatedAtRaw ? new Date(updatedAtRaw) : null;
+    const ageHours = updatedAt && Number.isFinite(updatedAt.getTime())
+      ? (Date.now() - updatedAt.getTime()) / 3600000
+      : null;
+
+    const today = history?.days?.[todayKey];
+    const tomorrow = history?.days?.[tomorrowKey];
+    const completeness = [];
+    if (today) completeness.push(`Idag ${today.present ?? "—"}/${today.expected ?? "—"}`);
+    if (tomorrow) completeness.push(`Imorgon ${tomorrow.present ?? "—"}/${tomorrow.expected ?? "—"}`);
+
+    if (ageHours === null) {
+      return { label: "Okänd", short: "okänd", detail: completeness.join(" · ") };
+    }
+    if (ageHours > 24) {
+      return {
+        label: `Föråldrad (${Math.floor(ageHours)} h)`,
+        short: "föråldrad",
+        detail: completeness.join(" · ")
+      };
+    }
+    if (!today) {
+      return { label: "Saknar data för idag", short: "ofullständig", detail: completeness.join(" · ") };
+    }
+    if (Number(today.present) < Number(today.expected)) {
+      return {
+        label: `Ofullständig idag: ${today.present ?? "—"}/${today.expected ?? "—"}`,
+        short: "ofullständig",
+        detail: completeness.join(" · ")
+      };
+    }
+    if (tomorrow && Number(tomorrow.present) < Number(tomorrow.expected)) {
+      return {
+        label: `Ofullständig imorgon: ${tomorrow.present ?? "—"}/${tomorrow.expected ?? "—"}`,
+        short: "ofullständig",
+        detail: completeness.join(" · ")
+      };
+    }
+    return { label: "Aktuell", short: "aktuell", detail: completeness.join(" · ") };
+  }
+
   async function loadMini(){
     const statusEl = document.getElementById("mini-status");
     const noteEl = document.getElementById("mini-note");
@@ -318,10 +367,14 @@
 
       const updatedAt = j?.meta?.updatedAt;
       document.getElementById("sys-updated").textContent =
-        updatedAt ? new Date(updatedAt).toLocaleString("sv-SE") : "—";
+        updatedAt && Number.isFinite(new Date(updatedAt).getTime())
+          ? new Date(updatedAt).toLocaleString("sv-SE")
+          : "—";
 
-      statusEl.textContent = "ok";
-      document.getElementById("sys-status").textContent = "OK";
+      const status = dataStatus(j);
+      statusEl.textContent = status.short;
+      document.getElementById("sys-status").textContent = status.label;
+      noteEl.textContent = status.detail;
 
     } catch (e) {
       statusEl.textContent = "fel";
@@ -383,8 +436,45 @@
     }
   }
 
-  // What's my IP
-  async function loadWhatsMyIp() {
+  // What's my IP + hörnwidget använder samma två externa anrop.
+  let networkInfoPromise = null;
+
+  function fetchNetworkInfo(force = false) {
+    if (!force && networkInfoPromise) return networkInfoPromise;
+
+    networkInfoPromise = (async () => {
+      const result = { ip: null, info: null, ipError: null, infoError: null };
+      try {
+        const ipResult = await fetchJson("https://api.ipify.org?format=json");
+        result.ip = ipResult?.ip || null;
+      } catch (error) {
+        result.ipError = error;
+      }
+
+      try {
+        result.info = await fetchJson("https://ipapi.co/json/");
+      } catch (error) {
+        result.infoError = error;
+      }
+      return result;
+    })();
+
+    return networkInfoPromise;
+  }
+
+  function networkLocation(info) {
+    return [info?.city, info?.region, info?.country_name || info?.country]
+      .filter(Boolean)
+      .join(", ") || "—";
+  }
+
+  function networkIsp(info) {
+    const asn = info?.asn || "";
+    const org = info?.org || info?.org_name || "";
+    return [asn, org].filter(Boolean).join(" · ") || "—";
+  }
+
+  async function loadWhatsMyIp(force = false) {
     const status = document.getElementById("ip-status");
     const note = document.getElementById("ip-note");
     const ipPublic = document.getElementById("ip-public");
@@ -397,33 +487,21 @@
     ipIsp.textContent = "—";
     ipLoc.textContent = "—";
 
-    try {
-      const ip = await fetchJson("https://api.ipify.org?format=json");
-      ipPublic.textContent = ip?.ip || "okänt";
+    const result = await fetchNetworkInfo(force);
+    ipPublic.textContent = result.ip || "Ej tillgängligt";
+    ipIsp.textContent = networkIsp(result.info);
+    ipLoc.textContent = networkLocation(result.info);
 
-      try {
-        const info = await fetchJson("https://ipapi.co/json/");
-        const asn = info?.asn ? info.asn : "";
-        const org = info?.org ? info.org : (info?.org_name || "");
-        ipIsp.textContent = (asn && org) ? `${asn} · ${org}` : (org || asn || "—");
-
-        const city = info?.city || "";
-        const region = info?.region || "";
-        const country = info?.country_name || info?.country || "";
-        const loc = [city, region, country].filter(Boolean).join(", ");
-        ipLoc.textContent = loc || "—";
-      } catch {
-        note.textContent = "Plats/ISP kunde inte hämtas (blockerad eller otillgänglig).";
-      }
-
-      status.textContent = "ok";
-    } catch {
+    if (result.ipError) {
       status.textContent = "fel";
-      note.textContent = "IP kunde inte hämtas (nätverk/adblocker/CSP).";
+      note.textContent = "IP kunde inte hämtas (nätverk, blockerare eller tjänstfel).";
+    } else if (result.infoError) {
+      status.textContent = "delvis";
+      note.textContent = "Plats och ISP kunde inte hämtas från den externa tjänsten.";
+    } else {
+      status.textContent = "ok";
     }
   }
-
-  document.getElementById("ip-refresh").addEventListener("click", loadWhatsMyIp);
 
   // Corner widget: teknisk info (kompakt)
   const cwToggle = document.getElementById("cwToggle");
@@ -434,11 +512,10 @@
     cwPanel.hidden = expanded;
   });
 
-  async function loadClientWidget() {
+  async function loadClientWidget(force = false) {
     const statusMini = document.getElementById("client-status-mini");
     statusMini.textContent = "…";
 
-    // Lokalt (alltid)
     const lang = navigator.language || (navigator.languages ? navigator.languages.join(", ") : "—");
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "—";
     const screenInfo = `${window.screen.width}×${window.screen.height} @ ${window.devicePixelRatio || 1}x`;
@@ -447,29 +524,20 @@
     document.getElementById("ci-tz").textContent = tz;
     document.getElementById("ci-screen").textContent = screenInfo;
 
-    // IP + ev. geo (kan blockeras)
-    try {
-      const ip = await fetchJson("https://api.ipify.org?format=json");
-      document.getElementById("ci-ip").textContent = ip?.ip || "okänt";
+    const result = await fetchNetworkInfo(force);
+    document.getElementById("ci-ip").textContent = result.ip || "Ej tillgängligt";
+    document.getElementById("ci-location").textContent = result.info ? networkLocation(result.info) : "Ej tillgängligt";
+    document.getElementById("ci-isp").textContent = result.info ? networkIsp(result.info) : "Ej tillgängligt";
 
-      try {
-        const info = await fetchJson("https://ipapi.co/json/");
-        const loc = [info?.city, info?.region, info?.country_name].filter(Boolean).join(", ");
-        document.getElementById("ci-location").textContent = loc || "—";
-        document.getElementById("ci-isp").textContent = [info?.asn, info?.org].filter(Boolean).join(" · ") || "—";
-        statusMini.textContent = "ok";
-      } catch {
-        document.getElementById("ci-location").textContent = "Ej tillgängligt";
-        document.getElementById("ci-isp").textContent = "Ej tillgängligt";
-        statusMini.textContent = "delvis";
-      }
-    } catch {
-      document.getElementById("ci-ip").textContent = "Ej tillgängligt";
-      document.getElementById("ci-location").textContent = "Ej tillgängligt";
-      document.getElementById("ci-isp").textContent = "Ej tillgängligt";
-      statusMini.textContent = "delvis";
-    }
+    statusMini.textContent = result.ipError ? "fel" : (result.infoError ? "delvis" : "ok");
   }
+
+  async function refreshNetworkInfo() {
+    networkInfoPromise = null;
+    await Promise.all([loadWhatsMyIp(true), loadClientWidget(false)]);
+  }
+
+  document.getElementById("ip-refresh").addEventListener("click", refreshNetworkInfo);
 
   // initial load
   loadMini();

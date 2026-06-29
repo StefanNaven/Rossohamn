@@ -48,7 +48,7 @@
         </select>
         
         <label class="small" for="chartMode">Visning</label>
-        <select id="chartMode" title="Auto = staplar för korta 15-minutersgrafer, linje för längre historik.">
+        <select id="chartMode" title="Auto = staplar för dygn och nuvarande tidsfönster, linje för längre historik.">
           <option value="auto" selected>Auto</option>
           <option value="line">Linje</option>
           <option value="bar">Staplar</option>
@@ -56,7 +56,7 @@
         
         <label class="toggle small" title="Fyll bara korta luckor (max 8 null i rad) med linjär interpolation. Rådata ändras inte.">
           <input id="fillGaps" type="checkbox" />
-          Extrapolera null (≤8)
+          Interpolera null (≤8)
         </label>
 
         <label class="toggle small" title="Visa referenslinjer motsvarande 1/2/3 kr/kWh (omräknat till vald serie).">
@@ -100,9 +100,10 @@
 
     <div class="card" id="costCard" style="display:none;">
       <div class="row" style="justify-content:space-between;">
-        <div style="font-weight:700;">Pris-exempel</div>
+        <div style="font-weight:700;">Spotpriskostnad – exempel</div>
         <div class="small" id="costWhen">—</div>
       </div>
+      <div class="small" style="margin-top:8px;">Beräkningen använder endast visat spotpris. Övriga elkostnader ingår inte.</div>
       <div id="costBody" style="margin-top:10px;"></div>
     </div>
 

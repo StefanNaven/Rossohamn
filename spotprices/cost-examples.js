@@ -1,5 +1,5 @@
 // cost-examples.js
-// Klick på en datapunkt -> räkna kostnadsexempel i SEK
+// Klick på en datapunkt -> räkna exempel på spotpriskostnad i SEK
 // Förval kan justeras och sparas i localStorage.
 
 function safeNum(x) {
@@ -178,7 +178,7 @@ function renderCostCard(container, { labelText, sekPerKwh, presets, metricLabel 
     </div>
 
     <table style="margin-top:10px;">
-      <thead><tr><th>Exempel</th><th>Kostnad</th><th>Beräkning</th></tr></thead>
+      <thead><tr><th>Exempel</th><th>Spotpriskostnad</th><th>Beräkning</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
 
