@@ -5,11 +5,11 @@
     "timeZone": "Europe/Stockholm",
     "eursek": 11.0775,
     "eursekDate": "2026-07-22",
-    "updatedAt": "2026-07-23T09:00:21.886Z",
+    "updatedAt": "2026-07-23T11:30:11.734Z",
     "includesTransferFee": false,
     "request": {
-      "periodStart": "202607210600",
-      "periodEnd": "202607261200"
+      "periodStart": "202607210800",
+      "periodEnd": "202607261400"
     }
   },
   "days": {
