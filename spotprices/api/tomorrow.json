@@ -6,9 +6,9 @@
     "date": "2026-10-26",
     "resolutionMinutes": 15,
     "expected": 96,
-    "present": 0,
-    "updatedAt": "2026-10-25T10:00:11.063Z",
-    "historyUpdatedAt": "2026-10-25T10:00:11.039Z",
+    "present": 86,
+    "updatedAt": "2026-10-25T12:30:04.975Z",
+    "historyUpdatedAt": "2026-10-25T12:30:04.956Z",
     "eursek": 11.131,
     "eursekDate": "2026-10-23",
     "includesTransferFee": false
@@ -401,204 +401,1296 @@
   ],
   "raw": {
     "points": [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null
+      {
+        "utc": "2026-10-25T23:00:00.000Z",
+        "time": "00:00",
+        "eurMwh": 0.97,
+        "sekKwh": 0.010797,
+        "oreKwh": 1.08
+      },
+      {
+        "utc": "2026-10-25T23:15:00.000Z",
+        "time": "00:15",
+        "eurMwh": 0.33,
+        "sekKwh": 0.003673,
+        "oreKwh": 0.367
+      },
+      {
+        "utc": "2026-10-25T23:30:00.000Z",
+        "time": "00:30",
+        "eurMwh": 0.49,
+        "sekKwh": 0.005454,
+        "oreKwh": 0.545
+      },
+      {
+        "utc": "2026-10-25T23:45:00.000Z",
+        "time": "00:45",
+        "eurMwh": 0.48,
+        "sekKwh": 0.005343,
+        "oreKwh": 0.534
+      },
+      {
+        "utc": "2026-10-26T00:00:00.000Z",
+        "time": "01:00",
+        "eurMwh": 0.36,
+        "sekKwh": 0.004007,
+        "oreKwh": 0.401
+      },
+      null,
+      {
+        "utc": "2026-10-26T00:30:00.000Z",
+        "time": "01:30",
+        "eurMwh": 0.24,
+        "sekKwh": 0.002671,
+        "oreKwh": 0.267
+      },
+      {
+        "utc": "2026-10-26T00:45:00.000Z",
+        "time": "01:45",
+        "eurMwh": 0.23,
+        "sekKwh": 0.00256,
+        "oreKwh": 0.256
+      },
+      {
+        "utc": "2026-10-26T01:00:00.000Z",
+        "time": "02:00",
+        "eurMwh": 0.13,
+        "sekKwh": 0.001447,
+        "oreKwh": 0.145
+      },
+      {
+        "utc": "2026-10-26T01:15:00.000Z",
+        "time": "02:15",
+        "eurMwh": 0.36,
+        "sekKwh": 0.004007,
+        "oreKwh": 0.401
+      },
+      {
+        "utc": "2026-10-26T01:30:00.000Z",
+        "time": "02:30",
+        "eurMwh": 0.68,
+        "sekKwh": 0.007569,
+        "oreKwh": 0.757
+      },
+      {
+        "utc": "2026-10-26T01:45:00.000Z",
+        "time": "02:45",
+        "eurMwh": 1.17,
+        "sekKwh": 0.013023,
+        "oreKwh": 1.302
+      },
+      {
+        "utc": "2026-10-26T02:00:00.000Z",
+        "time": "03:00",
+        "eurMwh": 0.61,
+        "sekKwh": 0.00679,
+        "oreKwh": 0.679
+      },
+      null,
+      {
+        "utc": "2026-10-26T02:30:00.000Z",
+        "time": "03:30",
+        "eurMwh": 0.66,
+        "sekKwh": 0.007346,
+        "oreKwh": 0.735
+      },
+      {
+        "utc": "2026-10-26T02:45:00.000Z",
+        "time": "03:45",
+        "eurMwh": 0.59,
+        "sekKwh": 0.006567,
+        "oreKwh": 0.657
+      },
+      {
+        "utc": "2026-10-26T03:00:00.000Z",
+        "time": "04:00",
+        "eurMwh": 0.68,
+        "sekKwh": 0.007569,
+        "oreKwh": 0.757
+      },
+      {
+        "utc": "2026-10-26T03:15:00.000Z",
+        "time": "04:15",
+        "eurMwh": 1.25,
+        "sekKwh": 0.013914,
+        "oreKwh": 1.391
+      },
+      {
+        "utc": "2026-10-26T03:30:00.000Z",
+        "time": "04:30",
+        "eurMwh": 1.53,
+        "sekKwh": 0.01703,
+        "oreKwh": 1.703
+      },
+      {
+        "utc": "2026-10-26T03:45:00.000Z",
+        "time": "04:45",
+        "eurMwh": 0.86,
+        "sekKwh": 0.009573,
+        "oreKwh": 0.957
+      },
+      {
+        "utc": "2026-10-26T04:00:00.000Z",
+        "time": "05:00",
+        "eurMwh": 0.77,
+        "sekKwh": 0.008571,
+        "oreKwh": 0.857
+      },
+      {
+        "utc": "2026-10-26T04:15:00.000Z",
+        "time": "05:15",
+        "eurMwh": 0.36,
+        "sekKwh": 0.004007,
+        "oreKwh": 0.401
+      },
+      {
+        "utc": "2026-10-26T04:30:00.000Z",
+        "time": "05:30",
+        "eurMwh": -0.01,
+        "sekKwh": -0.000111,
+        "oreKwh": -0.011
+      },
+      {
+        "utc": "2026-10-26T04:45:00.000Z",
+        "time": "05:45",
+        "eurMwh": 0,
+        "sekKwh": 0,
+        "oreKwh": 0
+      },
+      {
+        "utc": "2026-10-26T05:00:00.000Z",
+        "time": "06:00",
+        "eurMwh": -0.46,
+        "sekKwh": -0.00512,
+        "oreKwh": -0.512
+      },
+      {
+        "utc": "2026-10-26T05:15:00.000Z",
+        "time": "06:15",
+        "eurMwh": -1.77,
+        "sekKwh": -0.019702,
+        "oreKwh": -1.97
+      },
+      {
+        "utc": "2026-10-26T05:30:00.000Z",
+        "time": "06:30",
+        "eurMwh": -0.06,
+        "sekKwh": -0.000668,
+        "oreKwh": -0.067
+      },
+      {
+        "utc": "2026-10-26T05:45:00.000Z",
+        "time": "06:45",
+        "eurMwh": 0.88,
+        "sekKwh": 0.009795,
+        "oreKwh": 0.98
+      },
+      {
+        "utc": "2026-10-26T06:00:00.000Z",
+        "time": "07:00",
+        "eurMwh": 0,
+        "sekKwh": 0,
+        "oreKwh": 0
+      },
+      {
+        "utc": "2026-10-26T06:15:00.000Z",
+        "time": "07:15",
+        "eurMwh": 0.13,
+        "sekKwh": 0.001447,
+        "oreKwh": 0.145
+      },
+      {
+        "utc": "2026-10-26T06:30:00.000Z",
+        "time": "07:30",
+        "eurMwh": 1.8,
+        "sekKwh": 0.020036,
+        "oreKwh": 2.004
+      },
+      {
+        "utc": "2026-10-26T06:45:00.000Z",
+        "time": "07:45",
+        "eurMwh": 2.99,
+        "sekKwh": 0.033282,
+        "oreKwh": 3.328
+      },
+      {
+        "utc": "2026-10-26T07:00:00.000Z",
+        "time": "08:00",
+        "eurMwh": 2.8,
+        "sekKwh": 0.031167,
+        "oreKwh": 3.117
+      },
+      {
+        "utc": "2026-10-26T07:15:00.000Z",
+        "time": "08:15",
+        "eurMwh": 3.13,
+        "sekKwh": 0.03484,
+        "oreKwh": 3.484
+      },
+      {
+        "utc": "2026-10-26T07:30:00.000Z",
+        "time": "08:30",
+        "eurMwh": 3.83,
+        "sekKwh": 0.042632,
+        "oreKwh": 4.263
+      },
+      {
+        "utc": "2026-10-26T07:45:00.000Z",
+        "time": "08:45",
+        "eurMwh": 4.55,
+        "sekKwh": 0.050646,
+        "oreKwh": 5.065
+      },
+      {
+        "utc": "2026-10-26T08:00:00.000Z",
+        "time": "09:00",
+        "eurMwh": 5,
+        "sekKwh": 0.055655,
+        "oreKwh": 5.566
+      },
+      {
+        "utc": "2026-10-26T08:15:00.000Z",
+        "time": "09:15",
+        "eurMwh": 6.95,
+        "sekKwh": 0.07736,
+        "oreKwh": 7.736
+      },
+      null,
+      null,
+      {
+        "utc": "2026-10-26T09:00:00.000Z",
+        "time": "10:00",
+        "eurMwh": 5.01,
+        "sekKwh": 0.055766,
+        "oreKwh": 5.577
+      },
+      {
+        "utc": "2026-10-26T09:15:00.000Z",
+        "time": "10:15",
+        "eurMwh": 6.75,
+        "sekKwh": 0.075134,
+        "oreKwh": 7.513
+      },
+      {
+        "utc": "2026-10-26T09:30:00.000Z",
+        "time": "10:30",
+        "eurMwh": 6.95,
+        "sekKwh": 0.07736,
+        "oreKwh": 7.736
+      },
+      null,
+      {
+        "utc": "2026-10-26T10:00:00.000Z",
+        "time": "11:00",
+        "eurMwh": 6.66,
+        "sekKwh": 0.074132,
+        "oreKwh": 7.413
+      },
+      {
+        "utc": "2026-10-26T10:15:00.000Z",
+        "time": "11:15",
+        "eurMwh": 6.95,
+        "sekKwh": 0.07736,
+        "oreKwh": 7.736
+      },
+      null,
+      null,
+      {
+        "utc": "2026-10-26T11:00:00.000Z",
+        "time": "12:00",
+        "eurMwh": 7.96,
+        "sekKwh": 0.088603,
+        "oreKwh": 8.86
+      },
+      {
+        "utc": "2026-10-26T11:15:00.000Z",
+        "time": "12:15",
+        "eurMwh": 6.95,
+        "sekKwh": 0.07736,
+        "oreKwh": 7.736
+      },
+      null,
+      null,
+      {
+        "utc": "2026-10-26T12:00:00.000Z",
+        "time": "13:00",
+        "eurMwh": 6.54,
+        "sekKwh": 0.072797,
+        "oreKwh": 7.28
+      },
+      {
+        "utc": "2026-10-26T12:15:00.000Z",
+        "time": "13:15",
+        "eurMwh": 6.05,
+        "sekKwh": 0.067343,
+        "oreKwh": 6.734
+      },
+      {
+        "utc": "2026-10-26T12:30:00.000Z",
+        "time": "13:30",
+        "eurMwh": 5,
+        "sekKwh": 0.055655,
+        "oreKwh": 5.566
+      },
+      {
+        "utc": "2026-10-26T12:45:00.000Z",
+        "time": "13:45",
+        "eurMwh": 6.91,
+        "sekKwh": 0.076915,
+        "oreKwh": 7.692
+      },
+      {
+        "utc": "2026-10-26T13:00:00.000Z",
+        "time": "14:00",
+        "eurMwh": 7.55,
+        "sekKwh": 0.084039,
+        "oreKwh": 8.404
+      },
+      {
+        "utc": "2026-10-26T13:15:00.000Z",
+        "time": "14:15",
+        "eurMwh": 6.95,
+        "sekKwh": 0.07736,
+        "oreKwh": 7.736
+      },
+      {
+        "utc": "2026-10-26T13:30:00.000Z",
+        "time": "14:30",
+        "eurMwh": 8.03,
+        "sekKwh": 0.089382,
+        "oreKwh": 8.938
+      },
+      {
+        "utc": "2026-10-26T13:45:00.000Z",
+        "time": "14:45",
+        "eurMwh": 8.63,
+        "sekKwh": 0.096061,
+        "oreKwh": 9.606
+      },
+      {
+        "utc": "2026-10-26T14:00:00.000Z",
+        "time": "15:00",
+        "eurMwh": 7.87,
+        "sekKwh": 0.087601,
+        "oreKwh": 8.76
+      },
+      {
+        "utc": "2026-10-26T14:15:00.000Z",
+        "time": "15:15",
+        "eurMwh": 8.5,
+        "sekKwh": 0.094614,
+        "oreKwh": 9.461
+      },
+      {
+        "utc": "2026-10-26T14:30:00.000Z",
+        "time": "15:30",
+        "eurMwh": 9.59,
+        "sekKwh": 0.106746,
+        "oreKwh": 10.675
+      },
+      {
+        "utc": "2026-10-26T14:45:00.000Z",
+        "time": "15:45",
+        "eurMwh": 9.41,
+        "sekKwh": 0.104743,
+        "oreKwh": 10.474
+      },
+      {
+        "utc": "2026-10-26T15:00:00.000Z",
+        "time": "16:00",
+        "eurMwh": 9.27,
+        "sekKwh": 0.103184,
+        "oreKwh": 10.318
+      },
+      {
+        "utc": "2026-10-26T15:15:00.000Z",
+        "time": "16:15",
+        "eurMwh": 9.06,
+        "sekKwh": 0.100847,
+        "oreKwh": 10.085
+      },
+      {
+        "utc": "2026-10-26T15:30:00.000Z",
+        "time": "16:30",
+        "eurMwh": 10,
+        "sekKwh": 0.11131,
+        "oreKwh": 11.131
+      },
+      {
+        "utc": "2026-10-26T15:45:00.000Z",
+        "time": "16:45",
+        "eurMwh": 16.94,
+        "sekKwh": 0.188559,
+        "oreKwh": 18.856
+      },
+      {
+        "utc": "2026-10-26T16:00:00.000Z",
+        "time": "17:00",
+        "eurMwh": 11.99,
+        "sekKwh": 0.133461,
+        "oreKwh": 13.346
+      },
+      {
+        "utc": "2026-10-26T16:15:00.000Z",
+        "time": "17:15",
+        "eurMwh": 15.18,
+        "sekKwh": 0.168969,
+        "oreKwh": 16.897
+      },
+      {
+        "utc": "2026-10-26T16:30:00.000Z",
+        "time": "17:30",
+        "eurMwh": 23.67,
+        "sekKwh": 0.263471,
+        "oreKwh": 26.347
+      },
+      {
+        "utc": "2026-10-26T16:45:00.000Z",
+        "time": "17:45",
+        "eurMwh": 25.53,
+        "sekKwh": 0.284174,
+        "oreKwh": 28.417
+      },
+      {
+        "utc": "2026-10-26T17:00:00.000Z",
+        "time": "18:00",
+        "eurMwh": 35.97,
+        "sekKwh": 0.400382,
+        "oreKwh": 40.038
+      },
+      {
+        "utc": "2026-10-26T17:15:00.000Z",
+        "time": "18:15",
+        "eurMwh": 31.55,
+        "sekKwh": 0.351183,
+        "oreKwh": 35.118
+      },
+      {
+        "utc": "2026-10-26T17:30:00.000Z",
+        "time": "18:30",
+        "eurMwh": 30,
+        "sekKwh": 0.33393,
+        "oreKwh": 33.393
+      },
+      null,
+      {
+        "utc": "2026-10-26T18:00:00.000Z",
+        "time": "19:00",
+        "eurMwh": 43.38,
+        "sekKwh": 0.482863,
+        "oreKwh": 48.286
+      },
+      {
+        "utc": "2026-10-26T18:15:00.000Z",
+        "time": "19:15",
+        "eurMwh": 42.6,
+        "sekKwh": 0.474181,
+        "oreKwh": 47.418
+      },
+      {
+        "utc": "2026-10-26T18:30:00.000Z",
+        "time": "19:30",
+        "eurMwh": 40.42,
+        "sekKwh": 0.449915,
+        "oreKwh": 44.992
+      },
+      {
+        "utc": "2026-10-26T18:45:00.000Z",
+        "time": "19:45",
+        "eurMwh": 40.49,
+        "sekKwh": 0.450694,
+        "oreKwh": 45.069
+      },
+      {
+        "utc": "2026-10-26T19:00:00.000Z",
+        "time": "20:00",
+        "eurMwh": 38.98,
+        "sekKwh": 0.433886,
+        "oreKwh": 43.389
+      },
+      {
+        "utc": "2026-10-26T19:15:00.000Z",
+        "time": "20:15",
+        "eurMwh": 37.51,
+        "sekKwh": 0.417524,
+        "oreKwh": 41.752
+      },
+      {
+        "utc": "2026-10-26T19:30:00.000Z",
+        "time": "20:30",
+        "eurMwh": 35,
+        "sekKwh": 0.389585,
+        "oreKwh": 38.959
+      },
+      {
+        "utc": "2026-10-26T19:45:00.000Z",
+        "time": "20:45",
+        "eurMwh": 30,
+        "sekKwh": 0.33393,
+        "oreKwh": 33.393
+      },
+      {
+        "utc": "2026-10-26T20:00:00.000Z",
+        "time": "21:00",
+        "eurMwh": 25.78,
+        "sekKwh": 0.286957,
+        "oreKwh": 28.696
+      },
+      {
+        "utc": "2026-10-26T20:15:00.000Z",
+        "time": "21:15",
+        "eurMwh": 21.38,
+        "sekKwh": 0.237981,
+        "oreKwh": 23.798
+      },
+      {
+        "utc": "2026-10-26T20:30:00.000Z",
+        "time": "21:30",
+        "eurMwh": 16.84,
+        "sekKwh": 0.187446,
+        "oreKwh": 18.745
+      },
+      {
+        "utc": "2026-10-26T20:45:00.000Z",
+        "time": "21:45",
+        "eurMwh": 17.11,
+        "sekKwh": 0.190451,
+        "oreKwh": 19.045
+      },
+      {
+        "utc": "2026-10-26T21:00:00.000Z",
+        "time": "22:00",
+        "eurMwh": 26.71,
+        "sekKwh": 0.297309,
+        "oreKwh": 29.731
+      },
+      {
+        "utc": "2026-10-26T21:15:00.000Z",
+        "time": "22:15",
+        "eurMwh": 20.49,
+        "sekKwh": 0.228074,
+        "oreKwh": 22.807
+      },
+      {
+        "utc": "2026-10-26T21:30:00.000Z",
+        "time": "22:30",
+        "eurMwh": 11.99,
+        "sekKwh": 0.133461,
+        "oreKwh": 13.346
+      },
+      {
+        "utc": "2026-10-26T21:45:00.000Z",
+        "time": "22:45",
+        "eurMwh": 10,
+        "sekKwh": 0.11131,
+        "oreKwh": 11.131
+      },
+      {
+        "utc": "2026-10-26T22:00:00.000Z",
+        "time": "23:00",
+        "eurMwh": 18.65,
+        "sekKwh": 0.207593,
+        "oreKwh": 20.759
+      },
+      {
+        "utc": "2026-10-26T22:15:00.000Z",
+        "time": "23:15",
+        "eurMwh": 15,
+        "sekKwh": 0.166965,
+        "oreKwh": 16.697
+      },
+      {
+        "utc": "2026-10-26T22:30:00.000Z",
+        "time": "23:30",
+        "eurMwh": 14.37,
+        "sekKwh": 0.159952,
+        "oreKwh": 15.995
+      },
+      {
+        "utc": "2026-10-26T22:45:00.000Z",
+        "time": "23:45",
+        "eurMwh": 9.62,
+        "sekKwh": 0.10708,
+        "oreKwh": 10.708
+      }
     ],
-    "missingCount": 96
+    "missingCount": 10
   },
   "extrapolated": {
     "method": "linear-internal-only",
     "points": [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null
+      {
+        "utc": "2026-10-25T23:00:00.000Z",
+        "time": "00:00",
+        "eurMwh": 0.97,
+        "sekKwh": 0.010797,
+        "oreKwh": 1.08
+      },
+      {
+        "utc": "2026-10-25T23:15:00.000Z",
+        "time": "00:15",
+        "eurMwh": 0.33,
+        "sekKwh": 0.003673,
+        "oreKwh": 0.367
+      },
+      {
+        "utc": "2026-10-25T23:30:00.000Z",
+        "time": "00:30",
+        "eurMwh": 0.49,
+        "sekKwh": 0.005454,
+        "oreKwh": 0.545
+      },
+      {
+        "utc": "2026-10-25T23:45:00.000Z",
+        "time": "00:45",
+        "eurMwh": 0.48,
+        "sekKwh": 0.005343,
+        "oreKwh": 0.534
+      },
+      {
+        "utc": "2026-10-26T00:00:00.000Z",
+        "time": "01:00",
+        "eurMwh": 0.36,
+        "sekKwh": 0.004007,
+        "oreKwh": 0.401
+      },
+      {
+        "utc": "2026-10-26T00:15:00.000Z",
+        "time": "01:15",
+        "eurMwh": 0.3,
+        "sekKwh": 0.003339,
+        "oreKwh": 0.334
+      },
+      {
+        "utc": "2026-10-26T00:30:00.000Z",
+        "time": "01:30",
+        "eurMwh": 0.24,
+        "sekKwh": 0.002671,
+        "oreKwh": 0.267
+      },
+      {
+        "utc": "2026-10-26T00:45:00.000Z",
+        "time": "01:45",
+        "eurMwh": 0.23,
+        "sekKwh": 0.00256,
+        "oreKwh": 0.256
+      },
+      {
+        "utc": "2026-10-26T01:00:00.000Z",
+        "time": "02:00",
+        "eurMwh": 0.13,
+        "sekKwh": 0.001447,
+        "oreKwh": 0.145
+      },
+      {
+        "utc": "2026-10-26T01:15:00.000Z",
+        "time": "02:15",
+        "eurMwh": 0.36,
+        "sekKwh": 0.004007,
+        "oreKwh": 0.401
+      },
+      {
+        "utc": "2026-10-26T01:30:00.000Z",
+        "time": "02:30",
+        "eurMwh": 0.68,
+        "sekKwh": 0.007569,
+        "oreKwh": 0.757
+      },
+      {
+        "utc": "2026-10-26T01:45:00.000Z",
+        "time": "02:45",
+        "eurMwh": 1.17,
+        "sekKwh": 0.013023,
+        "oreKwh": 1.302
+      },
+      {
+        "utc": "2026-10-26T02:00:00.000Z",
+        "time": "03:00",
+        "eurMwh": 0.61,
+        "sekKwh": 0.00679,
+        "oreKwh": 0.679
+      },
+      {
+        "utc": "2026-10-26T02:15:00.000Z",
+        "time": "03:15",
+        "eurMwh": 0.635,
+        "sekKwh": 0.007068,
+        "oreKwh": 0.707
+      },
+      {
+        "utc": "2026-10-26T02:30:00.000Z",
+        "time": "03:30",
+        "eurMwh": 0.66,
+        "sekKwh": 0.007346,
+        "oreKwh": 0.735
+      },
+      {
+        "utc": "2026-10-26T02:45:00.000Z",
+        "time": "03:45",
+        "eurMwh": 0.59,
+        "sekKwh": 0.006567,
+        "oreKwh": 0.657
+      },
+      {
+        "utc": "2026-10-26T03:00:00.000Z",
+        "time": "04:00",
+        "eurMwh": 0.68,
+        "sekKwh": 0.007569,
+        "oreKwh": 0.757
+      },
+      {
+        "utc": "2026-10-26T03:15:00.000Z",
+        "time": "04:15",
+        "eurMwh": 1.25,
+        "sekKwh": 0.013914,
+        "oreKwh": 1.391
+      },
+      {
+        "utc": "2026-10-26T03:30:00.000Z",
+        "time": "04:30",
+        "eurMwh": 1.53,
+        "sekKwh": 0.01703,
+        "oreKwh": 1.703
+      },
+      {
+        "utc": "2026-10-26T03:45:00.000Z",
+        "time": "04:45",
+        "eurMwh": 0.86,
+        "sekKwh": 0.009573,
+        "oreKwh": 0.957
+      },
+      {
+        "utc": "2026-10-26T04:00:00.000Z",
+        "time": "05:00",
+        "eurMwh": 0.77,
+        "sekKwh": 0.008571,
+        "oreKwh": 0.857
+      },
+      {
+        "utc": "2026-10-26T04:15:00.000Z",
+        "time": "05:15",
+        "eurMwh": 0.36,
+        "sekKwh": 0.004007,
+        "oreKwh": 0.401
+      },
+      {
+        "utc": "2026-10-26T04:30:00.000Z",
+        "time": "05:30",
+        "eurMwh": -0.01,
+        "sekKwh": -0.000111,
+        "oreKwh": -0.011
+      },
+      {
+        "utc": "2026-10-26T04:45:00.000Z",
+        "time": "05:45",
+        "eurMwh": 0,
+        "sekKwh": 0,
+        "oreKwh": 0
+      },
+      {
+        "utc": "2026-10-26T05:00:00.000Z",
+        "time": "06:00",
+        "eurMwh": -0.46,
+        "sekKwh": -0.00512,
+        "oreKwh": -0.512
+      },
+      {
+        "utc": "2026-10-26T05:15:00.000Z",
+        "time": "06:15",
+        "eurMwh": -1.77,
+        "sekKwh": -0.019702,
+        "oreKwh": -1.97
+      },
+      {
+        "utc": "2026-10-26T05:30:00.000Z",
+        "time": "06:30",
+        "eurMwh": -0.06,
+        "sekKwh": -0.000668,
+        "oreKwh": -0.067
+      },
+      {
+        "utc": "2026-10-26T05:45:00.000Z",
+        "time": "06:45",
+        "eurMwh": 0.88,
+        "sekKwh": 0.009795,
+        "oreKwh": 0.98
+      },
+      {
+        "utc": "2026-10-26T06:00:00.000Z",
+        "time": "07:00",
+        "eurMwh": 0,
+        "sekKwh": 0,
+        "oreKwh": 0
+      },
+      {
+        "utc": "2026-10-26T06:15:00.000Z",
+        "time": "07:15",
+        "eurMwh": 0.13,
+        "sekKwh": 0.001447,
+        "oreKwh": 0.145
+      },
+      {
+        "utc": "2026-10-26T06:30:00.000Z",
+        "time": "07:30",
+        "eurMwh": 1.8,
+        "sekKwh": 0.020036,
+        "oreKwh": 2.004
+      },
+      {
+        "utc": "2026-10-26T06:45:00.000Z",
+        "time": "07:45",
+        "eurMwh": 2.99,
+        "sekKwh": 0.033282,
+        "oreKwh": 3.328
+      },
+      {
+        "utc": "2026-10-26T07:00:00.000Z",
+        "time": "08:00",
+        "eurMwh": 2.8,
+        "sekKwh": 0.031167,
+        "oreKwh": 3.117
+      },
+      {
+        "utc": "2026-10-26T07:15:00.000Z",
+        "time": "08:15",
+        "eurMwh": 3.13,
+        "sekKwh": 0.03484,
+        "oreKwh": 3.484
+      },
+      {
+        "utc": "2026-10-26T07:30:00.000Z",
+        "time": "08:30",
+        "eurMwh": 3.83,
+        "sekKwh": 0.042632,
+        "oreKwh": 4.263
+      },
+      {
+        "utc": "2026-10-26T07:45:00.000Z",
+        "time": "08:45",
+        "eurMwh": 4.55,
+        "sekKwh": 0.050646,
+        "oreKwh": 5.065
+      },
+      {
+        "utc": "2026-10-26T08:00:00.000Z",
+        "time": "09:00",
+        "eurMwh": 5,
+        "sekKwh": 0.055655,
+        "oreKwh": 5.566
+      },
+      {
+        "utc": "2026-10-26T08:15:00.000Z",
+        "time": "09:15",
+        "eurMwh": 6.95,
+        "sekKwh": 0.07736,
+        "oreKwh": 7.736
+      },
+      {
+        "utc": "2026-10-26T08:30:00.000Z",
+        "time": "09:30",
+        "eurMwh": 6.303333,
+        "sekKwh": 0.070162,
+        "oreKwh": 7.016
+      },
+      {
+        "utc": "2026-10-26T08:45:00.000Z",
+        "time": "09:45",
+        "eurMwh": 5.656667,
+        "sekKwh": 0.062964,
+        "oreKwh": 6.296
+      },
+      {
+        "utc": "2026-10-26T09:00:00.000Z",
+        "time": "10:00",
+        "eurMwh": 5.01,
+        "sekKwh": 0.055766,
+        "oreKwh": 5.577
+      },
+      {
+        "utc": "2026-10-26T09:15:00.000Z",
+        "time": "10:15",
+        "eurMwh": 6.75,
+        "sekKwh": 0.075134,
+        "oreKwh": 7.513
+      },
+      {
+        "utc": "2026-10-26T09:30:00.000Z",
+        "time": "10:30",
+        "eurMwh": 6.95,
+        "sekKwh": 0.07736,
+        "oreKwh": 7.736
+      },
+      {
+        "utc": "2026-10-26T09:45:00.000Z",
+        "time": "10:45",
+        "eurMwh": 6.805,
+        "sekKwh": 0.075746,
+        "oreKwh": 7.575
+      },
+      {
+        "utc": "2026-10-26T10:00:00.000Z",
+        "time": "11:00",
+        "eurMwh": 6.66,
+        "sekKwh": 0.074132,
+        "oreKwh": 7.413
+      },
+      {
+        "utc": "2026-10-26T10:15:00.000Z",
+        "time": "11:15",
+        "eurMwh": 6.95,
+        "sekKwh": 0.07736,
+        "oreKwh": 7.736
+      },
+      {
+        "utc": "2026-10-26T10:30:00.000Z",
+        "time": "11:30",
+        "eurMwh": 7.286667,
+        "sekKwh": 0.081108,
+        "oreKwh": 8.111
+      },
+      {
+        "utc": "2026-10-26T10:45:00.000Z",
+        "time": "11:45",
+        "eurMwh": 7.623333,
+        "sekKwh": 0.084855,
+        "oreKwh": 8.486
+      },
+      {
+        "utc": "2026-10-26T11:00:00.000Z",
+        "time": "12:00",
+        "eurMwh": 7.96,
+        "sekKwh": 0.088603,
+        "oreKwh": 8.86
+      },
+      {
+        "utc": "2026-10-26T11:15:00.000Z",
+        "time": "12:15",
+        "eurMwh": 6.95,
+        "sekKwh": 0.07736,
+        "oreKwh": 7.736
+      },
+      {
+        "utc": "2026-10-26T11:30:00.000Z",
+        "time": "12:30",
+        "eurMwh": 6.813333,
+        "sekKwh": 0.075839,
+        "oreKwh": 7.584
+      },
+      {
+        "utc": "2026-10-26T11:45:00.000Z",
+        "time": "12:45",
+        "eurMwh": 6.676667,
+        "sekKwh": 0.074318,
+        "oreKwh": 7.432
+      },
+      {
+        "utc": "2026-10-26T12:00:00.000Z",
+        "time": "13:00",
+        "eurMwh": 6.54,
+        "sekKwh": 0.072797,
+        "oreKwh": 7.28
+      },
+      {
+        "utc": "2026-10-26T12:15:00.000Z",
+        "time": "13:15",
+        "eurMwh": 6.05,
+        "sekKwh": 0.067343,
+        "oreKwh": 6.734
+      },
+      {
+        "utc": "2026-10-26T12:30:00.000Z",
+        "time": "13:30",
+        "eurMwh": 5,
+        "sekKwh": 0.055655,
+        "oreKwh": 5.566
+      },
+      {
+        "utc": "2026-10-26T12:45:00.000Z",
+        "time": "13:45",
+        "eurMwh": 6.91,
+        "sekKwh": 0.076915,
+        "oreKwh": 7.692
+      },
+      {
+        "utc": "2026-10-26T13:00:00.000Z",
+        "time": "14:00",
+        "eurMwh": 7.55,
+        "sekKwh": 0.084039,
+        "oreKwh": 8.404
+      },
+      {
+        "utc": "2026-10-26T13:15:00.000Z",
+        "time": "14:15",
+        "eurMwh": 6.95,
+        "sekKwh": 0.07736,
+        "oreKwh": 7.736
+      },
+      {
+        "utc": "2026-10-26T13:30:00.000Z",
+        "time": "14:30",
+        "eurMwh": 8.03,
+        "sekKwh": 0.089382,
+        "oreKwh": 8.938
+      },
+      {
+        "utc": "2026-10-26T13:45:00.000Z",
+        "time": "14:45",
+        "eurMwh": 8.63,
+        "sekKwh": 0.096061,
+        "oreKwh": 9.606
+      },
+      {
+        "utc": "2026-10-26T14:00:00.000Z",
+        "time": "15:00",
+        "eurMwh": 7.87,
+        "sekKwh": 0.087601,
+        "oreKwh": 8.76
+      },
+      {
+        "utc": "2026-10-26T14:15:00.000Z",
+        "time": "15:15",
+        "eurMwh": 8.5,
+        "sekKwh": 0.094614,
+        "oreKwh": 9.461
+      },
+      {
+        "utc": "2026-10-26T14:30:00.000Z",
+        "time": "15:30",
+        "eurMwh": 9.59,
+        "sekKwh": 0.106746,
+        "oreKwh": 10.675
+      },
+      {
+        "utc": "2026-10-26T14:45:00.000Z",
+        "time": "15:45",
+        "eurMwh": 9.41,
+        "sekKwh": 0.104743,
+        "oreKwh": 10.474
+      },
+      {
+        "utc": "2026-10-26T15:00:00.000Z",
+        "time": "16:00",
+        "eurMwh": 9.27,
+        "sekKwh": 0.103184,
+        "oreKwh": 10.318
+      },
+      {
+        "utc": "2026-10-26T15:15:00.000Z",
+        "time": "16:15",
+        "eurMwh": 9.06,
+        "sekKwh": 0.100847,
+        "oreKwh": 10.085
+      },
+      {
+        "utc": "2026-10-26T15:30:00.000Z",
+        "time": "16:30",
+        "eurMwh": 10,
+        "sekKwh": 0.11131,
+        "oreKwh": 11.131
+      },
+      {
+        "utc": "2026-10-26T15:45:00.000Z",
+        "time": "16:45",
+        "eurMwh": 16.94,
+        "sekKwh": 0.188559,
+        "oreKwh": 18.856
+      },
+      {
+        "utc": "2026-10-26T16:00:00.000Z",
+        "time": "17:00",
+        "eurMwh": 11.99,
+        "sekKwh": 0.133461,
+        "oreKwh": 13.346
+      },
+      {
+        "utc": "2026-10-26T16:15:00.000Z",
+        "time": "17:15",
+        "eurMwh": 15.18,
+        "sekKwh": 0.168969,
+        "oreKwh": 16.897
+      },
+      {
+        "utc": "2026-10-26T16:30:00.000Z",
+        "time": "17:30",
+        "eurMwh": 23.67,
+        "sekKwh": 0.263471,
+        "oreKwh": 26.347
+      },
+      {
+        "utc": "2026-10-26T16:45:00.000Z",
+        "time": "17:45",
+        "eurMwh": 25.53,
+        "sekKwh": 0.284174,
+        "oreKwh": 28.417
+      },
+      {
+        "utc": "2026-10-26T17:00:00.000Z",
+        "time": "18:00",
+        "eurMwh": 35.97,
+        "sekKwh": 0.400382,
+        "oreKwh": 40.038
+      },
+      {
+        "utc": "2026-10-26T17:15:00.000Z",
+        "time": "18:15",
+        "eurMwh": 31.55,
+        "sekKwh": 0.351183,
+        "oreKwh": 35.118
+      },
+      {
+        "utc": "2026-10-26T17:30:00.000Z",
+        "time": "18:30",
+        "eurMwh": 30,
+        "sekKwh": 0.33393,
+        "oreKwh": 33.393
+      },
+      {
+        "utc": "2026-10-26T17:45:00.000Z",
+        "time": "18:45",
+        "eurMwh": 36.69,
+        "sekKwh": 0.408396,
+        "oreKwh": 40.84
+      },
+      {
+        "utc": "2026-10-26T18:00:00.000Z",
+        "time": "19:00",
+        "eurMwh": 43.38,
+        "sekKwh": 0.482863,
+        "oreKwh": 48.286
+      },
+      {
+        "utc": "2026-10-26T18:15:00.000Z",
+        "time": "19:15",
+        "eurMwh": 42.6,
+        "sekKwh": 0.474181,
+        "oreKwh": 47.418
+      },
+      {
+        "utc": "2026-10-26T18:30:00.000Z",
+        "time": "19:30",
+        "eurMwh": 40.42,
+        "sekKwh": 0.449915,
+        "oreKwh": 44.992
+      },
+      {
+        "utc": "2026-10-26T18:45:00.000Z",
+        "time": "19:45",
+        "eurMwh": 40.49,
+        "sekKwh": 0.450694,
+        "oreKwh": 45.069
+      },
+      {
+        "utc": "2026-10-26T19:00:00.000Z",
+        "time": "20:00",
+        "eurMwh": 38.98,
+        "sekKwh": 0.433886,
+        "oreKwh": 43.389
+      },
+      {
+        "utc": "2026-10-26T19:15:00.000Z",
+        "time": "20:15",
+        "eurMwh": 37.51,
+        "sekKwh": 0.417524,
+        "oreKwh": 41.752
+      },
+      {
+        "utc": "2026-10-26T19:30:00.000Z",
+        "time": "20:30",
+        "eurMwh": 35,
+        "sekKwh": 0.389585,
+        "oreKwh": 38.959
+      },
+      {
+        "utc": "2026-10-26T19:45:00.000Z",
+        "time": "20:45",
+        "eurMwh": 30,
+        "sekKwh": 0.33393,
+        "oreKwh": 33.393
+      },
+      {
+        "utc": "2026-10-26T20:00:00.000Z",
+        "time": "21:00",
+        "eurMwh": 25.78,
+        "sekKwh": 0.286957,
+        "oreKwh": 28.696
+      },
+      {
+        "utc": "2026-10-26T20:15:00.000Z",
+        "time": "21:15",
+        "eurMwh": 21.38,
+        "sekKwh": 0.237981,
+        "oreKwh": 23.798
+      },
+      {
+        "utc": "2026-10-26T20:30:00.000Z",
+        "time": "21:30",
+        "eurMwh": 16.84,
+        "sekKwh": 0.187446,
+        "oreKwh": 18.745
+      },
+      {
+        "utc": "2026-10-26T20:45:00.000Z",
+        "time": "21:45",
+        "eurMwh": 17.11,
+        "sekKwh": 0.190451,
+        "oreKwh": 19.045
+      },
+      {
+        "utc": "2026-10-26T21:00:00.000Z",
+        "time": "22:00",
+        "eurMwh": 26.71,
+        "sekKwh": 0.297309,
+        "oreKwh": 29.731
+      },
+      {
+        "utc": "2026-10-26T21:15:00.000Z",
+        "time": "22:15",
+        "eurMwh": 20.49,
+        "sekKwh": 0.228074,
+        "oreKwh": 22.807
+      },
+      {
+        "utc": "2026-10-26T21:30:00.000Z",
+        "time": "22:30",
+        "eurMwh": 11.99,
+        "sekKwh": 0.133461,
+        "oreKwh": 13.346
+      },
+      {
+        "utc": "2026-10-26T21:45:00.000Z",
+        "time": "22:45",
+        "eurMwh": 10,
+        "sekKwh": 0.11131,
+        "oreKwh": 11.131
+      },
+      {
+        "utc": "2026-10-26T22:00:00.000Z",
+        "time": "23:00",
+        "eurMwh": 18.65,
+        "sekKwh": 0.207593,
+        "oreKwh": 20.759
+      },
+      {
+        "utc": "2026-10-26T22:15:00.000Z",
+        "time": "23:15",
+        "eurMwh": 15,
+        "sekKwh": 0.166965,
+        "oreKwh": 16.697
+      },
+      {
+        "utc": "2026-10-26T22:30:00.000Z",
+        "time": "23:30",
+        "eurMwh": 14.37,
+        "sekKwh": 0.159952,
+        "oreKwh": 15.995
+      },
+      {
+        "utc": "2026-10-26T22:45:00.000Z",
+        "time": "23:45",
+        "eurMwh": 9.62,
+        "sekKwh": 0.10708,
+        "oreKwh": 10.708
+      }
     ],
     "filled": [
       false,
@@ -606,6 +1698,7 @@
       false,
       false,
       false,
+      true,
       false,
       false,
       false,
@@ -613,6 +1706,7 @@
       false,
       false,
       false,
+      true,
       false,
       false,
       false,
@@ -637,13 +1731,20 @@
       false,
       false,
       false,
+      true,
+      true,
       false,
       false,
       false,
+      true,
       false,
       false,
+      true,
+      true,
       false,
       false,
+      true,
+      true,
       false,
       false,
       false,
@@ -667,16 +1768,7 @@
       false,
       false,
       false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
+      true,
       false,
       false,
       false,
@@ -698,18 +1790,48 @@
       false,
       false
     ],
-    "stillNullCount": 96
+    "stillNullCount": 0
   },
   "windows": {
     "raw": {
-      "cheapest2h": null,
-      "cheapest4h": null,
+      "cheapest2h": {
+        "startIndex": 22,
+        "slots": 8,
+        "startTime": "05:30",
+        "endTime": "07:15",
+        "avgOreKwh": -0.179
+      },
+      "cheapest4h": {
+        "startIndex": 14,
+        "slots": 16,
+        "startTime": "03:30",
+        "endTime": "07:15",
+        "avgOreKwh": 0.376
+      },
       "cheapest8h": null
     },
     "extrapolated": {
-      "cheapest2h": null,
-      "cheapest4h": null,
-      "cheapest8h": null
+      "cheapest2h": {
+        "startIndex": 22,
+        "slots": 8,
+        "startTime": "05:30",
+        "endTime": "07:15",
+        "avgOreKwh": -0.179
+      },
+      "cheapest4h": {
+        "startIndex": 14,
+        "slots": 16,
+        "startTime": "03:30",
+        "endTime": "07:15",
+        "avgOreKwh": 0.376
+      },
+      "cheapest8h": {
+        "startIndex": 0,
+        "slots": 32,
+        "startTime": "00:00",
+        "endTime": "07:45",
+        "avgOreKwh": 0.598
+      }
     }
   }
 }
