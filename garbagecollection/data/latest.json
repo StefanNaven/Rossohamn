@@ -1,8 +1,8 @@
 {
   "address": "Höjden",
-  "restavfall": "2026-10-21",
-  "matavfall": "2026-10-21",
-  "updatedAt": "2026-10-12 14:00",
+  "restavfall": "2026-11-04",
+  "matavfall": "2026-11-04",
+  "updatedAt": "2026-10-26 15:00",
   "source": {
     "provider": "homey"
   }
