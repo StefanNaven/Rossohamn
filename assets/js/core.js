@@ -1,0 +1,30 @@
+export const TZ = 'Europe/Stockholm';
+export const PATHS = Object.freeze({ today:'/spotprices/api/today.json', tomorrow:'/spotprices/api/tomorrow.json', garbage:'/garbagecollection/data/latest.json', garbageTable:'/garbagecollection/data/garbagetable.json', history:'/spotprices/history.json', energy:'/config/energy.json', site:'/config/site.json' });
+export const DEFAULT_SITE = {timeZone:TZ,weather:{name:'Rossöhamns närområde',latitude:58.9,longitude:11.2},freshnessHours:{prices:30,garbage:48,garbageTable:720},tomorrowExpectedAfterHour:16};
+export function dateKey(value=new Date()) {const p=new Intl.DateTimeFormat('sv-SE',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(value);return ['year','month','day'].map(k=>p.find(x=>x.type===k).value).join('-');}
+export function validDate(value){if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value))return false;const d=new Date(value+'T12:00:00Z');return Number.isFinite(+d)&&d.toISOString().slice(0,10)===value;}
+export function addDays(key,days){if(!validDate(key))throw new Error('Ogiltigt datum');const d=new Date(key+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+days);return d.toISOString().slice(0,10);}
+export function daysUntil(key,now=new Date()){return validDate(key)?Math.round((Date.parse(key+'T12:00:00Z')-Date.parse(dateKey(now)+'T12:00:00Z'))/86400000):null;}
+export function formatDate(key){return validDate(key)?new Intl.DateTimeFormat('sv-SE',{timeZone:TZ,weekday:'long',day:'numeric',month:'long'}).format(new Date(key+'T12:00:00Z')):'—';}
+export function timeText(value){const d=new Date(value);return Number.isFinite(+d)?new Intl.DateTimeFormat('sv-SE',{timeZone:TZ,hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(d):'—';}
+export function dateTimeText(value){const d=new Date(value);return value!=null&&Number.isFinite(+d)?new Intl.DateTimeFormat('sv-SE',{timeZone:TZ,dateStyle:'short',timeStyle:'short'}).format(d):'—';}
+// Homey writes garbage timestamps as local civil time without an offset. Resolve explicitly
+// in Stockholm; ambiguous/nonexistent clock times are not silently assigned an offset.
+export function timestampMs(value){if(typeof value!=='string')return null;if(/(?:Z|[+-]\d\d:\d\d)$/i.test(value)&&/^\d{4}-\d{2}-\d{2}T/.test(value)){const t=Date.parse(value);return Number.isFinite(t)?t:null;}
+ const m=value.match(/^(\d{4}-\d{2}-\d{2})[ T](\d\d):(\d\d)(?::(\d\d))?$/);if(!m||!validDate(m[1])||+m[2]>23||+m[3]>59||+(m[4]||0)>59)return null;
+ const civil=Date.parse(`${m[1]}T${m[2]}:${m[3]}:${m[4]||'00'}Z`);const fmt=new Intl.DateTimeFormat('sv-SE',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});const matches=[];
+ for(const offset of [60,120]){const candidate=civil-offset*60000;const p=Object.fromEntries(fmt.formatToParts(new Date(candidate)).map(x=>[x.type,x.value]));if(`${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}`===`${m[1]} ${m[2]}:${m[3]}:${m[4]||'00'}`)matches.push(candidate);}return matches.length===1?matches[0]:null;
+}
+export function numberText(v,d=2){return Number.isFinite(v)?v.toLocaleString('sv-SE',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';}
+export function countdown(key,now=new Date()){const n=daysUntil(key,now);return n===null?'Datum saknas':n<0?'Datum har passerat':n===0?'Idag':n===1?'Imorgon':`${n} dagar kvar`;}
+export function ageStatus(value,maxHours,now=new Date()){const t=timestampMs(value);if(t===null)return {state:'warn',label:'Okänd uppdateringstid'};const h=(+now-t)/3600000;if(h< -0.0834)return {state:'error',label:'Uppdateringstid ligger i framtiden'};return h>maxHours?{state:'warn',label:`Föråldrad (${Math.floor(h)} h)`}:{state:'ok',label:'Aktuell'};}
+export async function fetchJson(url,{timeout=12000,signal}={}){const ctrl=new AbortController();const timer=setTimeout(()=>ctrl.abort(),timeout);const abort=()=>ctrl.abort();if(signal?.aborted)ctrl.abort();signal?.addEventListener('abort',abort,{once:true});try{const r=await fetch(url,{cache:'no-store',signal:ctrl.signal,credentials:'omit',referrerPolicy:'no-referrer'});if(!r.ok)throw new Error(`HTTP ${r.status}`);return await r.json();}finally{clearTimeout(timer);signal?.removeEventListener('abort',abort);}}
+export async function loadSite(){try{const j=await fetchJson(PATHS.site);if(j.schemaVersion!==1)throw new Error('Konfiguration');const h=j.freshnessHours??{};return {...DEFAULT_SITE, ...j, timeZone:TZ,freshnessHours:Object.fromEntries(Object.entries(DEFAULT_SITE.freshnessHours).map(([k,v])=>[k,Number.isFinite(h[k])&&h[k]>0?h[k]:v])),tomorrowExpectedAfterHour:Number.isInteger(j.tomorrowExpectedAfterHour)&&j.tomorrowExpectedAfterHour>=0&&j.tomorrowExpectedAfterHour<=23?j.tomorrowExpectedAfterHour:16};}catch{return DEFAULT_SITE;}}
+export function setText(id,text){const e=document.getElementById(id);if(e)e.textContent=text??'—';}
+export function setStatus(id,status){const e=document.getElementById(id);if(e){e.textContent=status.label;e.dataset.state=status.state;}}
+export function element(tag,text,cls){const e=document.createElement(tag);if(text!=null)e.textContent=text;if(cls)e.className=cls;return e;}
+export function rowNode(title,detail,value,state){const row=element('div',null,'data-row');const left=element('div');left.append(element('strong',title));if(detail)left.append(element('span',detail,'small'));row.append(left);const right=element('span',value,state?'status':'');if(state)right.dataset.state=state;row.append(right);return row;}
+export function updateButton(id,action){const button=document.getElementById(id);button?.addEventListener('click',async()=>{button.disabled=true;try{await action();}finally{button.disabled=false;}});}
+export function getStorage(key){try{return globalThis.localStorage?.getItem(key)??null;}catch{return null;}}
+export function setStorage(key,val){try{if(!globalThis.localStorage)return false;localStorage.setItem(key,val);return true;}catch{return false;}}
+export function removeStorage(key){try{globalThis.localStorage?.removeItem(key);}catch{}}

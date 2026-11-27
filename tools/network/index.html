@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="sv">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <meta content="#101923" name="theme-color"/>
+  <meta content="Rossöhamn – energi, hushåll, tekniska verktyg och datastatus." name="description"/>
+  <title>
+   Nätverksverktyg · Rossöhamn
+  </title>
+  <link href="/assets/favicon.svg" rel="icon" type="image/svg+xml"/>
+  <link href="/assets/css/base.css" rel="stylesheet"/>
+ </head>
+ <body>
+  <a class="skip" href="#main">
+   Till innehållet
+  </a>
+  <header class="site-header">
+   <div class="header-inner">
+    <a class="brand" href="/">
+     <span aria-hidden="true" class="brand-mark">
+      R
+     </span>
+     <span>
+      Rossöhamn
+      <small>
+       HOME &amp; AUTOMATION
+      </small>
+     </span>
+    </a>
+    <nav aria-label="Huvudmeny">
+     <a href="/">
+      Översikt
+     </a>
+     <a href="/spotprices/">
+      Energi
+     </a>
+     <a href="/household/">
+      Hushåll
+     </a>
+     <a aria-current="page" href="/tools/">
+      Verktyg
+     </a>
+     <a href="/status/">
+      System
+     </a>
+    </nav>
+   </div>
+  </header>
+  <main class="wrap" id="main">
+   <section class="page-heading">
+    <div>
+     <p class="eyebrow">
+      Verktyg
+     </p>
+     <h1>
+      Nätverk
+     </h1>
+     <a href="/tools/">
+      ← Alla verktyg
+     </a>
+    </div>
+   </section>
+   <section class="card">
+    <h2>
+     What's my IP
+    </h2>
+    <p>
+     Hämtar publika adresser via ipify och ungefärlig IP-information via ipapi.co. Externa tjänster ser din anslutnings IP. VPN och proxy kan påverka resultatet. IPv6 kan vara otillgängligt.
+    </p>
+    <button class="button primary" id="loadIp">
+     Hämta IP-information
+    </button>
+    <dl aria-live="polite" class="key-value" id="ipResult">
+    </dl>
+    <p class="small" id="ipMessage" role="status">
+    </p>
+   </section>
+   <section class="card">
+    <h2>
+     DNS Lookup
+    </h2>
+    <p>
+     Frågan skickas till Google Public DNS (DNS over HTTPS), inte din lokala DNS-server.
+    </p>
+    <form class="row" id="dnsForm">
+     <label class="grow">
+      Publikt domännamn
+      <input id="dnsName" placeholder="example.com" required=""/>
+     </label>
+     <label>
+      Typ
+      <select id="dnsType">
+       <option>
+        A
+       </option>
+       <option>
+        AAAA
+       </option>
+       <option>
+        CNAME
+       </option>
+       <option>
+        MX
+       </option>
+       <option>
+        TXT
+       </option>
+       <option>
+        NS
+       </option>
+       <option>
+        SOA
+       </option>
+       <option>
+        CAA
+       </option>
+      </select>
+     </label>
+     <button type="submit">
+      Slå upp
+     </button>
+    </form>
+    <pre aria-live="polite" id="dnsResult"></pre>
+   </section>
+   <section class="card">
+    <h2>
+     IPv4 Subnet Calculator
+    </h2>
+    <form class="row" id="subnetForm">
+     <label class="grow">
+      IPv4/CIDR
+      <input id="subnetInput" required="" value="192.168.1.10/24"/>
+     </label>
+     <button type="submit">
+      Beräkna
+     </button>
+    </form>
+    <dl aria-live="polite" class="key-value" id="subnetResult">
+    </dl>
+   </section>
+   <section class="card">
+    <h2>
+     Webbläsarinformation
+    </h2>
+    <dl class="key-value" id="browserInfo">
+    </dl>
+   </section>
+  </main>
+  <footer class="site-footer">
+   <span>
+    Rossöhamn · Energi &amp; automation
+   </span>
+   <a href="https://github.com/StefanNaven/Rossohamn">
+    GitHub
+   </a>
+   <a href="/status/">
+    Datastatus
+   </a>
+  </footer>
+  <script src="/assets/js/network.js" type="module">
+  </script>
+ </body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "supplierMarkupOreExVat": 5.30,
+  "gridTransferOreIncVat": 26.00,
+  "energyTaxOreIncVat": 45.00,
+  "vatPercent": 25,
+  "source": "Senast kända Homey-inställningar 2026-11-17; kontrollera mot aktuellt avtal.",
+  "updatedAt": null
+}

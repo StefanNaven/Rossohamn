@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="sv">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <meta content="#101923" name="theme-color"/>
+  <meta content="Rossöhamn – energi, hushåll, tekniska verktyg och datastatus." name="description"/>
+  <title>
+   Hushåll · Rossöhamn
+  </title>
+  <link href="/assets/favicon.svg" rel="icon" type="image/svg+xml"/>
+  <link href="/assets/css/base.css" rel="stylesheet"/>
+ </head>
+ <body>
+  <a class="skip" href="#main">
+   Till innehållet
+  </a>
+  <header class="site-header">
+   <div class="header-inner">
+    <a class="brand" href="/">
+     <span aria-hidden="true" class="brand-mark">
+      R
+     </span>
+     <span>
+      Rossöhamn
+      <small>
+       HOME &amp; AUTOMATION
+      </small>
+     </span>
+    </a>
+    <nav aria-label="Huvudmeny">
+     <a href="/">
+      Översikt
+     </a>
+     <a href="/spotprices/">
+      Energi
+     </a>
+     <a aria-current="page" href="/household/">
+      Hushåll
+     </a>
+     <a href="/tools/">
+      Verktyg
+     </a>
+     <a href="/status/">
+      System
+     </a>
+    </nav>
+   </div>
+  </header>
+  <main class="wrap" id="main">
+   <section class="page-heading">
+    <div>
+     <p class="eyebrow">
+      Vardagsplanering
+     </p>
+     <h1>
+      Hushåll
+     </h1>
+     <p class="muted">
+      Praktisk information från befintliga datakällor.
+     </p>
+    </div>
+   </section>
+   <section class="card">
+    <h2>
+     Sophämtning
+    </h2>
+    <p>
+     Hämtningsdatum för Höjden, avvikande dagar och kalenderexport.
+    </p>
+    <a class="button primary" href="/garbagecollection/">
+     Öppna sophämtning →
+    </a>
+   </section>
+   <section class="card" id="weather">
+    <h2>
+     Väder och dagsljus
+    </h2>
+    <p>
+     Områdesprognos för Rossöhamns närområde, inte en lokal mätstation. När du hämtar prognosen skickas en begäran till Open-Meteo med fasta områdeskoordinater och din anslutnings IP-adress.
+    </p>
+    <button class="button primary" id="loadWeather">
+     Hämta väder
+    </button>
+    <p class="small" id="weatherStatus" role="status">
+     Ingen extern förfrågan har skickats.
+    </p>
+    <div class="stack" id="weatherResult">
+    </div>
+    <p class="small">
+     Källa:
+     <a href="https://open-meteo.com/en/docs">
+      Open-Meteo
+     </a>
+     . Prognoser är inte mätvärden.
+    </p>
+   </section>
+  </main>
+  <footer class="site-footer">
+   <span>
+    Rossöhamn · Energi &amp; automation
+   </span>
+   <a href="https://github.com/StefanNaven/Rossohamn">
+    GitHub
+   </a>
+   <a href="/status/">
+    Datastatus
+   </a>
+  </footer>
+  <script src="/assets/js/weather.js" type="module">
+  </script>
+ </body>
+</html>

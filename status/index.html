@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="sv">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <meta content="#101923" name="theme-color"/>
+  <meta content="Rossöhamn – energi, hushåll, tekniska verktyg och datastatus." name="description"/>
+  <title>
+   Datastatus · Rossöhamn
+  </title>
+  <link href="/assets/favicon.svg" rel="icon" type="image/svg+xml"/>
+  <link href="/assets/css/base.css" rel="stylesheet"/>
+ </head>
+ <body>
+  <a class="skip" href="#main">
+   Till innehållet
+  </a>
+  <header class="site-header">
+   <div class="header-inner">
+    <a class="brand" href="/">
+     <span aria-hidden="true" class="brand-mark">
+      R
+     </span>
+     <span>
+      Rossöhamn
+      <small>
+       HOME &amp; AUTOMATION
+      </small>
+     </span>
+    </a>
+    <nav aria-label="Huvudmeny">
+     <a href="/">
+      Översikt
+     </a>
+     <a href="/spotprices/">
+      Energi
+     </a>
+     <a href="/household/">
+      Hushåll
+     </a>
+     <a href="/tools/">
+      Verktyg
+     </a>
+     <a aria-current="page" href="/status/">
+      System
+     </a>
+    </nav>
+   </div>
+  </header>
+  <main class="wrap" id="main">
+   <section class="page-heading">
+    <div>
+     <p class="eyebrow">
+      Publik datakvalitet
+     </p>
+     <h1>
+      System &amp; datastatus
+     </h1>
+     <p class="muted">
+      Kontrollerar publicerade filer, inte Homeys eller Raspberry Pis interna driftstatus.
+     </p>
+    </div>
+    <button class="button" id="refreshStatus">
+     Uppdatera
+    </button>
+   </section>
+   <section class="card">
+    <h2>
+     Datakällor
+    </h2>
+    <p class="small" id="statusTime" role="status">
+     Laddar…
+    </p>
+    <div aria-live="polite" class="stack" id="statusRows">
+    </div>
+   </section>
+   <section class="card">
+    <h2>
+     Kontrollhistorik i denna webbläsare
+    </h2>
+    <p class="small">
+     De senaste 20 manuella eller initiala kontrollerna, sparade lokalt. Inte en central driftlogg.
+    </p>
+    <div class="stack" id="statusHistory">
+    </div>
+    <button id="clearHistory">
+     Rensa historik
+    </button>
+   </section>
+   <section class="card">
+    <h2>
+     Automatiska tester
+    </h2>
+    <p>
+     GitHub Actions kontrollerar kod, länkar och publicerade JSON-format. Schemalagd datakontroll kontrollerar aktualitet.
+    </p>
+    <a href="https://github.com/StefanNaven/Rossohamn/actions">
+     Visa GitHub Actions →
+    </a>
+   </section>
+  </main>
+  <footer class="site-footer">
+   <span>
+    Rossöhamn · Energi &amp; automation
+   </span>
+   <a href="https://github.com/StefanNaven/Rossohamn">
+    GitHub
+   </a>
+   <a href="/status/">
+    Datastatus
+   </a>
+  </footer>
+  <script src="/assets/js/status.js" type="module">
+  </script>
+ </body>
+</html>
