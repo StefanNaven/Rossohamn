@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="sv">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <meta content="#101923" name="theme-color"/>
+  <meta content="Rossöhamn – energi, hushåll, tekniska verktyg och datastatus." name="description"/>
+  <title>
+   Verktyg · Rossöhamn
+  </title>
+  <link href="/assets/favicon.svg" rel="icon" type="image/svg+xml"/>
+  <link href="/assets/css/base.css" rel="stylesheet"/>
+ </head>
+ <body>
+  <a class="skip" href="#main">
+   Till innehållet
+  </a>
+  <header class="site-header">
+   <div class="header-inner">
+    <a class="brand" href="/">
+     <span aria-hidden="true" class="brand-mark">
+      R
+     </span>
+     <span>
+      Rossöhamn
+      <small>
+       HOME &amp; AUTOMATION
+      </small>
+     </span>
+    </a>
+    <nav aria-label="Huvudmeny">
+     <a href="/">
+      Översikt
+     </a>
+     <a href="/spotprices/">
+      Energi
+     </a>
+     <a href="/household/">
+      Hushåll
+     </a>
+     <a aria-current="page" href="/tools/">
+      Verktyg
+     </a>
+     <a href="/status/">
+      System
+     </a>
+    </nav>
+   </div>
+  </header>
+  <main class="wrap" id="main">
+   <section class="page-heading">
+    <div>
+     <p class="eyebrow">
+      Tekniska hjälpmedel
+     </p>
+     <h1>
+      Verktyg
+     </h1>
+     <p class="muted">
+      Små verktyg som körs direkt i webbläsaren.
+     </p>
+    </div>
+   </section>
+   <div class="dashboard-grid">
+    <section class="card">
+     <h2>
+      Nätverk
+     </h2>
+     <p>
+      Publik IPv4/IPv6, ISP, ASN, DNS-uppslagning och lokal IPv4-subnätsberäkning.
+     </p>
+     <a class="button primary" href="/tools/network/">
+      Nätverksverktyg →
+     </a>
+    </section>
+    <section class="card">
+     <h2>
+      JSON Formatter
+     </h2>
+     <label for="jsonInput">
+      JSON
+     </label>
+     <textarea id="jsonInput" placeholder='{"example": true}' rows="6" spellcheck="false"></textarea>
+     <div class="row">
+      <button id="jsonFormat">
+       Formatera
+      </button>
+      <button id="jsonCompact">
+       Kompaktera
+      </button>
+      <button id="jsonCopy">
+       Kopiera
+      </button>
+     </div>
+     <p class="small" id="jsonMessage" role="status">
+     </p>
+    </section>
+    <section class="card">
+     <h2>
+      Base64 Encoder / Decoder
+     </h2>
+     <label for="base64Input">
+      Text eller Base64 (UTF-8)
+     </label>
+     <textarea id="base64Input" rows="5" spellcheck="false"></textarea>
+     <div class="row">
+      <button id="base64Encode">
+       Encode
+      </button>
+      <button id="base64Decode">
+       Decode
+      </button>
+      <button id="base64Copy">
+       Kopiera
+      </button>
+     </div>
+     <p class="small" id="base64Message" role="status">
+     </p>
+    </section>
+    <section class="card">
+     <h2>
+      Unix Timestamp Converter
+     </h2>
+     <label for="unixInput">
+      Unix-tid
+     </label>
+     <div class="row">
+      <input class="grow" id="unixInput" inputmode="numeric"/>
+      <select aria-label="Enhet" id="unixUnit">
+       <option value="s">
+        Sekunder
+       </option>
+       <option value="ms">
+        Millisekunder
+       </option>
+      </select>
+     </div>
+     <button id="unixConvert">
+      Konvertera
+     </button>
+     <label for="isoInput">
+      ISO 8601 (inkl. tidszon)
+     </label>
+     <input id="isoInput" placeholder="2026-11-25T20:00:00Z"/>
+     <div class="row">
+      <button id="isoConvert">
+       Till Unix
+      </button>
+      <button id="unixNow">
+       Nu
+      </button>
+     </div>
+     <pre aria-live="polite" id="unixResult"></pre>
+    </section>
+   </div>
+   <p class="small">
+    JSON, Base64 och tidskonvertering skickar inte inmatad data till en server. Lägg ändå aldrig in hemligheter på en publik webbplats.
+   </p>
+  </main>
+  <footer class="site-footer">
+   <span>
+    Rossöhamn · Energi &amp; automation
+   </span>
+   <a href="https://github.com/StefanNaven/Rossohamn">
+    GitHub
+   </a>
+   <a href="/status/">
+    Datastatus
+   </a>
+  </footer>
+  <script src="/assets/js/tools.js" type="module">
+  </script>
+ </body>
+</html>

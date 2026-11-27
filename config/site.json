@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "timeZone": "Europe/Stockholm",
+  "weather": {"name": "Rossöhamns närområde", "latitude": 58.9, "longitude": 11.2},
+  "freshnessHours": {"prices": 30, "garbage": 48, "garbageTable": 720},
+  "tomorrowExpectedAfterHour": 16
+}

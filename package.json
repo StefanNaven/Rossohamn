@@ -3,6 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "check": "python3 scripts/validate_site.py && node scripts/validate-data.js",
+    "check:freshness": "node scripts/validate-data.js --freshness"
   }
 }

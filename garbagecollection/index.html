@@ -1,97 +1,154 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="sv">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Rossohamn – Garbage Collection</title>
-  <link rel="stylesheet" href="../assets/home.css" />
-  <link rel="stylesheet" href="./garbage.css" />
-</head>
-<body>
-  <main class="gc-page">
-    <section class="tile hero">
-      <div class="row-space">
-        <div>
-          <h1>Garbage Collection</h1>
-          <p class="gc-subtitle">Sophämtning för Höjden</p>
-        </div>
-      </div>
-
-      <div class="gc-links">
-        <a
-          href="https://www.stromstad.se/byggaboochmiljo/avfallochatervinning/sophamtning.4.47f506a2157fa40ebf68316c.html?query=Konrad+Olssons+v%C3%A4g+10"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Källa: Strömstads kommun
-        </a>
-      </div>
-    </section>
-
-    <section class="grid3 gc-top-grid">
-      <article class="tile">
-        <div class="tile-title">Adress</div>
-        <div id="addressValue" class="gc-value">Laddar…</div>
-      </article>
-
-      <article class="tile">
-        <div class="tile-title">Nästa Matavfall</div>
-        <div id="matavfallValue" class="gc-value">Laddar…</div>
-      </article>
-
-      <article class="tile">
-        <div class="tile-title">Nästa Restavfall</div>
-        <div id="restavfallValue" class="gc-value">Laddar…</div>
-      </article>
-    </section>
-
-    <section class="tile gc-status-tile">
-      <div class="tile-title">Status</div>
-      <div class="kv">
-        <div class="kv-row">
-          <span>Senast uppdaterad hämtning</span>
-          <strong id="updatedAtValue">Laddar…</strong>
-        </div>
-        <div class="kv-row">
-          <span>Senast uppdaterad infotabell</span>
-          <strong id="tableUpdatedAtValue">Laddar…</strong>
-        </div>
-        <div class="kv-row">
-          <span>Datakälla</span>
-          <strong id="sourceMode">Laddar…</strong>
-        </div>
-      </div>
-    </section>
-
-    <section class="tile gc-table-tile">
-      <div class="row-space gc-table-header">
-        <div class="tile-title">Avvikande hämtningsdagar</div>
-      </div>
-
-      <p class="gc-note">
-        Tabellen visar avvikande hämtningsdagar vid exempelvis helgdagar.
-      </p>
-
-      <div class="gc-table-wrap">
-        <table class="gc-table">
-          <thead>
-            <tr>
-              <th>Ordinarie hämtningsdag</th>
-              <th>Hämtas</th>
-            </tr>
-          </thead>
-          <tbody id="pickupTableBody">
-            <tr>
-              <td colspan="2">Laddar…</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <p id="tableMessage" class="gc-message"></p>
-    </section>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <meta content="#101923" name="theme-color"/>
+  <meta content="Rossöhamn – energi, hushåll, tekniska verktyg och datastatus." name="description"/>
+  <title>
+   Sophämtning · Rossöhamn
+  </title>
+  <link href="/assets/favicon.svg" rel="icon" type="image/svg+xml"/>
+  <link href="/assets/css/base.css" rel="stylesheet"/>
+ </head>
+ <body>
+  <a class="skip" href="#main">
+   Till innehållet
+  </a>
+  <header class="site-header">
+   <div class="header-inner">
+    <a class="brand" href="/">
+     <span aria-hidden="true" class="brand-mark">
+      R
+     </span>
+     <span>
+      Rossöhamn
+      <small>
+       HOME &amp; AUTOMATION
+      </small>
+     </span>
+    </a>
+    <nav aria-label="Huvudmeny">
+     <a href="/">
+      Översikt
+     </a>
+     <a href="/spotprices/">
+      Energi
+     </a>
+     <a aria-current="page" href="/household/">
+      Hushåll
+     </a>
+     <a href="/tools/">
+      Verktyg
+     </a>
+     <a href="/status/">
+      System
+     </a>
+    </nav>
+   </div>
+  </header>
+  <main class="wrap" id="main">
+   <section class="page-heading">
+    <div>
+     <p class="eyebrow">
+      Hushåll · Höjden
+     </p>
+     <h1>
+      Sophämtning
+     </h1>
+     <p class="muted">
+      Publicerade datum från Homey.
+     </p>
+    </div>
+    <button class="button" id="refreshGarbage">
+     Uppdatera
+    </button>
+   </section>
+   <section class="card">
+    <h2>
+     Nästa hämtning
+    </h2>
+    <p class="small" id="garbageNotice" role="status">
+     Laddar…
+    </p>
+    <div class="metrics">
+     <div>
+      <span class="muted">
+       Matavfall
+      </span>
+      <strong class="metric metric-sm" id="matavfallValue">
+       —
+      </strong>
+      <span class="small" id="foodCountdown">
+       —
+      </span>
+     </div>
+     <div>
+      <span class="muted">
+       Restavfall
+      </span>
+      <strong class="metric metric-sm" id="restavfallValue">
+       —
+      </strong>
+      <span class="small" id="restCountdown">
+       —
+      </span>
+     </div>
+    </div>
+    <p class="small" id="updatedAtValue">
+     —
+    </p>
+    <button class="button" disabled="" id="downloadCalendar">
+     Exportera aktuella datum (.ics)
+    </button>
+    <p class="small">
+     Engångsexport, inte automatisk kalenderprenumeration. Importera på nytt när datumen ändras.
+    </p>
+   </section>
+   <section class="card">
+    <h2>
+     Avvikande hämtningsdagar
+    </h2>
+    <p class="small" id="tableMessage" role="status">
+     Laddar…
+    </p>
+    <div class="table-scroll">
+     <table>
+      <thead>
+       <tr>
+        <th>
+         Ordinarie dag
+        </th>
+        <th>
+         Hämtas
+        </th>
+       </tr>
+      </thead>
+      <tbody id="pickupTableBody">
+      </tbody>
+     </table>
+    </div>
+    <p class="small">
+     Kontrollera aktuella avvikelser hos
+     <a href="https://www.stromstad.se/byggaboochmiljo/avfallochatervinning/sophamtning.4.47f506a2157fa40ebf68316c.html">
+      Strömstads kommun
+     </a>
+     .
+    </p>
+   </section>
   </main>
-
-  <script src="./lib/garbage.js"></script>
-</body>
+  <footer class="site-footer">
+   <span>
+    Rossöhamn · Energi &amp; automation
+   </span>
+   <a href="https://github.com/StefanNaven/Rossohamn">
+    GitHub
+   </a>
+   <a href="/status/">
+    Datastatus
+   </a>
+  </footer>
+  <script src="/garbagecollection/lib/garbage.js" type="module">
+  </script>
+ </body>
 </html>

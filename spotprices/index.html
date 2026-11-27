@@ -1,128 +1,297 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="sv">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Rossohamn – Spotpriser (SE3)</title>
-
-  <link rel="stylesheet" href="styles.css">
-
-  <!-- Chart.js (CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-</head>
-
-<body>
-  <div class="wrap">
-    <div class="card">
-      <div class="row" style="justify-content:space-between;">
-        <div>
-          <div class="title">Rossohamn – Spotpriser</div>
-          <div class="small">Källa: ENTSO-E A44 (SE3) → history.json</div>
-        </div>
-        <div class="row">
-          <label class="small" for="src">Data-URL</label>
-          <input id="src" style="min-width:180px; flex: 1 1 260px;" />
-          <button id="reload" class="btn">Ladda</button>
-        </div>
-      </div>
-
-      <div id="meta" class="meta" style="margin-top:10px;"></div>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <meta content="#101923" name="theme-color"/>
+  <meta content="Rossöhamn – energi, hushåll, tekniska verktyg och datastatus." name="description"/>
+  <title>
+   Energi · Rossöhamn
+  </title>
+  <link href="/assets/favicon.svg" rel="icon" type="image/svg+xml"/>
+  <link href="/assets/css/base.css" rel="stylesheet"/>
+  <link href="/spotprices/styles.css" rel="stylesheet"/>
+ </head>
+ <body>
+  <a class="skip" href="#main">
+   Till innehållet
+  </a>
+  <header class="site-header">
+   <div class="header-inner">
+    <a class="brand" href="/">
+     <span aria-hidden="true" class="brand-mark">
+      R
+     </span>
+     <span>
+      Rossöhamn
+      <small>
+       HOME &amp; AUTOMATION
+      </small>
+     </span>
+    </a>
+    <nav aria-label="Huvudmeny">
+     <a href="/">
+      Översikt
+     </a>
+     <a aria-current="page" href="/spotprices/">
+      Energi
+     </a>
+     <a href="/household/">
+      Hushåll
+     </a>
+     <a href="/tools/">
+      Verktyg
+     </a>
+     <a href="/status/">
+      System
+     </a>
+    </nav>
+   </div>
+  </header>
+  <main class="wrap" id="main">
+   <section class="page-heading">
+    <div>
+     <p class="eyebrow">
+      ENTSO-E · SE3
+     </p>
+     <h1>
+      Energi &amp; elpriser
+     </h1>
+     <p class="muted">
+      Spotpris, historik, kostnader och planering.
+     </p>
     </div>
-
-    <div class="card">
-      <div class="row tabs">
-        <button id="tab-today" class="active">Idag</button>
-        <button id="tab-tomorrow">Imorgon</button>
-        <button id="tab-day">Dag</button>
-        <button id="tab-7d">7 dagar</button>
-        <button id="tab-14d">14 dagar</button>
-        <button id="tab-30d">30 dagar</button>
-
-        <span style="flex:1;"></span>
-
-        <label class="small" for="metric">Serie</label>
-        <select id="metric">
-          <option value="oreKwh" selected>öre/kWh</option>
-          <option value="sekKwh">SEK/kWh</option>
-          <option value="eurMwh">EUR/MWh</option>
-        </select>
-        
-        <label class="small" for="chartMode">Visning</label>
-        <select id="chartMode" title="Auto = staplar för dygn och nuvarande tidsfönster, linje för längre historik.">
-          <option value="auto" selected>Auto</option>
-          <option value="line">Linje</option>
-          <option value="bar">Staplar</option>
-        </select>
-        
-        <label class="toggle small" title="Fyll bara korta luckor (max 8 null i rad) med linjär interpolation. Rådata ändras inte.">
-          <input id="fillGaps" type="checkbox" />
-          Interpolera null (≤8)
-        </label>
-
-        <label class="toggle small" title="Visa referenslinjer motsvarande 1/2/3 kr/kWh (omräknat till vald serie).">
-          <input id="krLines" type="checkbox" />
-          1/2/3 kr-linjer
-        </label>
-
-        <label class="small" for="datePick">Datum</label>
-        <select id="datePick"></select>
-
-        <button id="prevDay" class="btn">←</button>
-        <button id="nextDay" class="btn">→</button>
-      </div>
-
-      <div style="margin-top:10px;" class="chartWrap">
-        <canvas id="chart"></canvas>
-      </div>
+    <a class="button" href="/status/">
+     Datastatus
+    </a>
+   </section>
+   <section class="card">
+    <div class="section-heading">
+     <h2>
+      Datakälla
+     </h2>
     </div>
-
-    <div class="card">
-      <div class="row" style="justify-content:space-between;">
-        <div style="font-weight:700;">Summering</div>
-        <div class="small" id="summaryNote">Billigaste fönster kräver komplett fönster (inga null)</div>
-      </div>
-      <div id="summary" style="margin-top:10px;"></div>
+    <div aria-live="polite" class="meta" id="meta">
+     Laddar historik…
     </div>
-
-    <!-- Graf 2 + summering, UNDER huvud-summeringen -->
-    <div class="card">
-      <div class="row" style="justify-content:space-between;">
-        <div style="font-weight:700;">Nuvarande tidsfönster (−2h / +18h)</div>
-        <div class="small" id="summaryNote14">—</div>
-      </div>
-
-      <div style="margin-top:10px;" class="chartWrap">
-        <canvas id="chart14"></canvas>
-      </div>
-
-      <div id="summary14" style="margin-top:10px;"></div>
+    <details>
+     <summary>
+      Avancerad datakälla
+     </summary>
+     <div class="row">
+      <label for="src">
+       Data-URL
+      </label>
+      <input class="grow" id="src" value="history.json"/>
+      <button class="btn" id="reload">
+       Ladda
+      </button>
+     </div>
+     <p class="small">
+      En extern URL kan göra en begäran till den angivna servern.
+     </p>
+    </details>
+   </section>
+   <section class="card">
+    <h2>
+     Prisutveckling
+    </h2>
+    <div class="row tabs">
+     <button class="active" id="tab-today">
+      Idag
+     </button>
+     <button id="tab-tomorrow">
+      Imorgon
+     </button>
+     <button id="tab-day">
+      Dag
+     </button>
+     <button id="tab-7d">
+      7 dagar
+     </button>
+     <button id="tab-14d">
+      14 dagar
+     </button>
+     <button id="tab-30d">
+      30 dagar
+     </button>
     </div>
-
-    <div class="card" id="costCard" style="display:none;">
-      <div class="row" style="justify-content:space-between;">
-        <div>
-          <div style="font-weight:700;">Ditt elpris</div>
-          <div class="small">Elområde SE3</div>
-        </div>
-    
-        <div class="small" id="costWhen">—</div>
-      </div>
-    
-      <div class="small" style="margin-top:8px;">
-        Klicka på en stapel eller punkt i grafen för att beräkna det uppskattade
-        rörliga elpriset inklusive moms, nätöverföring och energiskatt.
-      </div>
-    
-      <div id="costBody" style="margin-top:10px;"></div>
+    <details>
+     <summary>
+      Graf- och datuminställningar
+     </summary>
+     <div class="row">
+      <label for="metric">
+       Serie
+      </label>
+      <select id="metric">
+       <option selected="" value="oreKwh">
+        öre/kWh
+       </option>
+       <option value="sekKwh">
+        SEK/kWh
+       </option>
+       <option value="eurMwh">
+        EUR/MWh
+       </option>
+      </select>
+      <label for="chartMode">
+       Visning
+      </label>
+      <select id="chartMode">
+       <option selected="" value="auto">
+        Auto
+       </option>
+       <option value="line">
+        Linje
+       </option>
+       <option value="bar">
+        Staplar
+       </option>
+      </select>
+      <label class="toggle">
+       <input id="fillGaps" type="checkbox"/>
+       Interpolera null (≤8)
+      </label>
+      <label class="toggle">
+       <input id="krLines" type="checkbox"/>
+       1/2/3 kr-linjer
+      </label>
+      <label for="datePick">
+       Datum
+      </label>
+      <select id="datePick">
+      </select>
+      <button aria-label="Föregående dag" class="btn" id="prevDay">
+       ←
+      </button>
+      <button aria-label="Nästa dag" class="btn" id="nextDay">
+       →
+      </button>
+     </div>
+    </details>
+    <div class="chartWrap">
+     <canvas aria-label="Graf över spotpriser" id="chart" role="img">
+      Elprisgraf
+     </canvas>
     </div>
-
-    <div class="card small">
-      Tips: du kan byta datakälla via querystring:
-      <span class="pill">?src=https://www.rossohamn.se/spotprices/history.json</span>
+   </section>
+   <section class="card">
+    <h2>
+     Summering
+    </h2>
+    <p class="small" id="summaryNote">
+     Billigaste fönster kräver komplett fönster.
+    </p>
+    <div id="summary">
     </div>
-  </div>
-
-  <!-- All logik ligger här -->
-  <script type="module" src="./app.js"></script>
-</body>
+   </section>
+   <section class="card">
+    <h2>
+     Nuvarande tidsfönster (−2h / +18h)
+    </h2>
+    <p class="small" id="summaryNote14">
+     —
+    </p>
+    <div class="chartWrap">
+     <canvas aria-label="Elpris närmast i tid" id="chart14" role="img">
+      Elprisgraf
+     </canvas>
+    </div>
+    <div id="summary14">
+    </div>
+   </section>
+   <section class="card" id="costCard" style="display:none">
+    <div class="section-heading">
+     <h2>
+      Kostnad för valt prisintervall
+     </h2>
+     <span class="small" id="costWhen">
+     </span>
+    </div>
+    <div id="costBody">
+    </div>
+   </section>
+   <section class="card" id="energy-settings">
+    <h2>
+     Ditt elavtal
+    </h2>
+    <p class="small" id="tariffSource">
+     Laddar grundvärden…
+    </p>
+    <form class="form-grid" id="tariffForm">
+     <label>
+      Elhandelspåslag, öre/kWh exkl. moms
+      <input name="supplierMarkupOreExVat" required="" step="any" type="number"/>
+     </label>
+     <label>
+      Nätöverföring, öre/kWh inkl. moms
+      <input min="0" name="gridTransferOreIncVat" required="" step="any" type="number"/>
+     </label>
+     <label>
+      Energiskatt, öre/kWh inkl. moms
+      <input min="0" name="energyTaxOreIncVat" required="" step="any" type="number"/>
+     </label>
+     <label>
+      Moms på spotpris och påslag, %
+      <input min="0" name="vatPercent" required="" step="any" type="number"/>
+     </label>
+     <div class="row">
+      <button class="button primary" type="submit">
+       Spara lokalt
+      </button>
+      <button class="button" id="resetTariff" type="button">
+       Återställ
+      </button>
+     </div>
+    </form>
+    <p class="small" id="tariffMessage" role="status">
+    </p>
+    <p class="small">
+     Fasta avgifter och eventuell effekttariff ingår inte. Klicka på en grafpunkt för prisuppdelning och kostnadsexempel.
+    </p>
+   </section>
+   <section class="card">
+    <h2>
+     Elbilsladdning · kostnadsuppskattning
+    </h2>
+    <p class="muted">
+     Ange tillförd energi från elnätet och ett antaget genomsnittligt spotpris. Resultatet är inte en laddplan eller styrning av Homey.
+    </p>
+    <form class="form-grid" id="evForm">
+     <label>
+      Energi från elnätet (kWh)
+      <input id="evKwh" min="0" required="" step="any" type="number" value="40"/>
+     </label>
+     <label>
+      Spotpris (öre/kWh exkl. moms)
+      <input id="evSpot" placeholder="Ange spotpris" required="" step="any" type="number"/>
+     </label>
+     <button class="button primary" type="submit">
+      Beräkna
+     </button>
+    </form>
+    <p class="metric" id="evResult" role="status">
+     —
+    </p>
+   </section>
+  </main>
+  <footer class="site-footer">
+   <span>
+    Rossöhamn · Energi &amp; automation
+   </span>
+   <a href="https://github.com/StefanNaven/Rossohamn">
+    GitHub
+   </a>
+   <a href="/status/">
+    Datastatus
+   </a>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js">
+  </script>
+  <script src="./app.js" type="module">
+  </script>
+  <script src="/assets/js/energy-page.js" type="module">
+  </script>
+ </body>
 </html>

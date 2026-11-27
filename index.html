@@ -1,549 +1,237 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="sv">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Rossöhamn</title>
-  <meta name="description" content="Rossöhamn – nyheter, automation och verktyg." />
-
-  <!-- Samma bas-stil som spotprices -->
-  <link rel="stylesheet" href="/spotprices/styles.css" />
-
-  <!-- Startsidan: layout & komponenter -->
-  <link rel="stylesheet" href="/assets/home.css" />
-</head>
-
-<body>
-<main class="wrap">
-
-  <!-- Header -->
-  <header class="card hero">
-    <div class="row row-space">
-      <div class="row">
-        <div class="title">Rossöhamn</div>
-        <span class="pill">hem</span>
-        <span class="pill">automation</span>
-        <span class="pill">info</span>
-      </div>
-
-      <nav class="row nav" aria-label="Huvudmeny">
-        <a class="navlink active" href="/">Hem</a>
-        <a class="navlink" href="#aktuellt">Aktuellt</a>
-        <a class="navlink" href="#automation">Automation</a>
-        <a class="navlink" href="#elpriser">Elpriser</a>
-        <a class="navlink" href="#whatsmyip">What’s my IP</a>
-        <a class="navlink cta" href="/spotprices/">Spotpriser</a>
-      </nav>
-    </div>
-
-    <p class="meta" style="margin-top:10px;">
-      Samlingssida för nyheter, information och verktyg. Här kan du senare lägga till fler delar (t.ex. Homey-data).
-    </p>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <meta content="#101923" name="theme-color"/>
+  <meta content="Rossöhamn – energi, hushåll, tekniska verktyg och datastatus." name="description"/>
+  <title>
+   Översikt · Rossöhamn
+  </title>
+  <link href="/assets/favicon.svg" rel="icon" type="image/svg+xml"/>
+  <link href="/assets/css/base.css" rel="stylesheet"/>
+ </head>
+ <body>
+  <a class="skip" href="#main">
+   Till innehållet
+  </a>
+  <header class="site-header">
+   <div class="header-inner">
+    <a class="brand" href="/">
+     <span aria-hidden="true" class="brand-mark">
+      R
+     </span>
+     <span>
+      Rossöhamn
+      <small>
+       HOME &amp; AUTOMATION
+      </small>
+     </span>
+    </a>
+    <nav aria-label="Huvudmeny">
+     <a aria-current="page" href="/">
+      Översikt
+     </a>
+     <a href="/spotprices/">
+      Energi
+     </a>
+     <a href="/household/">
+      Hushåll
+     </a>
+     <a href="/tools/">
+      Verktyg
+     </a>
+     <a href="/status/">
+      System
+     </a>
+    </nav>
+   </div>
   </header>
-
-  <!-- Top row: Aktuellt + What's my IP -->
-  <section class="twoCol">
-    <!-- Segment: Aktuellt / Nyheter -->
-    <section class="card" id="aktuellt">
-      <div class="row row-space">
-        <div class="title">Aktuellt</div>
-        <span class="pill">nyheter</span>
+  <main class="wrap" id="main">
+   <section class="page-heading">
+    <div>
+     <p class="eyebrow">
+      Ditt digitala nav
+     </p>
+     <h1>
+      Översikt
+     </h1>
+     <p class="muted" id="todayLabel">
+      Lokal tid: Sverige
+     </p>
+    </div>
+    <button class="button" id="refresh">
+     Uppdatera
+    </button>
+   </section>
+   <div class="dashboard-grid">
+    <section class="card energy-main">
+     <div class="section-heading">
+      <div>
+       <p class="eyebrow">
+        Energi · SE3
+       </p>
+       <h2>
+        Elpriset just nu
+       </h2>
       </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th style="width:140px;">Datum</th>
-            <th>Information</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="small">—</td>
-            <td>Här kan du publicera notiser till andra (fritid, hamninfo, uppdateringar).</td>
-          </tr>
-        </tbody>
-      </table>
+      <span aria-live="polite" class="status" id="energyStatus">
+       Laddar…
+      </span>
+     </div>
+     <div class="metrics">
+      <div>
+       <span class="muted">
+        Spotpris exkl. moms
+       </span>
+       <strong class="metric" id="spotNow">
+        —
+       </strong>
+       <span class="muted">
+        öre/kWh
+       </span>
+      </div>
+      <div>
+       <span class="muted">
+        Rörligt pris inkl. moms
+       </span>
+       <strong class="metric" id="totalNow">
+        —
+       </strong>
+       <span class="muted">
+        kr/kWh
+       </span>
+      </div>
+     </div>
+     <p class="small" id="currentInterval">
+      —
+     </p>
+     <div class="section-heading">
+      <h3>
+       Idag och imorgon
+      </h3>
+      <span class="small">
+       Spotpris · öre/kWh
+      </span>
+     </div>
+     <div aria-label="Elprisgraf" class="mini-chart" id="priceChart" role="img">
+     </div>
+     <p aria-live="polite" class="small" id="priceSummary">
+      —
+     </p>
+     <a class="button primary" href="/spotprices/">
+      Öppna energidashboarden →
+     </a>
     </section>
-
-    <!-- What's my IP -->
-    <section class="card" id="whatsmyip">
-      <div class="row row-space">
-        <div class="title">What’s my IP</div>
-        <span class="pill" id="ip-status">laddar…</span>
+    <section class="card">
+     <div class="section-heading">
+      <div>
+       <p class="eyebrow">
+        Planering
+       </p>
+       <h2>
+        Billigast framåt
+       </h2>
       </div>
-
-      <div class="kv">
-        <div class="kv-row">
-          <div class="small">Public IP</div>
-          <div class="meta" id="ip-public">—</div>
-        </div>
-        <div class="kv-row">
-          <div class="small">ISP / ASN</div>
-          <div class="meta" id="ip-isp">—</div>
-        </div>
-        <div class="kv-row">
-          <div class="small">Plats</div>
-          <div class="meta" id="ip-loc">—</div>
-        </div>
-      </div>
-
-      <div class="row" style="margin-top:12px;">
-        <button class="btn" type="button" id="ip-refresh">Uppdatera</button>
-        <span class="small" id="ip-note"></span>
-      </div>
+     </div>
+     <p class="small">
+      Sammanhängande, kompletta prisintervall från nästa ännu inte påbörjade kvart/timme. Rådata, utan interpolation.
+     </p>
+     <div aria-live="polite" class="stack" id="cheapWindows">
+      Laddar…
+     </div>
+     <p class="small" id="tomorrowStatus">
+      —
+     </p>
     </section>
-  </section>
-
-  <!-- Segment: Automation -->
-  <section class="card" id="automation">
-    <div class="row row-space">
-      <div class="title">Automation</div>
-      <span class="pill">översikt</span>
-    </div>
-
-    <div class="grid">
-      <div class="tile">
-        <div class="tile-title">Systemstatus</div>
-        <div class="small" id="sys-status">—</div>
-        <div class="meta">Datapipeline</div>
+    <section class="card">
+     <div class="section-heading">
+      <div>
+       <p class="eyebrow">
+        Hushåll
+       </p>
+       <h2>
+        Sophämtning
+       </h2>
       </div>
-
-      <div class="tile">
-        <div class="tile-title">Senaste uppdatering</div>
-        <div class="small" id="sys-updated">—</div>
-        <div class="meta">history.json</div>
+      <span class="status" id="garbageStatus">
+       Laddar…
+      </span>
+     </div>
+     <div class="stack" id="garbageSummary">
+      Laddar…
+     </div>
+     <a href="/garbagecollection/">
+      Visa hämtningsdagar →
+     </a>
+    </section>
+    <section class="card">
+     <div class="section-heading">
+      <div>
+       <p class="eyebrow">
+        Datapipeline
+       </p>
+       <h2>
+        Datastatus
+       </h2>
       </div>
-
-      <a class="tile" href="/spotprices/">
-        <div class="tile-title">Spotpriser</div>
-        <div class="small">Dashboard</div>
-        <div class="meta">Graf · tabell · historik</div>
-      </a>
-
-      <a class="tile" href="/garbagecollection/" id="garbageTile">
-        <div class="tile-title">Sophämtning</div>
-        <div class="small" id="gcRest">Restavfall: laddar…</div>
-        <div class="small" id="gcFood">Matavfall: laddar…</div>
-        <div class="meta">Nästa hämtning</div>
-      </a>
-    </div>
-  </section>
-
-  <!-- Segment: Elpriser (minigraf vid sidan) -->
-  <section class="card" id="elpriser">
-    <div class="row row-space">
-      <div class="title">Elpriser</div>
-      <span class="pill" id="mini-status">laddar…</span>
-    </div>
-
-    <div class="priceGrid">
-      <div class="priceInfo">
-        <p class="meta" style="margin-top:0;">
-          Miniöversikt för idag (öre/kWh). Klicka grafen eller knappen för full vy.
-        </p>
-
-        <div class="row">
-          <a class="btn" href="/spotprices/">Öppna spotpriser</a>
-          <button class="btn" type="button" id="refresh">Uppdatera</button>
-        </div>
-
-        <div class="meta" id="mini-meta" style="margin-top:10px;"></div>
-        <div class="small" id="mini-note" style="margin-top:6px;"></div>
-      </div>
-
-      <a href="/spotprices/" class="miniSpark" aria-label="Öppna spotpriser">
-        <svg id="spark" viewBox="0 0 1000 160" preserveAspectRatio="none">
-          <rect width="1000" height="160" class="spark-bg"></rect>
-          <path id="sparkFill" class="spark-fill"></path>
-          <path id="sparkLine" class="spark-line"></path>
-          <text id="sparkText" x="14" y="26" class="spark-text">Hämtar data…</text>
-        </svg>
-      </a>
-    </div>
-  </section>
-
-  <!-- Segment: Information -->
-  <section class="card" id="info">
-    <div class="row row-space">
-      <div class="title">Information</div>
-      <span class="pill">sidor</span>
-    </div>
-
-    <div class="grid3">
-      <div class="tile">
-        <div class="tile-title">Publiceringar</div>
-        <div class="small">—</div>
-        <div class="meta">Lägg upp inlägg/uppdateringar här (sen kan det bli egna sidor).</div>
-      </div>
-
-      <div class="tile">
-        <div class="tile-title">Fritid</div>
-        <div class="small">—</div>
-        <div class="meta">Aktiviteter på Rossöhamn, tips, länkar.</div>
-      </div>
-
-      <div class="tile">
-        <div class="tile-title">Praktisk info</div>
-        <div class="small">—</div>
-        <div class="meta">...</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="card">
-    <div class="row row-space">
-      <div class="small">© <span id="year"></span> Rossöhamn</div>
-      <div class="row">
-        <a class="navlink" href="#aktuellt">Aktuellt</a>
-        <a class="navlink" href="#automation">Automation</a>
-        <a class="navlink" href="#elpriser">Elpriser</a>
-        <a class="navlink" href="#whatsmyip">What’s my IP</a>
-        <a class="navlink" href="/spotprices/">Spotpriser</a>
-      </div>
-    </div>
+     </div>
+     <div aria-live="polite" class="stack" id="systemSummary">
+      Laddar…
+     </div>
+     <a href="/status/">
+      Öppna datastatus →
+     </a>
+    </section>
+    <section class="card">
+     <p class="eyebrow">
+      Hushåll
+     </p>
+     <h2>
+      Väder och dagsljus
+     </h2>
+     <p class="muted">
+      Prognos för Rossöhamns närområde samt soluppgång och solnedgång.
+     </p>
+     <a href="/household/#weather">
+      Öppna väder →
+     </a>
+    </section>
+    <section class="card">
+     <p class="eyebrow">
+      Verktyg
+     </p>
+     <h2>
+      Tekniska hjälpmedel
+     </h2>
+     <p class="muted">
+      IP, DNS, subnät, JSON, Base64 och tidsstämplar.
+     </p>
+     <a href="/tools/">
+      Öppna verktyg →
+     </a>
+    </section>
+   </div>
+   <p class="small">
+    Prisberäkning enligt konfigurerade exempelavgifter eller dina sparade avgifter. Fasta avgifter och eventuell effekttariff ingår inte. Se
+    <a href="/spotprices/#energy-settings">
+     inställningar
+    </a>
+    .
+   </p>
+  </main>
+  <footer class="site-footer">
+   <span>
+    Rossöhamn · Energi &amp; automation
+   </span>
+   <a href="https://github.com/StefanNaven/Rossohamn">
+    GitHub
+   </a>
+   <a href="/status/">
+    Datastatus
+   </a>
   </footer>
-
-</main>
-
-<!-- Kompakt info-widget nere i hörnet -->
-<aside class="cornerWidget" id="clientWidget" aria-label="Teknisk info">
-  <button class="cwBtn" id="cwToggle" type="button" aria-expanded="false">
-    <span class="cwDot" aria-hidden="true"></span>
-    <span class="cwTitle">Teknisk info</span>
-    <span class="cwState pill" id="client-status-mini">…</span>
-  </button>
-
-  <div class="cwPanel" id="cwPanel" hidden>
-    <div class="cwRow">
-      <div class="small">IP</div>
-      <div class="meta cwValue" id="ci-ip">—</div>
-    </div>
-    <div class="cwRow">
-      <div class="small">Plats</div>
-      <div class="meta cwValue" id="ci-location">—</div>
-    </div>
-    <div class="cwRow">
-      <div class="small">ISP/ASN</div>
-      <div class="meta cwValue" id="ci-isp">—</div>
-    </div>
-    <div class="cwRow">
-      <div class="small">Språk</div>
-      <div class="meta cwValue" id="ci-lang">—</div>
-    </div>
-    <div class="cwRow">
-      <div class="small">Tidzon</div>
-      <div class="meta cwValue" id="ci-tz">—</div>
-    </div>
-    <div class="cwRow">
-      <div class="small">Skärm</div>
-      <div class="meta cwValue" id="ci-screen">—</div>
-    </div>
-
-    <div class="cwHint small">
-      Visar teknisk information från webbläsaren samt uppgifter från externa IP-tjänster.
-    </div>
-  </div>
-</aside>
-
-<script>
-  document.getElementById("year").textContent = new Date().getFullYear();
-  const DATA_URL = "/spotprices/history.json";
-  const GARBAGE_URL = "/garbagecollection/data/latest.json";
-
-  function todayKeyStockholm() {
-    const parts = new Intl.DateTimeFormat("sv-SE", {
-      timeZone: "Europe/Stockholm",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit"
-    }).formatToParts(new Date());
-
-    const y = parts.find(p => p.type === "year").value;
-    const m = parts.find(p => p.type === "month").value;
-    const d = parts.find(p => p.type === "day").value;
-    return `${y}-${m}-${d}`;
-  }
-
-  function drawSpark(points, label) {
-    const W=1000, H=160, pad=14;
-    const line=document.getElementById("sparkLine");
-    const fill=document.getElementById("sparkFill");
-    const text=document.getElementById("sparkText");
-
-    if (!points || points.length < 2) {
-      line.setAttribute("d", "");
-      fill.setAttribute("d", "");
-      text.textContent = "Ingen data för idag";
-      document.getElementById("mini-meta").textContent = "";
-      return;
-    }
-
-    const min=Math.min(...points), max=Math.max(...points);
-    const span=max-min || 1;
-    const xs=(W-pad*2)/(points.length-1);
-    const y=v => (H-pad) - ((v-min)/span) * (H-pad*2);
-
-    let d="";
-    points.forEach((v,i)=>{ d += `${i?"L":"M"}${pad+i*xs} ${y(v)} `; });
-
-    line.setAttribute("d", d);
-    fill.setAttribute("d", `${d}L ${pad+(points.length-1)*xs} ${H-pad} L ${pad} ${H-pad} Z`);
-    text.textContent = "";
-
-    document.getElementById("mini-meta").textContent =
-      `Idag (${label}) · Min ${min.toFixed(1)} öre/kWh · Max ${max.toFixed(1)} öre/kWh`;
-  }
-
-
-  function dataStatus(history) {
-    const todayKey = todayKeyStockholm();
-    const tomorrowDate = new Date(`${todayKey}T12:00:00Z`);
-    tomorrowDate.setUTCDate(tomorrowDate.getUTCDate() + 1);
-    const tomorrowKey = tomorrowDate.toISOString().slice(0, 10);
-
-    const updatedAtRaw = history?.meta?.updatedAt;
-    const updatedAt = updatedAtRaw ? new Date(updatedAtRaw) : null;
-    const ageHours = updatedAt && Number.isFinite(updatedAt.getTime())
-      ? (Date.now() - updatedAt.getTime()) / 3600000
-      : null;
-
-    const today = history?.days?.[todayKey];
-    const tomorrow = history?.days?.[tomorrowKey];
-    const completeness = [];
-    if (today) completeness.push(`Idag ${today.present ?? "—"}/${today.expected ?? "—"}`);
-    if (tomorrow) completeness.push(`Imorgon ${tomorrow.present ?? "—"}/${tomorrow.expected ?? "—"}`);
-
-    if (ageHours === null) {
-      return { label: "Okänd", short: "okänd", detail: completeness.join(" · ") };
-    }
-    if (ageHours > 24) {
-      return {
-        label: `Föråldrad (${Math.floor(ageHours)} h)`,
-        short: "föråldrad",
-        detail: completeness.join(" · ")
-      };
-    }
-    if (!today) {
-      return { label: "Saknar data för idag", short: "ofullständig", detail: completeness.join(" · ") };
-    }
-    if (Number(today.present) < Number(today.expected)) {
-      return {
-        label: `Ofullständig idag: ${today.present ?? "—"}/${today.expected ?? "—"}`,
-        short: "ofullständig",
-        detail: completeness.join(" · ")
-      };
-    }
-    if (tomorrow && Number(tomorrow.present) < Number(tomorrow.expected)) {
-      return {
-        label: `Ofullständig imorgon: ${tomorrow.present ?? "—"}/${tomorrow.expected ?? "—"}`,
-        short: "ofullständig",
-        detail: completeness.join(" · ")
-      };
-    }
-    return { label: "Aktuell", short: "aktuell", detail: completeness.join(" · ") };
-  }
-
-  async function loadMini(){
-    const statusEl = document.getElementById("mini-status");
-    const noteEl = document.getElementById("mini-note");
-    noteEl.textContent = "";
-
-    try{
-      statusEl.textContent = "laddar…";
-      const r = await fetch(DATA_URL, { cache:"no-store" });
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      const j = await r.json();
-
-      const key = todayKeyStockholm();
-      const day = j?.days?.[key];
-
-      const pts = (day?.points || [])
-        .map(p => p?.oreKwh)
-        .filter(Number.isFinite);
-
-      drawSpark(pts, key);
-
-      const updatedAt = j?.meta?.updatedAt;
-      document.getElementById("sys-updated").textContent =
-        updatedAt && Number.isFinite(new Date(updatedAt).getTime())
-          ? new Date(updatedAt).toLocaleString("sv-SE")
-          : "—";
-
-      const status = dataStatus(j);
-      statusEl.textContent = status.short;
-      document.getElementById("sys-status").textContent = status.label;
-      noteEl.textContent = status.detail;
-
-    } catch (e) {
-      statusEl.textContent = "fel";
-      document.getElementById("sys-status").textContent = "Fel";
-      document.getElementById("sparkText").textContent = "Fel: " + (e?.message || String(e));
-      noteEl.textContent = "Kontrollera att /spotprices/history.json är åtkomlig och giltig JSON.";
-    }
-  }
-
-  document.getElementById("refresh").addEventListener("click", loadMini);
-
-  // Shared fetch helper
-  async function fetchJson(url) {
-    const r = await fetch(url, { cache: "no-store" });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    return await r.json();
-  }
-
-  function formatSvShortDate(value) {
-    if (!value) return "—";
-    const d = new Date(value);
-    if (isNaN(d)) return String(value);
-    return d.toLocaleDateString("sv-SE", {
-      weekday: "short",
-      day: "numeric",
-      month: "short"
-    });
-  }
-
-  function firstDefined(...values) {
-    return values.find(v => v !== undefined && v !== null && v !== "");
-  }
-
-  // Garbage collection tile
-  async function loadGarbageTile() {
-    const restEl = document.getElementById("gcRest");
-    const foodEl = document.getElementById("gcFood");
-    if (!restEl || !foodEl) return;
-
-    restEl.textContent = "Restavfall: laddar…";
-    foodEl.textContent = "Matavfall: laddar…";
-
-    try {
-      const j = await fetchJson(GARBAGE_URL);
-
-      const rest = j?.restavfall;
-      const food = j?.matavfall;
-
-      if (!j?.restavfall || !j?.matavfall) {
-        throw new Error("Ogiltig garbage JSON");
-      }
-
-      restEl.textContent = `Restavfall: ${formatSvShortDate(rest)}`;
-      foodEl.textContent = `Matavfall: ${formatSvShortDate(food)}`;
-    } catch (e) {
-      restEl.textContent = "Sophämtning: fel";
-      foodEl.textContent = "";
-      console.error("Garbage fetch failed:", e);
-    }
-  }
-
-  // What's my IP + hörnwidget använder samma två externa anrop.
-  let networkInfoPromise = null;
-
-  function fetchNetworkInfo(force = false) {
-    if (!force && networkInfoPromise) return networkInfoPromise;
-
-    networkInfoPromise = (async () => {
-      const result = { ip: null, info: null, ipError: null, infoError: null };
-      try {
-        const ipResult = await fetchJson("https://api.ipify.org?format=json");
-        result.ip = ipResult?.ip || null;
-      } catch (error) {
-        result.ipError = error;
-      }
-
-      try {
-        result.info = await fetchJson("https://ipapi.co/json/");
-      } catch (error) {
-        result.infoError = error;
-      }
-      return result;
-    })();
-
-    return networkInfoPromise;
-  }
-
-  function networkLocation(info) {
-    return [info?.city, info?.region, info?.country_name || info?.country]
-      .filter(Boolean)
-      .join(", ") || "—";
-  }
-
-  function networkIsp(info) {
-    const asn = info?.asn || "";
-    const org = info?.org || info?.org_name || "";
-    return [asn, org].filter(Boolean).join(" · ") || "—";
-  }
-
-  async function loadWhatsMyIp(force = false) {
-    const status = document.getElementById("ip-status");
-    const note = document.getElementById("ip-note");
-    const ipPublic = document.getElementById("ip-public");
-    const ipIsp = document.getElementById("ip-isp");
-    const ipLoc = document.getElementById("ip-loc");
-
-    note.textContent = "";
-    status.textContent = "laddar…";
-    ipPublic.textContent = "—";
-    ipIsp.textContent = "—";
-    ipLoc.textContent = "—";
-
-    const result = await fetchNetworkInfo(force);
-    ipPublic.textContent = result.ip || "Ej tillgängligt";
-    ipIsp.textContent = networkIsp(result.info);
-    ipLoc.textContent = networkLocation(result.info);
-
-    if (result.ipError) {
-      status.textContent = "fel";
-      note.textContent = "IP kunde inte hämtas (nätverk, blockerare eller tjänstfel).";
-    } else if (result.infoError) {
-      status.textContent = "delvis";
-      note.textContent = "Plats och ISP kunde inte hämtas från den externa tjänsten.";
-    } else {
-      status.textContent = "ok";
-    }
-  }
-
-  // Corner widget: teknisk info (kompakt)
-  const cwToggle = document.getElementById("cwToggle");
-  const cwPanel = document.getElementById("cwPanel");
-  cwToggle.addEventListener("click", () => {
-    const expanded = cwToggle.getAttribute("aria-expanded") === "true";
-    cwToggle.setAttribute("aria-expanded", String(!expanded));
-    cwPanel.hidden = expanded;
-  });
-
-  async function loadClientWidget(force = false) {
-    const statusMini = document.getElementById("client-status-mini");
-    statusMini.textContent = "…";
-
-    const lang = navigator.language || (navigator.languages ? navigator.languages.join(", ") : "—");
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "—";
-    const screenInfo = `${window.screen.width}×${window.screen.height} @ ${window.devicePixelRatio || 1}x`;
-
-    document.getElementById("ci-lang").textContent = lang;
-    document.getElementById("ci-tz").textContent = tz;
-    document.getElementById("ci-screen").textContent = screenInfo;
-
-    const result = await fetchNetworkInfo(force);
-    document.getElementById("ci-ip").textContent = result.ip || "Ej tillgängligt";
-    document.getElementById("ci-location").textContent = result.info ? networkLocation(result.info) : "Ej tillgängligt";
-    document.getElementById("ci-isp").textContent = result.info ? networkIsp(result.info) : "Ej tillgängligt";
-
-    statusMini.textContent = result.ipError ? "fel" : (result.infoError ? "delvis" : "ok");
-  }
-
-  async function refreshNetworkInfo() {
-    networkInfoPromise = null;
-    await Promise.all([loadWhatsMyIp(true), loadClientWidget(false)]);
-  }
-
-  document.getElementById("ip-refresh").addEventListener("click", refreshNetworkInfo);
-
-  // initial load
-  loadMini();
-  loadGarbageTile();
-  loadWhatsMyIp();
-  loadClientWidget();
-</script>
-</body>
+  <script src="/assets/js/dashboard.js" type="module">
+  </script>
+ </body>
 </html>

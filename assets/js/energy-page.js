@@ -1,0 +1,7 @@
+import {initializeTariff,tariffSettings,tariffSource,saveTariff,resetTariff,calcPrice,TARIFF_KEYS} from './energy.js';
+import {setText,numberText} from './core.js';
+const form=document.getElementById('tariffForm'),ev=document.getElementById('evForm');
+function fill(){const settings=tariffSettings();for(const k of TARIFF_KEYS)form.elements.namedItem(k).value=settings[k];setText('tariffSource',tariffSource());}
+function changed(){window.dispatchEvent(new Event('rossohamn:tariff-changed'));if(ev.checkValidity())computeEv();}
+function computeEv(){const kwh=document.getElementById('evKwh').valueAsNumber,spot=document.getElementById('evSpot').valueAsNumber;const cost=calcPrice(spot,tariffSettings());setText('evResult',cost&&Number.isFinite(kwh)&&kwh>=0?`${numberText(kwh*cost.totalSek)} kr`:'—');}
+await initializeTariff();fill();form.addEventListener('submit',e=>{e.preventDefault();try{const settings=Object.fromEntries(TARIFF_KEYS.map(k=>[k,form.elements.namedItem(k).valueAsNumber]));setText('tariffMessage',saveTariff(settings)?'Sparat i denna webbläsare.':'Kunde inte spara i webbläsaren.');fill();changed();}catch(e){setText('tariffMessage',e.message);}});document.getElementById('resetTariff').addEventListener('click',()=>{resetTariff();fill();setText('tariffMessage','Grundvärden återställda.');changed();});ev.addEventListener('submit',e=>{e.preventDefault();computeEv();});window.addEventListener('storage',()=>{fill();computeEv();});
