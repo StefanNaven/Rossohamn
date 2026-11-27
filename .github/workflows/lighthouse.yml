@@ -1,0 +1,35 @@
+name: Lighthouse (manual)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Start static server
+        run: python3 -m http.server 8080 --bind 127.0.0.1 > /tmp/rossohamn-http.log 2>&1 &
+
+      - name: Run Lighthouse
+        run: |
+          mkdir -p reports
+          for page in '' 'spotprices/' 'garbagecollection/' 'household/' 'tools/' 'status/'; do
+            name=${page%/}; name=${name:-overview}
+            npx --yes lighthouse@12 "http://127.0.0.1:8080/$page" --chrome-flags='--headless --no-sandbox' --output=html --output-path="reports/$name.html" --quiet
+          done
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: reports/
